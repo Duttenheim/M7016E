@@ -7,8 +7,8 @@ import(
 
 func main() {
 	server := docker.DockerServer{}
-	var path string
-	flag.StringVar(&path, "path", "", "Path to search for docker images")
+	path := flag.String("path", "", "Path to search for docker images")
+	port := flag.Int("port", 7070, "Host port")
 	flag.Parse()
-	server.Open(7070, path)
+	server.Open(uint16(*port), *path)
 }
