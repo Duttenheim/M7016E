@@ -76,6 +76,8 @@ func (image* DockerImage) Open() error {
 	} else {
 		return err
 	}
+
+	return nil
 }
 
 //------------------------------------------------------------------------------

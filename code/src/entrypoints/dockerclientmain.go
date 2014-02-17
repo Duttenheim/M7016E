@@ -18,11 +18,12 @@ func main() {
 	flag.Parse()
 	
 	// open connection
-	
 	address := fmt.Sprintf("%s:%d", *host, *port)
 	client, err := rpc.DialHTTP("tcp", address)
 	if (err != nil) {
-		log.Fatal("dialing:", err)
+		log.Fatal(err)
+	} else {
+		fmt.Printf("Connected to %s\n", address)
 	}
 	
 	args := &docker.SearchArgs{*image}	
@@ -34,7 +35,7 @@ func main() {
 	}
 	
 	if (reply.Exists) {
-		fmt.Printf("Image '%s' found!", *image)
+		fmt.Printf("Image '%s' found!\n", *image)
 	}
 	
 	if (reply.Exists && *printImage) {
