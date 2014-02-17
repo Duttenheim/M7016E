@@ -10,6 +10,18 @@ import(
 type DockerServer struct {}
 
 
+
+
+//------------------------------------------------------------------------------
+/**
+	Handles a single connection.
+	Should run in a concurrent go-function.
+*/
+func (server* DockerServer) HandleConnection(connection net.Conn) error {
+	fmt.Printf("Connection from '%s'", connection.RemoteAddr().String())
+	return nil
+}
+
 //------------------------------------------------------------------------------
 /**
 	Opens a docker server on a given port and address.
@@ -20,7 +32,7 @@ type DockerServer struct {}
 func (server* DockerServer) Open(port uint16, repoPath string) error {
 
 	// convert port to string...
-	portString := fmt.Sprintf("localhost:%d", port)
+	portString := fmt.Sprintf(":%d", port)
 	
 	// create a repo and open it
 	repo := new(DockerRepo)
