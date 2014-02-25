@@ -3,7 +3,7 @@ package docker
 import(
 	"errors"
 	"path/filepath"
-	"os"
+	"io/ioutil"
 	"fmt"
 )
 
@@ -38,33 +38,15 @@ func (image* DockerImage) Open() error {
 
 	// attempt to open file
 	image.isLoaded = false
-	file, err := os.Open(image.path)
+	content, err := ioutil.ReadFile(image.path)
 	
 	// return error if this didn't succeed
 	if (err != nil) {
 		return err
 	}
 
-	// get info
-	info, err := file.Stat()
-	
-	// return error if this didn't succeed
-	if (err != nil) {
-		return err
-	}
-	
-	// allocate buffer
-	data := make([]byte, info.Size(), info.Size())
-	read, err := file.Read(data)
-	if (err != nil) {
-		return err
-	} else if (int64(read) != info.Size()) {
-		msg := fmt.Sprintf("File read failed (read bytes does not correspond to file size)", image.path)
-		return errors.New(msg)
-	}	
-	
 	// now set string in object
-	image.content = string(data[:read])
+	image.content = string(content)
 	
 	// validate directly
 	err = image.Validate()
