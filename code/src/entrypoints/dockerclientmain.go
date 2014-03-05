@@ -48,7 +48,7 @@ func main() {
 		}
 		
 		fmt.Printf("\n\n--------Contents--------\n")
-		fmt.Printf("%t\n", reply.Content)
+		fmt.Printf("\n%s", reply.Content)
 	}
 	
 	
