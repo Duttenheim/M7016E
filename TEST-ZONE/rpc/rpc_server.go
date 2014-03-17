@@ -40,50 +40,14 @@ func read(path string) string {
 }
 
 func findId() string {	
-	var id,name [100]string								//Not dynamic !!
-	var indexId, indexName [200]int
-	var index int = 0									//index used to go through id and name
-	var keepFilling bool = true
-	var containerName string = "polo417/docpal_old"		//name to change
-    var idFound string
-    
     str := read("ps")
- 
-    /*--Displaying all the interesting characters of the file--*/
-    for i := 0; i<len(strings.Split(str, " "))-1; i++ {
-		
-		if ( (strings.Split(str, " ")[i]!="") && (strings.Split(str, " ")[i]!="About") && (strings.Split(str, " ")[i]!="CONTAINER") && (strings.Split(str, " ")[i]!="ID") && (strings.Split(str, " ")[i]!="IMAGE") && (strings.Split(str, " ")[i]!="COMMAND") && (strings.Split(str, " ")[i]!="CREATED") && (strings.Split(str, " ")[i]!="STATUS") && (strings.Split(str, " ")[i]!="PORTS") ){
-			if ( (strings.Split(strings.Split(str, " ")[i],"\n")[0]=="") || (i==136) ){
-				indexId[index]=i
-				indexName[index]=i+3
-				index++
-			} else {
-			}
-		}		
-    }
-    
-    /*--retrieving the IDs and the names of the containers from the file--*/
-    index=0
-    for (keepFilling==true) {
-		if (indexId[index]!=0) {
-			id[index]=strings.Split(strings.Split(str, " ")[indexId[index]],"\n")[1]
-			name[index]=strings.Split(str, " ")[indexName[index]]
-			index++
-		} else {
-			keepFilling=false
+	str2 := strings.Split(str, "\n")
+	for i := 1; i<len(str2)-1; i++ {
+		if ( (strings.Fields(str2[i])[1]=="polo417/docpal_old") || (strings.Fields(str2[i])[1]=="polo417/docpal_old:latest") ) {	//container name to change
+			return strings.Fields(str2[i])[0]
 		}
 	}
-	
-	index=0
-	for ( index < len(name) ) {
-		if ( (name[index]==containerName) || (name[index]==containerName+":latest") ) {
-			idFound = id[index]
-			break
-		} else {
-			index++
-		}
-	}
-	return idFound
+	return "[000]"
 }
 
 func getMemInfo() MemStat {
@@ -92,7 +56,7 @@ func getMemInfo() MemStat {
 	var memBuffer [13]int64
 
 	path="/sys/fs/cgroup/memory/lxc/"+findId()+"/memory.stat"
-	str = read(path)
+	str = read(path)	
 	for i:=0; i<13; i++ {
 		charizard, _ := strconv.ParseInt(strings.Split(strings.Split(str,"\n")[i]," ")[1], 0, 64)
 		memBuffer[i]=charizard;
@@ -164,6 +128,8 @@ func (t * MemStat) SendMemTot(args *int, reply *MemStat) error {
 
 func main() {
 	
+	//command to execute before launching the program : "sudo docker ps -notrunc > ps"
+	
 	cpu := new(CpuStat)
 	mem := new(MemStat)
 	memTot := new(MemStat)
@@ -176,6 +142,7 @@ func main() {
 	getMemTotInfo()
 	getCpuInfo()	*/
 	
+	
 	fmt.Println("RPC server listening on port 1234")
 	err := http.ListenAndServe(":1234", nil)
 	if err != nil {
@@ -186,6 +153,5 @@ func main() {
 	 */
 }
 	
-
 
 
