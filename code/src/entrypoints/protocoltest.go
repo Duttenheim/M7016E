@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"bitverse"
 	"protocol"
+	"strconv"
+	"strings"
+	"os"
+	"bufio"
 )
 
 type TestRpcInterface struct {}
@@ -23,48 +27,27 @@ type TestObserver struct {
 }
 
 func (observer* TestObserver) OnSiblingJoined(node* bitverse.EdgeNode, id string) {
-	fmt.Printf("Sibling '%s' joined supernode!\n", id)
+	//fmt.Printf("Sibling '%s' joined supernode!\n", id)
 }
 
 func (observer* TestObserver) OnSiblingLeft(node* bitverse.EdgeNode, id string) {
-	fmt.Printf("Sibling '%s' left supernode!\n", id)
+	//fmt.Printf("Sibling '%s' left supernode!\n", id)
 }
 
 func (observer* TestObserver) OnSiblingHeartbeat(node* bitverse.EdgeNode, id string) {
-	fmt.Printf("Sibling '%s' is still alive!\n", id)
+	//fmt.Printf("Sibling '%s' is still alive!\n", id)
 }
 
+var siblings []string
+var reply chan bool
+
 func (observer* TestObserver) OnChildrenReply(node* bitverse.EdgeNode, id string, children[] string) {
-	fmt.Printf("Supernode has '%d' children\n", len(children))
-
-	// run a new thread which sends locking RPC commands (needs to run in go routine since the Rpc invocation requires a reply to be sent back synchronously, meaning it will block the messaging thread)
-	go func() {	
-		// send them a test message
-		service := node.GetMsgService("TestMessagingService")
-		for _, child := range children {
-
-			if (child == node.Id()) {
-				continue
-			}
-
-			// create argument and invoke
-			args := new(TestRpcInput)
-			reply := new(TestRpcOutput)
-			err := protocol.RpcInvokeSync("TestRpcInterface.Test", args, reply, child, service)
-
-			if (err != nil) {
-				fmt.Println(err)
-				continue
-			}
-			fmt.Println(reply.Content)
-		}
-	}()
+	siblings = children
+	reply <- true
 }
 
 func (observer* TestObserver) OnConnected(localNode* bitverse.EdgeNode, remoteNode* bitverse.RemoteNode) {
-	fmt.Printf("Connected to supernode '%s'\n", remoteNode.Id())
 	observer.superNode = remoteNode
-	//remoteNode.SendChildrenRequest()
 }
 
 var secret string = "3e606ad97e0a738d8da4c4c74e8cd1f1f2e016c74d85f17ac2fc3b5dab4ed6c4"
@@ -86,18 +69,55 @@ func main() {
 	test := new(TestRpcInterface)
 	msgObserver.Register(test)
 	
-	_, serviceError := node.CreateMsgService(secret, "TestMessagingService", msgObserver)
+	service, serviceError := node.CreateMsgService(secret, "TestMessagingService", msgObserver)
 	if (serviceError != nil) {
 		panic(serviceError)
 	}
 
 	// wait for input
 	go func() {
+		bio := bufio.NewReader(os.Stdin)
 		for {
-			var c int
-			fmt.Scanf("%d", &c)
-			if (c == 1) {
-				observer.superNode.SendChildrenRequest()
+			fmt.Printf(">>")
+			line, _ := bio.ReadString('\n')
+			components := strings.Split(line, " ")
+			for index, comp := range components {
+				components[index] = strings.Trim(comp, "\n")
+			}
+			if (len(components) > 0) {
+				if (components[0] == "show") {
+					reply = make(chan bool)
+					observer.superNode.SendChildrenRequest()
+					<-reply
+					for index, value := range siblings {
+						fmt.Printf("%d. %s\n", index, value)
+					}
+				} else if (components[0] == "run") {
+					if (len(components) != 2) {
+						fmt.Printf("'run' command must be supplied with a sibling node index!\n")
+						continue
+					}
+					index, err := strconv.Atoi(components[1])
+					if (err != nil) {
+						fmt.Printf("Must supply a valid number to 'run'\n")
+						continue
+					}
+					if (index < len(siblings)) {
+						args := new(TestRpcInput)
+						reply := new(TestRpcOutput)
+						err := protocol.RpcInvokeSync("TestRpcInterface.Test", args, reply, siblings[index], service)
+						if (err != nil) {
+							fmt.Println(err)
+							continue
+						}
+	
+						fmt.Println(reply.Content)
+					} else {
+						fmt.Printf("Unknown sibling index '%d'\n", index)
+					}
+				} else {
+					fmt.Println("Unknown command: " + components[0])
+				}
 			}
 		}
 	}()

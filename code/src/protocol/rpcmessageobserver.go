@@ -131,7 +131,7 @@ func RpcInvokeAsync(functionName string, args interface{}, reply interface{}, no
 	}
 
 	// send message
-	service.SendAndGetReply(node, string(data), 20, func(err error, data interface{}) {
+	service.SendAndGetReply(node, string(data), 1, func(err error, data interface{}) {
 
 		if (err != nil) {
 			invocation.Error = err
