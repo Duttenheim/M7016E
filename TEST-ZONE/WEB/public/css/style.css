@@ -1,0 +1,127 @@
+/* Eléments principaux de la page */
+
+body
+{
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    color: #181818;
+}
+
+#bloc_page
+{
+    width: 900px;
+    margin: auto;
+}
+
+section h1, footer h1, nav a
+{
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    font-weight: normal;
+    text-transform: uppercase;
+}
+
+/* Header */
+
+header
+{
+    background: url('../images/separateur.png');
+    width: 600px;
+    height: 4px;
+    margin: auto;
+   
+}
+
+#titre_principal
+{
+    display: inline-block;
+}
+
+
+
+#logo, header h1
+{
+    display: inline-block;
+    margin-bottom: 20px;
+}
+
+
+
+/* Navigation */
+
+nav
+{
+    margin-bottom: 10px;
+    margin-top: 20px;
+    display: inline-block;
+    width: 600px;
+    text-align:  center;
+    background-image:url(../images/menu.png);
+    
+    
+    
+}
+
+nav ul
+{
+    list-style-type: none;  
+
+}
+
+nav li
+{
+    display: inline-block;
+    margin-left: 40px;
+        
+}
+
+nav a
+{
+    font-size: 1.3em;
+    color: #181818;
+    padding-bottom: 3px;
+    text-decoration: none;
+    
+}
+
+nav a:hover
+{
+    color: #760001;
+    border-bottom: 3px solid #760001;
+}
+
+
+#banniere_image { 
+background : transparent url("../images/YACSb.png") no-repeat; 
+height : 200px; 
+width : 401px; 
+margin : 0 auto;
+margin-bottom: 20px 
+} 
+
+
+#LTU { 
+background : transparent url("../images/LTU.png") no-repeat right; 
+height : 200px; 
+width : 108px; 
+} 
+	
+	}
+
+/* Corps */
+
+article, aside
+{
+    display: inline-block;
+    vertical-align: top;
+    text-align: justify;
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -1,30 +1,35 @@
+//http://stackoverflow.com/questions/18629327/adding-css-file-to-ejs
+
 var express = require('express');
 var app = express();
-var routes = require('./routes');
 
-app.set('port', process.env.PORT || 8080);
+app.set('views', __dirname + '/views');
 
-app.get('/', redirectHome);
-app.get('/images', redirectImages);
-app.get('/containers', redirectContainers);
-app.get('/nodes', redirectNodes);
+app.use(express.static(__dirname + '/public'));
+
+app.get('/', function(req, res){
+  res.render('index.ejs', {
+        title: 'YACS' 
+  });
+});
+
+app.get('/images', function(req, res){
+  res.render('images.ejs', {
+        title: 'YACS' 
+  });
+});
+
+app.get('/containers', function(req, res){
+  res.render('containers.ejs', {
+        title: 'YACS' 
+  });
+});
+
+app.get('/nodes', function(req, res){
+  res.render('nodes.ejs', {
+        title: 'YACS' 
+  });
+});
 
 
-function redirectHome(req,res){
-	routes.home(req,res);
-}
-
-function redirectImages(req,res){
-	routes.images(req,res);
-}
-
-function redirectContainers(req,res){
-	routes.containers(req,res);
-}
-
-function redirectNodes(req,res){
-	routes.nodes(req,res);
-}
-
-console.log('Express server listening on port ' + app.get('port'));
-app.listen(app.get('port'));
+app.listen(3000);
