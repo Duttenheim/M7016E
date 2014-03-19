@@ -98,13 +98,6 @@ margin-bottom: 20px
 } 
 
 
-#LTU { 
-background : transparent url("../images/LTU.png") no-repeat right; 
-height : 200px; 
-width : 108px; 
-} 
-	
-	}
 
 /* Corps */
 
@@ -113,6 +106,14 @@ article, aside
     display: inline-block;
     vertical-align: top;
     text-align: justify;
+}
+
+/* Footer */
+
+footer
+{
+    background : transparent url("../images/footer.png") no-repeat center;
+    padding-top: 100px;
 }
 
 
