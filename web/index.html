@@ -1,43 +1,63 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+<script src="lib/uuid.js" type="text/javascript></script>
+<script src="lib/aes.js" type="text/javascript></script>
+<script src="lib/sha1.js" type="text/javascript></script>
 <script src="lib/msg.js" type="text/javascript"></script>
+<script src="lib/websocket.js" type="text/javascript"></script>
+<script src="lib/bitverse.js" type="text/javascript"></script>
 <script type="text/javascript">
-function WebSocketTest()
+
+// setup node-uuid
+var UUID = require('node-uuid');
+
+var HandleMessage;
+
+var DefaultMessageHandler = function(msg)
 {
-  if ("WebSocket" in window)
-  {
-     alert("WebSocket is supported by your Browser!");
-     // Let us open a web socket
-     var ws = new WebSocket("ws://localhost:9998/echo");
-     ws.onopen = function()
-     {
-        // Web Socket is connected, send data using send()
-        ws.send("Message to send");
-        alert("Message is sent...");
-     };
-     ws.onmessage = function (evt) 
-     { 
-        var received_msg = evt.data;
-        alert("Message is received...");
-     };
-     ws.onclose = function()
-     { 
-        // websocket is closed.
-        alert("Connection is closed..."); 
-     };
-  }
-  else
-  {
-     // The browser doesn't support WebSocket
-     alert("WebSocket NOT supported by your Browser!");
-  }
+	alert(msg.Payload);
 }
+
+HandleMessage = DefaultMessageHandler;
+
+function OnMessage(msg)
+{
+	// parse string to message
+	var message = JSON.parse(msg.data);
+
+	// handle message, just assign the message handler variable
+	HandleMessage(message);
+}
+
+function OnOpen()
+{
+	alert("Yay, connected");
+
+	// create handshake and send
+	var message = new Msg();
+	message.Type = MsgTypeEnum.Handshake;
+	var json = JSON.stringify(message);
+	this.send(json);
+}
+
+function OnClose()
+{
+	alert("Goodbye!");
+}
+
+var node;
+
+function WebSocketTest()
+{  
+    node = CreateWebNode("ws://130.240.233.93:2020/node");
+}
+
 </script>
 </head>
 <body>
 <div id="sse">
-   <a href="javascript:WebSocketTest()">Run WebSocket</a>
+    <a href="javascript:WebSocketTest()">Run WebSocket</a>
 </div>
 </body>
 </html>
