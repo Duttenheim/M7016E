@@ -4,7 +4,7 @@ import (
 	"log"
 )
 
-var debugFlag bool = false
+var debugFlag bool = true
 
 func debug(str string) {
 	if debugFlag {
