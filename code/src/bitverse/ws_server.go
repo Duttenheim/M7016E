@@ -21,11 +21,7 @@ func (wsServer *wsServerType) WsHandler(ws *websocket.Conn) {
 		dec := json.NewDecoder(ws)
 		err = dec.Decode(&msg)
 		if err != nil {
-			debug("wsserver: connection closed")
-			if remoteNode != nil {
-				remoteNode.state = Dead
-				wsServer.remoteNodeChannel <- remoteNode
-			}
+			debug("wsserver: Incorrect message structure.")
 			break
 		}
 		if msg.Type == Handshake {
@@ -43,13 +39,27 @@ func (wsServer *wsServerType) WsHandler(ws *websocket.Conn) {
 }
 
 func (wsServer* wsServerType) WebHandler(ws* websocket.Conn) {
-	var in []byte
+	var err error
+	var msg Msg
+
+	for {
+		dec := json.NewDecoder(ws)
+		err = dec.Decode(&msg)
+		if err != nil {
+			debug("wsserver: Incorrect message structure.")
+			break
+		}
+		wsServer.msgChannel <- msg
+	}
+}
+
+/*	var in []byte
 	for {
 		if err := websocket.Message.Receive(ws, &in); err != nil {
 			break
 		}
 	}
-	websocket.Message.Send(ws, in)
+	websocket.Message.Send(ws, in)	*/
 }
 
 func makeWsServer(localNodeId NodeId, msgChannel chan Msg, remoteNodeChannel chan *RemoteNode) *wsServerType {
