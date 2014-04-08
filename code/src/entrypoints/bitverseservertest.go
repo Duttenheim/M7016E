@@ -11,7 +11,7 @@ func main() {
 	var done chan int
 	//var node* bitverse.SuperNode
 
-	_, done = bitverse.MakeSuperNode(transport, "localhost", "2020")
+	_, done = bitverse.MakeSuperNode(transport, "127.0.0.1", "2020")
 
 	<- done
 }

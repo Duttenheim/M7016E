@@ -42,6 +42,16 @@ func (wsServer *wsServerType) WsHandler(ws *websocket.Conn) {
 	}
 }
 
+func (wsServer* wsServerType) WebHandler(ws* websocket.Conn) {
+	var in []byte
+	for {
+		if err := websocket.Message.Receive(ws, &in); err != nil {
+			break
+		}
+	}
+	websocket.Message.Send(ws, in)
+}
+
 func makeWsServer(localNodeId NodeId, msgChannel chan Msg, remoteNodeChannel chan *RemoteNode) *wsServerType {
 	wsServer := new(wsServerType)
 	wsServer.msgChannel = msgChannel
@@ -54,7 +64,9 @@ func makeWsServer(localNodeId NodeId, msgChannel chan Msg, remoteNodeChannel cha
 func (wsServer *wsServerType) start(port string) {
 	debug("wsserver: starting a new server at port " + port)
 
+	http.Handle("/", http.FileServer(http.Dir(".")))
 	http.Handle("/node", websocket.Handler(wsServer.WsHandler))
+	http.Handle("/web", websocket.Handler(wsServer.WebHandler))
 
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
