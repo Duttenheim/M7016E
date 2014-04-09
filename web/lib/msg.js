@@ -10,12 +10,13 @@ var MsgTypeEnum =
 	Bye : 6	
 }
 
-function Msg ()
+function Msg()
 {
-	this.Type = -1;
-	this.Payload = "";
-	this.PayloadType = -1;
-	this.Src = "";
-	this.Dst = "";
-	this.Id = "";
+	this.Type;
+	this.Payload;
+	this.PayloadType;
+	this.Src;
+	this.Dst;
+	this.Id;
+    this.MsgServiceName;
 }

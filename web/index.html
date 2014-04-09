@@ -1,56 +1,35 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<script src="lib/uuid.js" type="text/javascript></script>
-<script src="lib/aes.js" type="text/javascript></script>
-<script src="lib/sha1.js" type="text/javascript></script>
+<script src="lib/uuid.js" type="text/javascript"></script>
+<script src="lib/aes.js" type="text/javascript"></script>
+<script src="lib/sha1.js" type="text/javascript"></script>
 <script src="lib/msg.js" type="text/javascript"></script>
 <script src="lib/websocket.js" type="text/javascript"></script>
 <script src="lib/bitverse.js" type="text/javascript"></script>
 <script type="text/javascript">
-
-// setup node-uuid
-var UUID = require('node-uuid');
-
-var HandleMessage;
-
-var DefaultMessageHandler = function(msg)
-{
-	alert(msg.Payload);
-}
-
-HandleMessage = DefaultMessageHandler;
-
-function OnMessage(msg)
-{
-	// parse string to message
-	var message = JSON.parse(msg.data);
-
-	// handle message, just assign the message handler variable
-	HandleMessage(message);
-}
-
-function OnOpen()
-{
-	alert("Yay, connected");
-
-	// create handshake and send
-	var message = new Msg();
-	message.Type = MsgTypeEnum.Handshake;
-	var json = JSON.stringify(message);
-	this.send(json);
-}
-
-function OnClose()
-{
-	alert("Goodbye!");
-}
-
 var node;
+var otherNode;
+
+var MyChildrenRetreivedCallback = function(children)
+{
+    otherNode = children[0];
+}
 
 function WebSocketTest()
 {  
     node = CreateWebNode("ws://130.240.233.93:2020/node");
+    node.childrenRetreivedCallback = MyChildrenRetreivedCallback;
+}
+
+function GetSiblings()
+{
+    node.GetSiblings();
+}
+
+function TestRPC()
+{
+    node.CallRPCFunction("TestRpcInterface.Test", {}, otherNode);
 }
 
 </script>
@@ -58,6 +37,12 @@ function WebSocketTest()
 <body>
 <div id="sse">
     <a href="javascript:WebSocketTest()">Run WebSocket</a>
+</div>
+<div id="sse">
+    <a href="javascript:GetSiblings()">Get children</a>
+</div>
+<div id="sse">
+    <a href="javascript:TestRPC()">Run RPC test</a>
 </div>
 </body>
 </html>
