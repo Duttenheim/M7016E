@@ -20,3 +20,9 @@ function Msg()
 	this.Id;
     this.MsgServiceName;
 }
+
+var globalMessageCounter = 0;
+Msg.prototype.GenerateMessageId = function()
+{
+    this.Id = this.Src + globalMessageCounter++;
+}

@@ -4,6 +4,8 @@
 <script src="lib/uuid.js" type="text/javascript"></script>
 <script src="lib/aes.js" type="text/javascript"></script>
 <script src="lib/mode-cfb-min.js" type="text/javascript"></script>
+<script src="lib/pad-nopadding-min.js" type="text/javascript"></script>
+<script src="lib/pad-zeropadding-min.js" type="text/javascript"></script>
 <script src="lib/sha1.js" type="text/javascript"></script>
 <script src="lib/msg.js" type="text/javascript"></script>
 <script src="lib/websocket.js" type="text/javascript"></script>
@@ -12,7 +14,7 @@
 var node;
 var otherNode;
 
-var MyChildrenRetreivedCallback = function(children)
+var MyChildrenReceivedCallback = function(children)
 {
     otherNode = children[0];
 }
@@ -20,7 +22,7 @@ var MyChildrenRetreivedCallback = function(children)
 function WebSocketTest()
 {  
     node = CreateWebNode("ws://130.240.233.93:2020/node");
-    node.childrenRetreivedCallback = MyChildrenRetreivedCallback;
+    node.childrenReceivedCallback = MyChildrenReceivedCallback;
 }
 
 function GetSiblings()

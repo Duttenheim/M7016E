@@ -42,14 +42,14 @@ function WebNode()
     this.superNodeId = "";
     this.socket;
 
-    this.childrenRetreivedCallback = function(children)
+    this.childrenReceivedCallback = function(children)
     {
         alert(children);
     }
 
-    this.messageRetreivedCallback = function(message)
+    this.messageReceivedCallback = function(message)
     {
-        alert(message);
+        alert(JSON.stringify(message));
     }
 }
 
@@ -62,8 +62,8 @@ WebNode.prototype.OnOpen = function()
     var message = new Msg();
     message.Type = MsgTypeEnum.Handshake;
     message.Src = this.id;
-    var json = JSON.stringify(message);
-    this.socket.send(json);
+
+    this.Send(message);
 }
 
 //------------------------------------------------------------------------------
@@ -91,12 +91,13 @@ WebNode.prototype.OnMessage = function(msg)
         var children = JSON.parse(message.Payload);
         var index = children.indexOf(this.id);
         if (index > -1) { children.splice(index, 1); }
-        this.childrenRetreivedCallback(children);
+        this.childrenReceivedCallback(children);
     }
     else if (message.Type == MsgTypeEnum.Data)
     {
         var decrypted = DecryptAES(message.Payload);
-//        alert(decrypted);
+        obj = JSON.parse(decrypted);
+        this.messageReceivedCallback(obj);
     }
 }
 
@@ -109,9 +110,8 @@ WebNode.prototype.GetSiblings = function()
     var message = new Msg();
     message.Type = MsgTypeEnum.Children;
 
-    // encode and send
-    var json = JSON.stringify(message);
-    this.socket.send(json);
+    // send message
+    this.Send(message);
 }
 
 //------------------------------------------------------------------------------
@@ -119,13 +119,10 @@ WebNode.prototype.GetSiblings = function()
 */
 function MakeIV(num)
 {
-    var text = "";
-    var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
-
-    for( var i=0; i < num; i++ )
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-    return text;
+    var buf = new Uint8Array(num);
+    crypto.getRandomValues(buf);
+    var str = String.fromCharCode.apply(null, buf);
+    return str;
 }
 
 //------------------------------------------------------------------------------
@@ -164,20 +161,22 @@ function EncryptAES(params)
 {
     var iv = MakeIV(16);
     var keyhex = CryptoJS.enc.Hex.parse(secret);
-    var ivhex = CryptoJS.enc.Utf8.parse(iv);
 
     var base64 = btoa(params);
 
-    //var encryptor = CryptoJS.algo.AES.createEncryptor(keyhex, { mode: CryptoJS.mode.CFB, iv: ivhex });
-    //var encrypted = encryptor.process(params);
-    //var decryptor = CryptoJS.algo.AES.createDecryptor(keyhex, { mode: CryptoJS.mode.CFB, iv: ivhex });
-    //var decrypted = decryptor.process(encrypted);
-    var encrypted = CryptoJS.AES.encrypt(base64, keyhex, { mode: CryptoJS.mode.CFB, iv: ivhex });
-    //var decrypted = CryptoJS.AES.decrypt(encrypted, keyhex, { mode: CryptoJS.mode.CFB, iv: ivhex });
+    var encrypted = CryptoJS.AES.encrypt(
+        base64,            
+        keyhex,
+        {
+            mode: CryptoJS.mode.CFB,
+            iv: CryptoJS.enc.Latin1.parse(iv),
+            padding: CryptoJS.pad.NoPadding
+        }
+    );
 
-    var fullmsg = btoa(iv.concat(encrypted.ciphertext.toString()));
-    //var fullmsg = CryptoJS.enc.Utf8.parse(iv).toString() + encrypted.ciphertext.toString();
-    return fullmsg;
+    var message = htoa(encrypted.ciphertext);
+    message = btoa(iv.concat(message));
+    return message;
 }
 
 //------------------------------------------------------------------------------
@@ -203,15 +202,14 @@ function DecryptAES(data)
         { 
             mode: CryptoJS.mode.CFB, 
             iv: CryptoJS.enc.Latin1.parse(iv),
-            padding: CrytpoJS.pad.NoPadding
+            padding: CryptoJS.pad.NoPadding
         } 
     );
 
-    console.log(CryptoJS.enc.Latin1.stringify(decrypted));
     // decode message
     var message = decrypted.toString();
     message = htoa(message);
-    message = btoa(message);
+    message = atob(message);
     return message;
 }
 
@@ -237,8 +235,17 @@ WebNode.prototype.CallRPCFunction = function(name, args, node)
     message.Dst = node;
     message.Src = this.id;
 
-    // encode message and send
-    var json = JSON.stringify(message);
+    // send message
+    this.Send(message);    
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+WebNode.prototype.Send = function(msg)
+{
+    msg.GenerateMessageId();
+    var json = JSON.stringify(msg);
     this.socket.send(json);
 }
 
