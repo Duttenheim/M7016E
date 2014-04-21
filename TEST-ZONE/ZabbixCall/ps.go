@@ -8,6 +8,7 @@ import (
 	"log"
 	"os/exec"
     "io/ioutil"
+    "os"
 )
 
 type MemStat struct {
@@ -51,23 +52,23 @@ func doPs() string {
 	return(out.String())
 }
 
-func findId() string {	
+func findId(name string) string {	
     str := string(doPs())
 	str2 := strings.Split(str, "\n")
 	for i := 1; i<len(str2)-1; i++ {
-		if ( (strings.Fields(str2[i])[1]=="polo417/docpal_old") || (strings.Fields(str2[i])[1]=="polo417/docpal_old:latest") ) {	//container name to change
+		if ( (strings.Fields(str2[i])[1]==name) || (strings.Fields(str2[i])[1]==(name+":latest")) ) {	//container name to change
 			return strings.Fields(str2[i])[0]
 		}
 	}
 	return "[000]"
 }
 
-func getMemInfo() MemStat {
+func getMemInfo(name string) MemStat {
 	var path,str string
 	var memory_stat MemStat
 	var memBuffer [13]int64
 
-	path="/sys/fs/cgroup/memory/lxc/"+findId()+"/memory.stat"
+	path="/sys/fs/cgroup/memory/lxc/"+findId(name)+"/memory.stat"
 	str = read(path)	
 	for i:=0; i<13; i++ {
 		charizard, _ := strconv.ParseInt(strings.Split(strings.Split(str,"\n")[i]," ")[1], 0, 64)
@@ -78,12 +79,12 @@ func getMemInfo() MemStat {
 	return memory_stat
 }
 
-func getMemTotInfo() MemStat {
+func getMemTotInfo(name string) MemStat {
 	var path,str string
 	var memory_stat_total MemStat
 	var memBuffer [13]int64
 
-	path="/sys/fs/cgroup/memory/lxc/"+findId()+"/memory.stat"
+	path="/sys/fs/cgroup/memory/lxc/"+findId(name)+"/memory.stat"
 	str = read(path)
 	for i:=0; i<13; i++ {
 		charizard, _ := strconv.ParseInt(strings.Split(strings.Split(str,"\n")[i]," ")[1], 0, 64)
@@ -94,12 +95,12 @@ func getMemTotInfo() MemStat {
 	return memory_stat_total
 }
 
-func getCpuInfo() CpuStat {
+func getCpuInfo(name string) CpuStat {
 	var path,str string
 	var cpu_stat CpuStat
 	var cpuBuffer [2]int64
 
-	path="/sys/fs/cgroup/cpuacct/lxc/"+findId()+"/cpuacct.stat"
+	path="/sys/fs/cgroup/cpuacct/lxc/"+findId(name)+"/cpuacct.stat"
     str = read(path)
 	for i:=0; i<2; i++ {
 		charizard, _ := strconv.ParseInt(strings.Split(strings.Split(str,"\n")[i]," ")[1], 0, 64)
@@ -111,7 +112,7 @@ func getCpuInfo() CpuStat {
 }
 
 func main() {
-	fmt.Println(getMemInfo().Cache, getCpuInfo().User)
+	fmt.Println(getMemInfo(os.Args[1]).Cache, getCpuInfo(os.Args[1]).User)
 }
 	
 
