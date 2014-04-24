@@ -15,17 +15,19 @@ import (
 type EdgeNodeHandler struct {}
 type ContainerArgs struct {
 	ID string
+	Repository string
+	ShowAll	bool
 }
-type TestRpcOutput struct {
+type RpcOutput struct {
 	Content string
 }
 
-func (obj* EdgeNodeHandler) Test(input* ContainerArgs, output* TestRpcOutput) error {
+func (obj* EdgeNodeHandler) Test(input* ContainerArgs, output* RpcOutput) error {
 	output.Content = "It works!"
 	return nil
 }
 
-func (obj* EdgeNodeHandler) StartContainer(args* ContainerArgs, output* TestRpcOutput) error {
+func (obj* EdgeNodeHandler) StartContainer(args* ContainerArgs, output* RpcOutput) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
 	err := client.StartContainer(args.ID, nil)
@@ -37,6 +39,85 @@ func (obj* EdgeNodeHandler) StartContainer(args* ContainerArgs, output* TestRpcO
 	}
 	return nil
 	
+}
+
+func (obj* EdgeNodeHandler) StopContainer(args* ContainerArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	err := client.StopContainer(args.ID, 3)
+	output.Content = ""
+	if err != nil {
+		output.Content += fmt.Sprintf("Error %s", err)	
+	} else {
+		output.Content += fmt.Sprintf("Stopped container %s", args.ID)
+	}
+	return nil
+}
+
+func (obj* EdgeNodeHandler) KillContainer(args* ContainerArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	output.Content = ""
+	err := client.KillContainer(args.ID)
+	if err != nil {
+		output.Content += fmt.Sprintf("Error %s", err)	
+	}else{
+		output.Content += fmt.Sprintf("Container %s was killed", args.ID)
+	}
+	return nil
+}
+
+func (obj* EdgeNodeHandler) ListContainers(args* ContainerArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	imgs, err := client.ListContainers(docker.ListContainersOptions{All: args.ShowAll})
+	output.Content = ""
+	if err != nil {
+		output.Content += fmt.Sprintf("Error %s", err)
+	} else {
+		output.Content += fmt.Sprintf("Containers found \n")
+	}
+	for _, img := range imgs {
+		output.Content += fmt.Sprintf("ID: %s \n", img.ID)
+		output.Content += fmt.Sprintf("Created: %d \n", img.Created)
+	}
+	return nil
+}
+
+func (obj* EdgeNodeHandler) PullImage(args* ContainerArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	output.Content = ""
+	err := client.PullImage(docker.PullImageOptions{Repository: args.Repository}, docker.AuthConfiguration{})
+	if err != nil {
+		output.Content += fmt.Sprintf("Error %s", err)	
+	} else {
+		output.Content += fmt.Sprintf("Pulled container")
+	}
+	return nil
+}
+
+
+func (obj* EdgeNodeHandler) ListImages(args* ContainerArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+        client, _ := docker.NewClient(endpoint)
+        imgs, err := client.ListImages(args.ShowAll)
+	if err != nil {
+		output.Content += fmt.Sprintf("Error %s", err)
+	} else {
+		output.Content += fmt.Sprintf("Containers found \n")
+	}
+        for _, img := range imgs {
+                output.Content += fmt.Sprintf("ID: ", img.ID)
+                output.Content += fmt.Sprintf("RepoTags: ", img.RepoTags)
+                output.Content += fmt.Sprintf("Created: ", img.Created)
+                output.Content += fmt.Sprintf("Size: ", img.Size)
+                output.Content += fmt.Sprintf("VirtualSize: ", img.VirtualSize)
+                output.Content += fmt.Sprintf("ParentId: ", img.ParentId)
+                output.Content += fmt.Sprintf("Repository: ", img.Repository)
+        }
+	return nil
+
 }
 
 type TestObserver struct {
@@ -121,7 +202,7 @@ func main() {
 					}
 					if (index < len(siblings)) {
 						args := new(ContainerArgs)
-						reply := new(TestRpcOutput)
+						reply := new(RpcOutput)
 						err := protocol.RpcInvokeSync("EdgeNodeHandler.Test", args, reply, siblings[index], service)
 						if (err != nil) {
 							fmt.Println(err)
