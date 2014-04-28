@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -18,6 +17,7 @@ type ContainerArgs struct {
 	Repository string
 	ShowAll	bool
 }
+
 type RpcOutput struct {
 	Content string
 }
@@ -58,7 +58,7 @@ func (obj* EdgeNodeHandler) KillContainer(args* ContainerArgs, output* RpcOutput
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
 	output.Content = ""
-	err := client.KillContainer(args.ID)
+	err := client.KillContainer(docker.KillContainerOptions{ID: args.ID})
 	if err != nil {
 		output.Content += fmt.Sprintf("Error %s", err)	
 	}else{
