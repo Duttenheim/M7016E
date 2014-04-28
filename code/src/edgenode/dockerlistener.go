@@ -14,8 +14,21 @@ import (
 type EdgeNodeHandler struct {}
 type ContainerArgs struct {
 	ID string
+}
+
+type CreateContainerArgs struct {
+	ContainerName string
+	ImageName string
+}
+
+type DockerListArgs struct {
+	ShowAll bool
+}
+
+type ImageArgs struct {
+	ID string
+	Name string
 	Repository string
-	ShowAll	bool
 }
 
 type RpcOutput struct {
@@ -25,6 +38,22 @@ type RpcOutput struct {
 func (obj* EdgeNodeHandler) Test(input* ContainerArgs, output* RpcOutput) error {
 	output.Content = "It works!"
 	return nil
+}
+
+func (obj* EdgeNodeHandler) CreateContainer(args* CreateContainerArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	config := docker.Config{Image: args.ImageName}
+	createArgs := docker.CreateContainerOptions{Name: args.ContainerName, Config: &config}	
+	container, err := client.CreateContainer(createArgs)
+	output.Content = ""
+	if err != nil {
+		output.Content += fmt.Sprintf("Error %s", err)	
+	}else{
+		output.Content += fmt.Sprintf("Container %s Created", container.ID)
+	}
+	return nil
+
 }
 
 func (obj* EdgeNodeHandler) StartContainer(args* ContainerArgs, output* RpcOutput) error {
@@ -67,7 +96,7 @@ func (obj* EdgeNodeHandler) KillContainer(args* ContainerArgs, output* RpcOutput
 	return nil
 }
 
-func (obj* EdgeNodeHandler) ListContainers(args* ContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) ListContainers(args* DockerListArgs, output* RpcOutput) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
 	imgs, err := client.ListContainers(docker.ListContainersOptions{All: args.ShowAll})
@@ -84,7 +113,7 @@ func (obj* EdgeNodeHandler) ListContainers(args* ContainerArgs, output* RpcOutpu
 	return nil
 }
 
-func (obj* EdgeNodeHandler) PullImage(args* ContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* RpcOutput) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
 	output.Content = ""
@@ -98,7 +127,7 @@ func (obj* EdgeNodeHandler) PullImage(args* ContainerArgs, output* RpcOutput) er
 }
 
 
-func (obj* EdgeNodeHandler) ListImages(args* ContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) ListImages(args* DockerListArgs, output* RpcOutput) error {
 	endpoint := "unix:///var/run/docker.sock"
         client, _ := docker.NewClient(endpoint)
         imgs, err := client.ListImages(args.ShowAll)
