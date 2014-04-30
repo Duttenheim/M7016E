@@ -3,3 +3,4 @@ build:
 	go build protocol
 	cd bitverse; make
 	cd entrypoints; make
+	cd edgenode; make

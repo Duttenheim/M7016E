@@ -60,7 +60,6 @@ func (wsServer* wsServerType) WebHandler(ws* websocket.Conn) {
 		}
 	}
 	websocket.Message.Send(ws, in)	*/
-}
 
 func makeWsServer(localNodeId NodeId, msgChannel chan Msg, remoteNodeChannel chan *RemoteNode) *wsServerType {
 	wsServer := new(wsServerType)
