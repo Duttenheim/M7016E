@@ -120,7 +120,7 @@ WebNode.prototype.GetSiblings = function()
 function MakeIV(num)
 {
     var buf = new Uint8Array(num);
-    crypto.getRandomValues(buf);
+    window.crypto.getRandomValues(buf);
     var str = String.fromCharCode.apply(null, buf);
     return str;
 }

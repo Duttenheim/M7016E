@@ -4,10 +4,6 @@ import (
 	"fmt"
 	"bitverse"
 	"protocol"
-	"strconv"
-	"strings"
-	"os"
-	"bufio"
 	"github.com/fsouza/go-dockerclient"
 )
 
@@ -153,16 +149,16 @@ type TestObserver struct {
 	superNode* bitverse.RemoteNode
 }
 
+func (observer* TestObserver) OnSiblingHeartbeat(node* bitverse.EdgeNode, id string) {
+    // empty
+}
+
 func (observer* TestObserver) OnSiblingJoined(node* bitverse.EdgeNode, id string) {
-	//fmt.Printf("Sibling '%s' joined supernode!\n", id)
+    // empty
 }
 
 func (observer* TestObserver) OnSiblingLeft(node* bitverse.EdgeNode, id string) {
-	//fmt.Printf("Sibling '%s' left supernode!\n", id)
-}
-
-func (observer* TestObserver) OnSiblingHeartbeat(node* bitverse.EdgeNode, id string) {
-	//fmt.Printf("Sibling '%s' is still alive!\n", id)
+    // empty
 }
 
 var siblings []string
@@ -196,58 +192,10 @@ func main() {
 	test := new(EdgeNodeHandler)
 	msgObserver.Register(test)
 	
-	service, serviceError := node.CreateMsgService(secret, "TestMessagingService", msgObserver)
+	_, serviceError := node.CreateMsgService(secret, "RPCMessageService", msgObserver)
 	if (serviceError != nil) {
 		panic(serviceError)
 	}
-
-	// wait for input
-	go func() {
-		bio := bufio.NewReader(os.Stdin)
-		for {
-			fmt.Printf(">>")
-			line, _ := bio.ReadString('\n')
-			components := strings.Split(line, " ")
-			for index, comp := range components {
-				components[index] = strings.Trim(comp, "\n")
-			}
-			if (len(components) > 0) {
-				if (components[0] == "show") {
-					reply = make(chan bool)
-					observer.superNode.SendChildrenRequest()
-					<-reply
-					for index, value := range siblings {
-						fmt.Printf("%d. %s\n", index, value)
-					}
-				} else if (components[0] == "run") {
-					if (len(components) != 2) {
-						fmt.Printf("'run' command must be supplied with a sibling node index!\n")
-						continue
-					}
-					index, err := strconv.Atoi(components[1])
-					if (err != nil) {
-						fmt.Printf("Must supply a valid number to 'run'\n")
-						continue
-					}
-					if (index < len(siblings)) {
-						args := new(ContainerArgs)
-						reply := new(RpcOutput)
-						err := protocol.RpcInvokeSync("EdgeNodeHandler.Test", args, reply, siblings[index], service)
-						if (err != nil) {
-							fmt.Println(err)
-							continue
-						}
-	
-						fmt.Println(reply.Content)
-					} else {
-						fmt.Printf("Unknown sibling index '%d'\n", index)
-					}
-				} else {
-					fmt.Println("Unknown command: " + components[0])
-				}
-			}
-		}
-	}()
 
 	// connect node and wait until done (which is forever)
 	go node.Connect("localhost:2020")
