@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"bitverse"
 	"protocol"
+    "flag"
 	"github.com/fsouza/go-dockerclient"
 )
 
@@ -198,6 +199,9 @@ func main() {
 	}
 
 	// connect node and wait until done (which is forever)
-	go node.Connect("localhost:2020")
+    addr := flag.String("address", "localhost", "Bitverse server IP-address")
+    flag.Parse()
+
+	go node.Connect(*addr + ":2020")
 	<- done	
 }
