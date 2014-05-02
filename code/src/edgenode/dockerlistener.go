@@ -45,9 +45,9 @@ func (obj* EdgeNodeHandler) CreateContainer(args* CreateContainerArgs, output* R
 	container, err := client.CreateContainer(createArgs)
 	output.Content = ""
 	if err != nil {
-		output.Content += fmt.Sprintf("Error %s", err)	
+		output.Content += fmt.Sprintf("ERROR: %s", err)	
 	}else{
-		output.Content += fmt.Sprintf("Container %s Created", container.ID)
+		output.Content += fmt.Sprintf("Container %s created successfully", container.ID)
 	}
 	return nil
 
@@ -58,10 +58,11 @@ func (obj* EdgeNodeHandler) StartContainer(args* ContainerArgs, output* RpcOutpu
 	client, _ := docker.NewClient(endpoint)
 	err := client.StartContainer(args.ID, nil)
 	output.Content = ""
+    fmt.Printf("Container id:%s\n", args.ID)
 	if err != nil {
-		output.Content += fmt.Sprintf("Error %s", err)	
+		output.Content += fmt.Sprintf("ERROR: %s", err)	
 	}else{
-		output.Content += fmt.Sprintf("Container %s Started", args.ID)
+		output.Content += fmt.Sprintf("Container %s started", args.ID)
 	}
 	return nil
 	
@@ -73,7 +74,7 @@ func (obj* EdgeNodeHandler) StopContainer(args* ContainerArgs, output* RpcOutput
 	err := client.StopContainer(args.ID, 3)
 	output.Content = ""
 	if err != nil {
-		output.Content += fmt.Sprintf("Error %s", err)	
+		output.Content += fmt.Sprintf("ERROR: %s", err)	
 	} else {
 		output.Content += fmt.Sprintf("Stopped container %s", args.ID)
 	}
@@ -86,7 +87,7 @@ func (obj* EdgeNodeHandler) KillContainer(args* ContainerArgs, output* RpcOutput
 	output.Content = ""
 	err := client.KillContainer(docker.KillContainerOptions{ID: args.ID})
 	if err != nil {
-		output.Content += fmt.Sprintf("Error %s", err)	
+		output.Content += fmt.Sprintf("ERROR: %s", err)	
 	}else{
 		output.Content += fmt.Sprintf("Container %s was killed", args.ID)
 	}
@@ -99,7 +100,7 @@ func (obj* EdgeNodeHandler) ListContainers(args* DockerListArgs, output* RpcOutp
 	imgs, err := client.ListContainers(docker.ListContainersOptions{All: args.ShowAll})
 	output.Content = ""
 	if err != nil {
-		output.Content += fmt.Sprintf("Error %s", err)
+		output.Content += fmt.Sprintf("ERROR: %s", err)
 	} else {
 		output.Content += fmt.Sprintf("Containers found \n")
 	}
@@ -116,7 +117,7 @@ func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* RpcOutput) error 
 	output.Content = ""
 	err := client.PullImage(docker.PullImageOptions{Repository: args.Repository}, docker.AuthConfiguration{})
 	if err != nil {
-		output.Content += fmt.Sprintf("Error %s", err)	
+		output.Content += fmt.Sprintf("ERROR: %s", err)	
 	} else {
 		output.Content += fmt.Sprintf("Pulled container")
 	}
@@ -129,7 +130,7 @@ func (obj* EdgeNodeHandler) ListImages(args* DockerListArgs, output* RpcOutput) 
         client, _ := docker.NewClient(endpoint)
         imgs, err := client.ListImages(args.ShowAll)
 	if err != nil {
-		output.Content += fmt.Sprintf("Error %s", err)
+		output.Content += fmt.Sprintf("ERROR: %s", err)
 	} else {
 		output.Content += fmt.Sprintf("Containers found \n")
 	}

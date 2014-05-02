@@ -50,7 +50,6 @@ func makeWsServer(localNodeId NodeId, msgChannel chan Msg, remoteNodeChannel cha
 func (wsServer *wsServerType) start(port string) {
 	debug("wsserver: starting a new server at port " + port)
 
-	http.Handle("/", http.FileServer(http.Dir("web/")))
 	http.Handle("/node", websocket.Handler(wsServer.WsHandler))
 
 	err := http.ListenAndServe(":"+port, nil)

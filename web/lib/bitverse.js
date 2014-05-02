@@ -51,6 +51,11 @@ function WebNode()
     {
         alert(JSON.stringify(message));
     }
+
+    this.connectedCallback = function()
+    {
+        alert("Connected!");
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -64,6 +69,9 @@ WebNode.prototype.OnOpen = function()
     message.Src = this.id;
 
     this.Send(message);
+
+    // call callback
+    this.connectedCallback();
 }
 
 //------------------------------------------------------------------------------

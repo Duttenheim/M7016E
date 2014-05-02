@@ -1,6 +1,9 @@
 <!DOCTYPE HTML>
 <html>
 <head>
+<style>
+body { font-family:"Arial" }
+</style>
 <script src="lib/uuid.js" type="text/javascript"></script>
 <script src="lib/aes.js" type="text/javascript"></script>
 <script src="lib/mode-cfb-min.js" type="text/javascript"></script>
@@ -11,22 +14,28 @@
 <script src="lib/websocket.js" type="text/javascript"></script>
 <script src="lib/bitverse.js" type="text/javascript"></script>
 <script src="lib/edgenode.js" type="text/javascript"></script>
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script> 
 <script src="gui.js" type="text/javascript"></script>
 <script type="text/javascript">
 var node;
+
+function OnConnected()
+{
+    var siblingButton = document.createElement("button");
+    var buttonContents = document.createTextNode("Request children");
+    siblingButton.appendChild(buttonContents);
+    siblingButton.onclick = function() { node.GetSiblings(); };
+    mainDiv = document.getElementById("util");
+    mainDiv.appendChild(siblingButton);
+}
 
 function Connect()
 {  
     addr = document.getElementById('ipAddress').value;
     node = CreateWebNode("ws://" + addr + "/node");
     node.childrenReceivedCallback = GuiChildrenReceivedCallback;
-
-    var siblingButton = document.createElement("button");
-    var buttonContents = document.createTextNode("Request children");
-    siblingButton.appendChild(buttonContents);
-    siblingButton.onclick = function() { node.GetSiblings(); };
-    mainDiv = document.getElementById("main");
-    mainDiv.appendChild(siblingButton);
+    node.messageReceivedCallback = GuiMessageReceivedCallback;
+    node.connectedCallback = OnConnected;
 }
 
 
@@ -35,8 +44,18 @@ function Connect()
 <body>
 <div id="main">
     <input type="text" id="ipAddress"/>
-    <a href="javascript:Connect()">Connect</a><br>
+    <input type="button" value="Connect" onclick="Connect()"/>
+    <hr>
+    <div id="util">
+    <h1>Server</h1>
+    </div>
+    <hr>
     <div id="children">
+    <h1>Children</h1>
+    </div>
+    <hr>
+    <div id="node">
+    <h1>Node</h1>
     </div>
 </div>
 </body>
