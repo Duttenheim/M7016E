@@ -18,6 +18,19 @@ type CreateContainerArgs struct {
 	ImageName string
 }
 
+type RemoveContainerArgs struct {
+    // The ID of the container.
+    ID  string
+
+    // A flag that indicates whether Docker should remove the volumes
+    // associated to the container.
+    RemoveVolumes bool
+
+    // A flag that indicates whether Docker should remove the container
+    // even if it is currently running.
+    Force bool
+}
+
 type DockerListArgs struct {
 	ShowAll bool
 }
@@ -26,6 +39,10 @@ type ImageArgs struct {
 	ID string
 	Name string
 	Repository string
+}
+
+type RemoveImageArgs struct {
+	Name string
 }
 
 type RpcOutput struct {
@@ -94,6 +111,35 @@ func (obj* EdgeNodeHandler) KillContainer(args* ContainerArgs, output* RpcOutput
 	return nil
 }
 
+
+func (obj* EdgeNodeHandler) RestartContainer(args* ContainerArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	output.Content = ""
+	err := client.RestartContainer(args.ID, 500)
+	if err != nil {
+		output.Content += fmt.Sprintf("ERROR: %s", err)	
+	}else{
+		output.Content += fmt.Sprintf("Container %s is restarting", args.ID)
+	}
+	return nil
+}
+
+func (obj* EdgeNodeHandler) RemoveContainer(args* RemoveContainerArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	output.Content = ""
+	err := client.RemoveContainer(docker.RemoveContainerOptions{ID: args.ID, RemoveVolumes: args.RemoveVolumes, Force: args.Force})
+	if err != nil {
+		output.Content += fmt.Sprintf("ERROR: %s", err)	
+	}else{
+		output.Content += fmt.Sprintf("Container %s was removed", args.ID)
+	}
+	return nil
+}
+
+
+
 func (obj* EdgeNodeHandler) ListContainers(args* DockerListArgs, output* RpcOutput) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
@@ -123,6 +169,20 @@ func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* RpcOutput) error 
 	}
 	return nil
 }
+
+func (obj* EdgeNodeHandler) RemoveImage(args* RemoveImageArgs, output* RpcOutput) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	output.Content = ""
+	err := client.RemoveImage(args.Name)
+	if err != nil {
+		output.Content += fmt.Sprintf("ERROR: %s", err)	
+	} else {
+		output.Content += fmt.Sprintf("Removed %s Image", args.Name)
+	}
+	return nil
+}
+
 
 
 func (obj* EdgeNodeHandler) ListImages(args* DockerListArgs, output* RpcOutput) error {
