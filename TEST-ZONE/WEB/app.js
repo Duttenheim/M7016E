@@ -19,17 +19,10 @@ app.get('/images', function(req, res){
   });
 });
 
-app.get('/containers', function(req, res){
-  res.render('containers.ejs', {
+app.get('/servers', function(req, res){
+  res.render('servers.ejs', {
         title: 'YACS' 
   });
 });
-
-app.get('/nodes', function(req, res){
-  res.render('nodes.ejs', {
-        title: 'YACS' 
-  });
-});
-
 
 app.listen(3000);
