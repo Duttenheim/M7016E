@@ -69,7 +69,7 @@ func main() {
 	test := new(TestRpcInterface)
 	msgObserver.Register(test)
 	
-	service, serviceError := node.CreateMsgService(secret, "TestMessagingService", msgObserver)
+	service, serviceError := node.CreateMsgService(secret, "RPCMessageService", msgObserver)
 	if (serviceError != nil) {
 		panic(serviceError)
 	}
@@ -123,6 +123,6 @@ func main() {
 	}()
 
 	// connect node and wait until done (which is forever)
-	go node.Connect("localhost:2020")
+	go node.Connect("130.240.233.93:2020")
 	<- done	
 }
