@@ -15,14 +15,20 @@ app.get('/', function(req, res){
 
 app.get('/images', function(req, res){
   res.render('images.ejs', {
-        title: 'YACS' 
+        title: 'YACS'
   });
 });
 
 app.get('/servers', function(req, res){
   res.render('servers.ejs', {
-        title: 'YACS' 
+        title: 'YACS'
   });
 });
+
+app.get('/manage', function(req, res){
+	  res.render('manage.ejs', {
+	        title: 'YACS' 
+	  });
+	});
 
 app.listen(3000);
