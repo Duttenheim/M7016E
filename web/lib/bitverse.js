@@ -51,6 +51,11 @@ function WebNode()
     {
         alert(JSON.stringify(message));
     }
+
+    this.connectedCallback = function()
+    {
+        alert("Connected!");
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -64,6 +69,9 @@ WebNode.prototype.OnOpen = function()
     message.Src = this.id;
 
     this.Send(message);
+
+    // call callback
+    this.connectedCallback();
 }
 
 //------------------------------------------------------------------------------
@@ -120,7 +128,7 @@ WebNode.prototype.GetSiblings = function()
 function MakeIV(num)
 {
     var buf = new Uint8Array(num);
-    crypto.getRandomValues(buf);
+    window.crypto.getRandomValues(buf);
     var str = String.fromCharCode.apply(null, buf);
     return str;
 }

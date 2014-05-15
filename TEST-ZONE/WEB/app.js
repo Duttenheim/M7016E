@@ -1,35 +1,53 @@
-//http://stackoverflow.com/questions/18629327/adding-css-file-to-ejs
 
-var express = require('express');
-var app = express();
+/**
+ * Module dependencies.
+ */
 
-app.set('views', __dirname + '/views');
+var express = require('express')
+  , routes = require('./routes')
+  , servers = require('./routes/servers')
+  , manage = require('./routes/manage')
 
-app.use(express.static(__dirname + '/public'));
+var app = module.exports = express.createServer();
 
-app.get('/', function(req, res){
-  res.render('index.ejs', {
-        title: 'YACS' 
-  });
+// Configuration
+
+app.configure(function(){
+  app.set('views', __dirname + '/views');
+  app.set('view engine', 'ejs');
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
+app.use(express.compiler({ src : __dirname + '/public', enable: ['less']}));
+  app.use(app.router);
+  app.use(express.static(__dirname + '/public'));
 });
 
-app.get('/images', function(req, res){
-  res.render('images.ejs', {
-        title: 'YACS' 
-  });
+app.configure('development', function(){
+  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
-app.get('/containers', function(req, res){
-  res.render('containers.ejs', {
-        title: 'YACS' 
-  });
+app.configure('production', function(){
+  app.use(express.errorHandler());
 });
 
-app.get('/nodes', function(req, res){
-  res.render('nodes.ejs', {
-        title: 'YACS' 
-  });
+// Compatible
+
+// Now less files with @import 'whatever.less' will work(https://github.com/senchalabs/connect/pull/174)
+var TWITTER_BOOTSTRAP_PATH = './vendor/twitter/bootstrap/less';
+express.compiler.compilers.less.compile = function(str, fn){
+  try {
+    var less = require('less');var parser = new less.Parser({paths: [TWITTER_BOOTSTRAP_PATH]});
+    parser.parse(str, function(err, root){fn(err, root.toCSS());});
+  } catch (err) {fn(err);}
+}
+
+// Routes
+
+app.get('/', routes.index);
+app.get('/home', routes.index);
+app.get('/servers', servers.index);
+app.get('/manage', manage.index);
+
+app.listen(3000, function(){
+  console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
-
-
-app.listen(3000);

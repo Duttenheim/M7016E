@@ -65,6 +65,7 @@ func MakeEdgeNode(transport Transport, bitverseObserver BitverseObserver) (*Edge
 							}
 							if err != nil {
 								info("edgenode: failed to decrypt payload, ignoring incoming msg")
+                                debug(err.Error())
 							} else {
 								reply := edgeNode.replyTable[msg.Id]
 								debug("msg <" + msg.Id + "> is a reply")

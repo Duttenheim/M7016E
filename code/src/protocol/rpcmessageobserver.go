@@ -199,8 +199,8 @@ func (observer* RpcMessageObserver) OnDeliver(service* bitverse.MsgService, msg*
 	input := reflect.New(inputType)
 	output := reflect.New(outputType)
 
-	// now unmarshal again, this time with the input struct
-	err = json.Unmarshal([]byte(msg.Payload), &input)
+	// now unmarshal arguments which should be a string
+	err = json.Unmarshal([]byte(pkg.Args.(string)), input.Interface())
 	if (err != nil) {
 		if (observer.debug) { fmt.Println("Message did not receive a proper input structure") }
 		return

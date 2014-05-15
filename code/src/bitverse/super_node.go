@@ -262,7 +262,7 @@ func (superNode *SuperNode) sendToChild(msg Msg) {
 			msg.Dst = remoteNode.Id()
 			remoteNode.deliver(&msg)
 		} else {
-			debug("failed to forward message to child")
+			debug("failed to forward message to child from: " + msg.Src + " to: " + msg.Dst)
 		}
 	}
 }

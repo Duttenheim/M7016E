@@ -1,6 +1,7 @@
 package main
 
 import (
+    "net/http"
 	"bitverse"
 	"fmt"
     "os"
@@ -19,8 +20,10 @@ func main() {
 		port,_ = strconv.Atoi(os.Args[1])
 	}
 	if ((port > 1023) && (port < 49151)){
+		// implicitly make this server work as a web server too
+		http.Handle("/", http.FileServer(http.Dir("web/")))
+		
 		_, done = bitverse.MakeSuperNode(transport, "127.0.0.1", os.Args[1])
-
 		<- done
 	}
 	fmt.Println("usage : ./bitverseserver port   with 1023<port<49151")
