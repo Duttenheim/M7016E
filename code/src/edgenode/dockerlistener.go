@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"bitverse"
 	"protocol"
-    "flag"
+	"encoding/json"
+    	"flag"
 	"github.com/fsouza/go-dockerclient"
 )
 
@@ -67,180 +68,243 @@ type RpcOutput struct {
 	ReplyCode int
 }
 
+type Container struct {
+	ID string
+	Image string
+	Created string
+	Status string
+}
+
+type ContainerCollection struct {
+	ReplyCode int
+	Containers []Container
+}
+
+type Image struct {
+	ID string
+	Created string
+	Size string
+	VirtualSize string
+	//RepoTags []string
+}
+
+type ImageCollection struct {
+	ReplyCode int
+	Images []Image
+}
+
 func (obj* EdgeNodeHandler) Test(input* ContainerArgs, output* RpcOutput) error {
 	output.Content = "It works!"
 	return nil
 }
 
-func (obj* EdgeNodeHandler) CreateContainer(args* CreateContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) CreateContainer(args* CreateContainerArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
 	config := docker.Config{Image: args.ImageName}
 	createArgs := docker.CreateContainerOptions{Name: args.ContainerName, Config: &config}	
 	container, err := client.CreateContainer(createArgs)
-	output.Content = ""
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
 	}else{
-		output.Content += fmt.Sprintf("Container %s created successfully", container.ID)
-		output.ReplyCode = CreateContainer
+		rpcOutput.Content += fmt.Sprintf("Container %s created successfully", container.ID)
+		rpcOutput.ReplyCode = CreateContainer
 	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
 	return nil
 
 }
 
-func (obj* EdgeNodeHandler) StartContainer(args* ContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) StartContainer(args* ContainerArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
 	err := client.StartContainer(args.ID, nil)
-	output.Content = ""
-    fmt.Printf("Container id:%s\n", args.ID)
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
 	}else{
-		output.Content += fmt.Sprintf("Container %s started", args.ID)
-		output.ReplyCode = StartContainer
+		rpcOutput.Content += fmt.Sprintf("Container %s started", args.ID)
+		rpcOutput.ReplyCode = StartContainer
 	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
 	return nil
 	
 }
 
-func (obj* EdgeNodeHandler) StopContainer(args* ContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) StopContainer(args* ContainerArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
 	err := client.StopContainer(args.ID, 3)
-	output.Content = ""
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
 	} else {
-		output.Content += fmt.Sprintf("Stopped container %s", args.ID)
-		output.ReplyCode = StopContainer
+		rpcOutput.Content += fmt.Sprintf("Stopped container %s", args.ID)
+		rpcOutput.ReplyCode = StopContainer
 	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
 	return nil
 }
 
-func (obj* EdgeNodeHandler) KillContainer(args* ContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) KillContainer(args* ContainerArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
-	output.Content = ""
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
 	err := client.KillContainer(docker.KillContainerOptions{ID: args.ID})
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
 	}else{
-		output.Content += fmt.Sprintf("Container %s was killed", args.ID)
-		output.ReplyCode = KillContainer
+		rpcOutput.Content += fmt.Sprintf("Container %s was killed", args.ID)
+		rpcOutput.ReplyCode = KillContainer
 	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
 	return nil
 }
 
 
-func (obj* EdgeNodeHandler) RestartContainer(args* ContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) RestartContainer(args* ContainerArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
-	output.Content = ""
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
 	err := client.RestartContainer(args.ID, 500)
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
 	}else{
-		output.Content += fmt.Sprintf("Container %s is restarting", args.ID)
-		output.ReplyCode = RestartContainer
+		rpcOutput.Content += fmt.Sprintf("Container %s is restarting", args.ID)
+		rpcOutput.ReplyCode = RestartContainer
 	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
 	return nil
 }
 
-func (obj* EdgeNodeHandler) RemoveContainer(args* RemoveContainerArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) RemoveContainer(args* RemoveContainerArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
-	output.Content = ""
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
 	err := client.RemoveContainer(docker.RemoveContainerOptions{ID: args.ID, RemoveVolumes: args.RemoveVolumes, Force: args.Force})
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
 	}else{
-		output.Content += fmt.Sprintf("Container %s was removed", args.ID)
-		output.ReplyCode = RemoveContainer
+		rpcOutput.Content += fmt.Sprintf("Container %s was removed", args.ID)
+		rpcOutput.ReplyCode = RemoveContainer
 	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
 	return nil
 }
 
 
 
-func (obj* EdgeNodeHandler) ListContainers(args* DockerListArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) ListContainers(args* DockerListArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
 	imgs, err := client.ListContainers(docker.ListContainersOptions{All: args.ShowAll})
-	output.Content = ""
+	rpcOutput := RpcOutput{}
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
+		b, _ := json.Marshal(rpcOutput)
+		*output += fmt.Sprintf(string(b))
 	} else {
-		output.Content += fmt.Sprintf("Containers found \n")
-		output.ReplyCode = ListContainers
+		
+		list := []Container{}
+		for _, img := range imgs {
+			cont := Container{}
+			cont.ID = img.ID
+			cont.Image = img.Image
+			cont.Created = string(img.Created)
+			cont.Status = img.Status
+			list = append(list,cont)
+		}
+		containerColl := ContainerCollection{ReplyCode: ListContainers, Containers: list}
+		b, _ := json.Marshal(containerColl)
+		*output += fmt.Sprintf(string(b))
 	}
-	for _, img := range imgs {
-		output.Content += fmt.Sprintf("ID: %s \n", img.ID)
-		output.Content += fmt.Sprintf("Created: %d \n", img.Created)
-	}
+	
 	return nil
 }
 
-func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
-	output.Content = ""
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
 	err := client.PullImage(docker.PullImageOptions{Repository: args.Repository}, docker.AuthConfiguration{})
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
 	} else {
-		output.Content += fmt.Sprintf("Pulled container")
-		output.ReplyCode = PullImage
+		rpcOutput.Content += fmt.Sprintf("Pulled container")
+		rpcOutput.ReplyCode = PullImage
 	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
 	return nil
 }
 
-func (obj* EdgeNodeHandler) RemoveImage(args* RemoveImageArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) RemoveImage(args* RemoveImageArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
-	output.Content = ""
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
 	err := client.RemoveImage(args.Name)
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
 	} else {
-		output.Content += fmt.Sprintf("Removed %s Image", args.Name)
-		output.ReplyCode = RemoveImage
+		rpcOutput.Content += fmt.Sprintf("Removed %s Image", args.Name)
+		rpcOutput.ReplyCode = RemoveImage
 	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
 	return nil
 }
 
 
 
-func (obj* EdgeNodeHandler) ListImages(args* DockerListArgs, output* RpcOutput) error {
+func (obj* EdgeNodeHandler) ListImages(args* DockerListArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
         client, _ := docker.NewClient(endpoint)
         imgs, err := client.ListImages(args.ShowAll)
+	rpcOutput := RpcOutput{}
 	if err != nil {
-		output.Content += fmt.Sprintf("ERROR: %s", err)
-		output.ReplyCode = ErrorCode
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
+		b, _ := json.Marshal(rpcOutput)
+		*output += fmt.Sprintf(string(b))
 	} else {
-		output.Content += fmt.Sprintf("Containers found \n")
-		output.ReplyCode = ListImages
+		list := []Image{}
+		for _, img := range imgs {
+			image := Image{}
+		        image.ID += fmt.Sprintf(img.ID)
+		        //image.RepoTags += fmt.Sprintf(img.RepoTags)
+		        image.Created += fmt.Sprintf(string(img.Created))
+		        image.Size += fmt.Sprintf(string(img.Size))
+		        image.VirtualSize += fmt.Sprintf(string(img.VirtualSize))
+			list = append(list, image)
+        	}
+		imageColl := ImageCollection{ReplyCode: ListImages, Images: list}
+		b, _ := json.Marshal(imageColl)
+		*output += fmt.Sprintf(string(b))
 	}
-        for _, img := range imgs {
-                output.Content += fmt.Sprintf("ID: ", img.ID)
-                output.Content += fmt.Sprintf("RepoTags: ", img.RepoTags)
-                output.Content += fmt.Sprintf("Created: ", img.Created)
-                output.Content += fmt.Sprintf("Size: ", img.Size)
-                output.Content += fmt.Sprintf("VirtualSize: ", img.VirtualSize)
-                output.Content += fmt.Sprintf("ParentId: ", img.ParentId)
-                output.Content += fmt.Sprintf("Repository: ", img.Repository)
-        }
 	return nil
 
 }

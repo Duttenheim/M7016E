@@ -5,7 +5,9 @@
 function CreateContainerList(){
 
 	var tbody = document.getElementById("containers_body");
+	var header = document.getElementById("avail_cont_head");
 	$("#containers_body").empty();
+	header.innerHTML = "Containers available: 10";
 	for (var i = 0; i < 10; i++)
     {
 		populateContainerList(tbody, i+1);
@@ -55,7 +57,9 @@ function populateContainerList(tbody, nr){
 
 function CreateImageList(){
 	var tbody = document.getElementById("images_body");
+	var header = document.getElementById("avail_img_head");
 	$("#images_body").empty();
+	header.innerHTML = "Images available: 10";
 	for (var i = 0; i < 10; i++)
     {
 		populateImageList(tbody, i+1);

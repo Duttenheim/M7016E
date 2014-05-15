@@ -14,37 +14,42 @@
 
 
 <html>
-	<h1><%= title %></h1>
-  	<p>Welcome to <%= title %></p>
+	<h1><%= title %> Edge-node</h1>
   	
-  	<h3> Images </h3>
-  	<button class="btn btn-primary" type="button" onclick="CreateImageList()">Get images</button>
-     <table class="table table-striped">
-     	<thead>
-     		<tr>
-     			<th>#</th>
-     			<th>Name</th>
-     			<th></th>
-     		</tr>
-     	</thead>
-     	<tbody id="images_body">
-     	</tbody>
-     </table>
-     
-     <h3> Containers </h3>
-     <button class="btn btn-primary" type="button" onclick="CreateContainerList()">Get containers</button>
-      <table class="table table-striped">
-     	<thead>
-     		<tr>
-     			<th>#</th>
-     			<th>Name</th>
-     			<th>ID</th>
-     			<th></th>
-     		</tr>
-     	</thead>
-     	<tbody id="containers_body">
-     	</tbody>
-     </table>
+  	<h3 id="avail_img_head"> Images available: 0</h3>
+  	<button class="btn btn-primary" type="button" onclick="CreateImageList()">Refresh images</button>
+  	<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#images_div"> Show table</button>
+	<div id="images_div" class="collapse">
+	     <table class="table table-striped">
+	     	<thead>
+	     		<tr>
+	     			<th>#</th>
+	     			<th>Name</th>
+	     			<th></th>
+	     		</tr>
+	     	</thead>
+	     	<tbody id="images_body">
+	     	</tbody>
+	     </table>
+     </div>
+     <br/>
+     <h3 id="avail_cont_head"> Containers available: 0 </h3>
+     <button class="btn btn-primary" type="button" onclick="CreateContainerList()">Refresh containers</button>
+     <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#containers_div"> Show table</button>
+     <div id="containers_div" class="collapse">
+	     <table class="table table-striped">
+	     	<thead>
+	     		<tr>
+	     			<th>#</th>
+	     			<th>Name</th>
+	     			<th>ID</th>
+	     			<th></th>
+	     		</tr>
+	     	</thead>
+	     	<tbody id="containers_body">
+	     	</tbody>
+	     </table>
+     </div>
      
 </html>
 
