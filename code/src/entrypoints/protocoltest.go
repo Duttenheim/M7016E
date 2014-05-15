@@ -109,13 +109,6 @@ func main() {
 						time.Sleep(2)
 						<- addresses
 						
-						/*fmt.Println("connected to", address)
-						reply = make(chan bool)
-						observer.superNode.SendChildrenRequest()
-						<-reply
-						for index, value := range siblings {
-							fmt.Printf("%d. %s\n", index, value)
-						}*/
 						
 					}
 				}else if (components[0] == "ids") {
@@ -154,11 +147,13 @@ func main() {
 	
 	go func(){
 		for {
-			fmt.Println("waiting for the address")
 			address := <- addresses
-			fmt.Println("address = ", address )
+			//fmt.Println("address = ", address )
 			oldID[numberOfId] = node.Id()
 			numberOfId += 1
+			if(numberOfId >= len(oldID)){
+				numberOfId = 0
+			}
 			fmt.Println("deleting node id : ", node.Id(), "        supernode id :", observer.superNode.Id)
 			node, done = bitverse.MakeEdgeNode(transport, observer)
 			fmt.Println("creating node id : ", node.Id(), "        supernode id :", observer.superNode.Id)
