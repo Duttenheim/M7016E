@@ -1,19 +1,21 @@
-function CheckOnline(addrid, elementid)
+function CheckOnline(addrid, elementid, buttonid)
 {
-	
 	var img = document.body.appendChild(document.createElement("img"));
 	
-	statusElement = document.getElementById(elementid);
-	statusElement.innerHTML = "Unknown";
-	addrElement = document.getElementById(addrid);
+	var addrElement = document.getElementById(addrid);
+	var statusElement = document.getElementById(elementid);
+	var buttonElement = document.getElementById(buttonid);
+	statusElement.innerHTML = "Pending";	
+	buttonElement.disabled = true;
 	
 	img.onload = function()
 	{
 		status = "<font color='green'>Online</font>";
 		statusElement.innerHTML = status;
+		buttonElement.enabled = true;
 	}
 	
-	failFunction = function()
+	var failFunction = function()
 	{
 		status = "<font color='red'>Offline</font>";
 		statusElement.innerHTML = status;
@@ -25,6 +27,6 @@ function CheckOnline(addrid, elementid)
 	setTimeout
 	(
 		failFunction,
-		1000
+		3000
 	);
 }
