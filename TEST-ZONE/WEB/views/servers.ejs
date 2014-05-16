@@ -8,6 +8,9 @@
   	<a href="/servers">Servers</a>
   </li>
   <li>
+  	<a href="/images">Images</a>
+  </li>
+  <li>
   	<a href="/manage">Manage</a>
   </li>
 </ul>
@@ -15,103 +18,66 @@
 
 <html>	                	 
     <body>
-        
         <section>
-        	
             <article>  
                           
                 <h1><%= title %> management page </h1>
-                <blockquote>
-                <blockquote> <p>Servers</p>
-
-
-
-				<head>
-				<style>
-				#customers
-				{
-				font-family:"Trebuchet MS", Arial, Helvetica, sans-serif;
-				width:100%;
-				border-collapse:collapse;
-				}
-				#customers td, #customers th 
-				{
-				font-size:1em;
-				padding:3px 7px 2px 7px;
-				}
-				#customers th 
-				{
-				font-size:1.1em;
-				text-align:left;
-				padding-top:5px;
-				padding-bottom:4px;
-				background-color:#356095;
-				color:#ffffff;
-				}
-				#customers tr.alt td 
-				{
-				color:#000000;
-				background-color:#e0dfe2;
-				}
-				</style>
-				</head>
-				
-				<body>
-				<table id="customers">
-				<tr>
-				  <th><center>Name</center></th>
-				  <th><center>IP</center></th>
-				  <th><center>Status</center></th>
-				  <th><center>Action</center></th>
-			  
-
-				</tr>
-				<tr>
-				<td>Core server 1</td>
-				<td>130.240.134.116</td>
-				<td>Online</td>
-				<td>
-					<input type="button" OnClick="javascript:window.location.reload()" value="Manage">
-				</td>
-				</tr>
-				<tr class="alt">
-				
-				<td>Core server 2</td>
-				<td>130.240.134.117</td>
-				<td>Online</td>
-				<td>
-					<input type="button" OnClick="javascript:window.location.reload()" value="Manage">
-				</td>
-				</tr>
-				
-				</tr>
-				<tr>
-				<td>Core server 3</td>
-				<td>130.240.134.118</td>
-				<td>Online</td>
-				<td>
-					<input type="button" OnClick="javascript:window.location.reload()" value="Manage">
-				</td>
-				</tr>
-				<tr class="alt">
-				
-				<td>Core server 4</td>
-				<td>130.240.134.119</td>
-				<td>Online</td>
-				<td>
-					<input type="button" OnClick="javascript:window.location.reload()" value="Manage">
-				</td>
-				</tr>
-				
-				</table>
-				</body>
-                </blockquote>
-                </blockquote>
                 
+                <p>Servers</p>
+
+			<body>
+			<table class="table table-hover table-bordered" id="serverlist">
+			<tr>
+			  <th><center>Name</center></th>
+			  <th><center>IP</center></th>
+			  <th><center>Status</center></th>
+			  <th><center>Action</center></th>
+			</tr>			
+			
+			<% for (var server in servers) %>
+			<tr>
+				<td>Core server 1</td>
+				<td id="server1ip"><%= servers.server1 %></td>
+				<td id="server1status">Online</td>
+				<td>
+					<input type="button" OnClick="CheckOnline('server1ip', 'server1status')" value="Manage">
+				</td>
+			</tr>
+			
+			<tr class="alt">			
+				<td>Core server 2</td>
+				<td id="server2ip">130.240.134.117</td>
+				<td id="server2status">Online</td>
+				<td>
+					<input type="button" OnClick="CheckOnline('server2ip', 'server2status')" value="Manage">
+				</td>
+			</tr>
+			
+			</tr>
+			
+			<tr>
+			<td>Core server 3</td>
+			<td id="server3ip">130.240.134.118</td>
+			<td id="server3status">Online</td>
+			<td>
+				<input type="button" OnClick="CheckOnline('server3ip', 'server3status')" value="Manage">
+			</td>
+			</tr>
+			
+			<tr class="alt">			
+			<td>Core server 4</td>
+			<td id="server4ip">130.240.134.119</td>
+			<td id="server4status">Online</td>
+			<td>
+				<input type="button" OnClick="CheckOnline('server4ip', 'server4status')" value="Manage">
+			</td>
+			</tr>
+			
+			</table>
+			</body>               
 
             </article>
         </section>
-        
     </body>
 </html>
 

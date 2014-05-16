@@ -7,6 +7,7 @@ var express = require('express')
   , routes = require('./routes')
   , servers = require('./routes/servers')
   , manage = require('./routes/manage')
+  , images = require('./routes/images')
 
 var app = module.exports = express.createServer();
 
@@ -46,7 +47,9 @@ express.compiler.compilers.less.compile = function(str, fn){
 app.get('/', routes.index);
 app.get('/home', routes.index);
 app.get('/servers', servers.index);
+app.get('/images', images.index);
 app.get('/manage', manage.index);
+
 
 app.listen(3000, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
