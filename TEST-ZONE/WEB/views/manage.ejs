@@ -5,9 +5,13 @@ var node;
 $( document ).ready(function() {
     console.log( "ready!" );
     var addr = document.getElementById('server_addr').innerHTML
+    var edgeNode = document.getElementById('edgeNode_id').innerHTML
     node = CreateWebNode("ws://"+addr+"/node");
     node.messageReceivedCallback = NodeReceiveCallback;
-    listImages()
+    node.connectedCallback = function() { 
+    	listImages(edgeNode);  
+    	listContainers(edgeNode); 
+    };
 });
 
 function listImages(edgeNode) 
