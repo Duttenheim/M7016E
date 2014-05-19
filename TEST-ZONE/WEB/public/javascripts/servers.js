@@ -8,18 +8,23 @@ function CheckOnline(addrid, elementid, buttonid)
 	statusElement.innerHTML = "Pending";	
 	buttonElement.disabled = true;
 	
+	var loaded = false;
 	img.onload = function()
 	{
 		status = "<font color='green'>Online</font>";
 		statusElement.innerHTML = status;
-		buttonElement.enabled = true;
+		buttonElement.disabled = false;
+		loaded = true;
 	}
 	
 	var failFunction = function()
 	{
-		status = "<font color='red'>Offline</font>";
-		statusElement.innerHTML = status;
-		img.src = "";
+		if (!loaded)
+		{
+			status = "<font color='red'>Offline</font>";
+			statusElement.innerHTML = status;
+			img.src = "";
+		}
 	}
 	
 	img.src = "http://" + addrElement.innerHTML + "/ping.bmp";
