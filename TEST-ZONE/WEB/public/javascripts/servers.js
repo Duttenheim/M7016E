@@ -42,7 +42,7 @@ function CheckOnline(addrid, elementid, buttonid)
 //------------------------------------------------------------------------------
 /**
 */
-function Redirect(serverip)
+function RedirectToSupernode(serverip)
 {
 	window.location.href = "/supernode" + "?ip=" + serverip;
 }

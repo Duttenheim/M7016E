@@ -1,13 +1,28 @@
 function GetSearchVars()
 {
-	var oGetVars = {};
-	if (window.location.search.length > 1)
+	//Holds key:value pairs
+    var queryStringColl = null;
+            
+    //Get querystring from url
+    var requestUrl = window.location.search.toString();
+
+    if (requestUrl != '')
 	{
-		for (var aItKey, nKeyId = 0, aCouples = window.location.search.substr(1).split("&"); nKeyId < aCouples.length; nKeyId++)
+        //window.location.search returns the part of the URL 
+        //that follows the ? symbol, including the ? symbol
+        requestUrl = requestUrl.substring(1);
+
+        queryStringColl = new Array();
+
+        //Get key:value pairs from querystring
+        var kvPairs = requestUrl.split('&');
+
+        for (var i = 0; i < kvPairs.length; i++)
 		{
-			aItKey = aCouples[nKeyId].split("=");
-			oGetVars[decodeURIComponent(aItKey[0])] = aItKey.length > 1 ? decodeURIComponent(aItKey[1]) : "";
-		}
-	}
-	return oGetVars;
+            var kvPair = kvPairs[i].split('=');
+            queryStringColl[kvPair[0]] = kvPair[1];
+        }
+    }
+
+    return queryStringColl;
 }
