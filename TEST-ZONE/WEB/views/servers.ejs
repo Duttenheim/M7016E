@@ -20,8 +20,8 @@
         <section>
             <article>  
                           
-                <h1><%= title %> management page </h1>
-                <p>Servers</p>
+			<h1><%= title %> management page </h1>
+			<p>Servers</p>
 
 			<body>
 			<table class="table table-hover table-bordered" id="serverlist">
@@ -43,7 +43,7 @@
 				<td id='<%= serverIpId %>'><%= serverIp %></td>
 				<td id='<%= serverStatusId %>'>Online</td>
 				<td>
-					<input class="btn" type="button" id='<%= serverButtonId %>' value="Manage">
+					<input class="btn" type="button" id='<%= serverButtonId %>' onclick="Redirect('<%= serverIp %>')" value="Manage">
 				</td>
 			</tr>
 			<script>

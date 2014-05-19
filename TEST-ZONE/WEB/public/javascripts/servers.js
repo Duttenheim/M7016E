@@ -1,3 +1,6 @@
+//------------------------------------------------------------------------------
+/**
+*/
 function CheckOnline(addrid, elementid, buttonid)
 {
 	var img = document.body.appendChild(document.createElement("img"));
@@ -34,4 +37,12 @@ function CheckOnline(addrid, elementid, buttonid)
 		failFunction,
 		3000
 	);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+function Redirect(serverip)
+{
+	window.location.href = "/supernode" + "?ip=" + serverip;
 }
