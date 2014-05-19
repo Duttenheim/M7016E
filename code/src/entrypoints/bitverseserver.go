@@ -12,6 +12,7 @@ func main() {
 	// create websocket transpot and channel
 	transport := bitverse.MakeWSTransport()
 	var done chan int
+
 	//var node* bitverse.SuperNode
 
 	// implicitly make this server work as a web server too

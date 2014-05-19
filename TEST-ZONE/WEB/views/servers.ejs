@@ -15,15 +15,13 @@
   </li>
 </ul>
 
-
 <html>	                	 
     <body>
         <section>
             <article>  
                           
-                <h1><%= title %> management page </h1>
-                
-                <p>Servers</p>
+			<h1><%= title %> management page </h1>
+			<p>Servers</p>
 
 			<body>
 			<table class="table table-hover table-bordered" id="serverlist">
@@ -34,44 +32,25 @@
 			  <th><center>Action</center></th>
 			</tr>			
 			
-			<% for (var server in servers) %>
+			<% var num = 1; %>
+			<% for (var server in servers) { %>
+			<% var serverIp = servers[server]; %>
+			<% var serverIpId = server + "ip"; %>
+			<% var serverStatusId = server + "status"; %>
+			<% var serverButtonId = server + "button"; %>
 			<tr>
-				<td>Core server 1</td>
-				<td id="server1ip"><%= servers.server1 %></td>
-				<td id="server1status">Online</td>
+				<td>Core server <%= num %></td>
+				<td id='<%= serverIpId %>'><%= serverIp %></td>
+				<td id='<%= serverStatusId %>'>Online</td>
 				<td>
-					<input type="button" OnClick="CheckOnline('server1ip', 'server1status')" value="Manage">
+					<input class="btn" type="button" id='<%= serverButtonId %>' onclick="RedirectToSupernode('<%= serverIp %>')" value="Manage">
 				</td>
 			</tr>
-			
-			<tr class="alt">			
-				<td>Core server 2</td>
-				<td id="server2ip">130.240.134.117</td>
-				<td id="server2status">Online</td>
-				<td>
-					<input type="button" OnClick="CheckOnline('server2ip', 'server2status')" value="Manage">
-				</td>
-			</tr>
-			
-			</tr>
-			
-			<tr>
-			<td>Core server 3</td>
-			<td id="server3ip">130.240.134.118</td>
-			<td id="server3status">Online</td>
-			<td>
-				<input type="button" OnClick="CheckOnline('server3ip', 'server3status')" value="Manage">
-			</td>
-			</tr>
-			
-			<tr class="alt">			
-			<td>Core server 4</td>
-			<td id="server4ip">130.240.134.119</td>
-			<td id="server4status">Online</td>
-			<td>
-				<input type="button" OnClick="CheckOnline('server4ip', 'server4status')" value="Manage">
-			</td>
-			</tr>
+			<script>
+				CheckOnline('<%= serverIpId %>', '<%= serverStatusId %>', '<%= serverButtonId %>');
+			</script>
+			<% num++; %>
+			<% }; %>
 			
 			</table>
 			</body>               

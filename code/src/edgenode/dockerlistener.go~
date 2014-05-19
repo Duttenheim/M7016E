@@ -295,7 +295,7 @@ func (obj* EdgeNodeHandler) ListImages(args* DockerListArgs, output* string) err
 		for _, img := range imgs {
 			image := Image{}
 		        image.ID += fmt.Sprintf(img.ID)
-		        image.RepoTags = img.RepoTags
+		        image.RepoTags += fmt.Sprintf(img.RepoTags)
 		        image.Created += fmt.Sprintf("%v", img.Created)
 		        image.Size += fmt.Sprintf("%d",img.Size)
 		        image.VirtualSize += fmt.Sprintf("%d", img.VirtualSize)
