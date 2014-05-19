@@ -1,0 +1,4 @@
+build:
+	go build -o ${GOPATH}/bin/bitverseserver bitverseservermain.go;
+	go build -o ${GOPATH}/bin/protocoltest protocoltest.go;
+
