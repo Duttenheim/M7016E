@@ -85,7 +85,7 @@ type Image struct {
 	Created string
 	Size string
 	VirtualSize string
-	//RepoTags []string
+	RepoTags []string
 }
 
 type ImageCollection struct {
@@ -228,10 +228,10 @@ func (obj* EdgeNodeHandler) ListContainers(args* DockerListArgs, output* string)
 		list := []Container{}
 		for _, img := range imgs {
 			cont := Container{}
-			cont.ID = img.ID
-			cont.Image = img.Image
-			cont.Created = string(img.Created)
-			cont.Status = img.Status
+			cont.ID += fmt.Sprintf(img.ID)
+			cont.Image += fmt.Sprintf(img.Image)
+			cont.Created += fmt.Sprintf("%v",img.Created)
+			cont.Status += fmt.Sprintf(img.Status)
 			list = append(list,cont)
 		}
 		containerColl := ContainerCollection{ReplyCode: ListContainers, Containers: list}
@@ -295,10 +295,10 @@ func (obj* EdgeNodeHandler) ListImages(args* DockerListArgs, output* string) err
 		for _, img := range imgs {
 			image := Image{}
 		        image.ID += fmt.Sprintf(img.ID)
-		        //image.RepoTags += fmt.Sprintf(img.RepoTags)
-		        image.Created += fmt.Sprintf(string(img.Created))
-		        image.Size += fmt.Sprintf(string(img.Size))
-		        image.VirtualSize += fmt.Sprintf(string(img.VirtualSize))
+		        image.RepoTags = img.RepoTags
+		        image.Created += fmt.Sprintf("%v", img.Created)
+		        image.Size += fmt.Sprintf("%d",img.Size)
+		        image.VirtualSize += fmt.Sprintf("%d", img.VirtualSize)
 			list = append(list, image)
         	}
 		imageColl := ImageCollection{ReplyCode: ListImages, Images: list}
