@@ -1,8 +1,5 @@
 /* Eléments principaux de la page */
 
-.breadcrumb {
-    border: 1px none #ddd;
-}
 
 .nav.nav-center {
     display: inline-block;
