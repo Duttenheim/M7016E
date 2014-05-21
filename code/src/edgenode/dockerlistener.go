@@ -53,7 +53,7 @@ type DockerListArgs struct {
 
 type ImageArgs struct {
 	ID string
-	Name string
+	Registry string
 	Repository string
 }
 
@@ -247,12 +247,12 @@ func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* string) error {
 	client, _ := docker.NewClient(endpoint)
 	rpcOutput := RpcOutput{}
 	rpcOutput.Content = ""
-	err := client.PullImage(docker.PullImageOptions{Repository: args.Repository}, docker.AuthConfiguration{})
+	err := client.PullImage(docker.PullImageOptions{Repository: args.Repository, Registry: args.Registry}, docker.AuthConfiguration{})
 	if err != nil {
 		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
 		rpcOutput.ReplyCode = ErrorCode
 	} else {
-		rpcOutput.Content += fmt.Sprintf("Pulled container")
+		rpcOutput.Content += fmt.Sprintf("Pulled Image: " + args.Registry+"/"+args.Repository)
 		rpcOutput.ReplyCode = PullImage
 	}
 	b, _ := json.Marshal(rpcOutput)

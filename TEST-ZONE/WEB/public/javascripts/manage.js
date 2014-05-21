@@ -3,25 +3,23 @@
  */
 
 function CreateImageList(json, node){
-	var tbody = document.getElementById("images_body");
-	var header = document.getElementById("avail_img_head");
 	var edgeNode = document.getElementById("edgeNode_id").innerHTML
+	var table = document.getElementById('images_table')
 	$("#images_body").empty();
-		
 	var count = 0;
 	for (var i = 0; i < json.Images.length; i++)
     {
 		var repo = json.Images[i].RepoTags[0].split(":");
-		
 		if(repo[0] != "<none>"){
+			populateImageList(count+1, json.Images[i], edgeNode, repo[0], node, table);
 			count++;
-			populateImageList(tbody, i+1, json.Images[i], edgeNode, repo[0]);
 		}
     }
-	header.innerHTML = "Images available: " + count;
+	console.log("Size: " + table.tBodies.length);
+	setImagesHeaderText(count);
 }
 
-function populateImageList(tbody, nr, image, edgeNode, imageName){
+function populateImageList(nr, image, edgeNode, imageName, node, table){
 	var row = document.createElement("tr");
     var cell1 = document.createElement("td");
     var cell2 = document.createElement("td");
@@ -43,9 +41,25 @@ function populateImageList(tbody, nr, image, edgeNode, imageName){
     var buttonText = document.createTextNode("Create container");
     createButton.className = "btn btn-success"
     createButton.appendChild(buttonText);
+    createButton.setAttribute('style', 'margin: 0px 2px 0px 0px');
     createButton.onclick = function()
     {
-    	CreateContainerPopup(row, nr, edgeNode, imageName);
+    	CreateContainerPopup(row, nr, edgeNode, image.ID);
+    }
+    
+    var deleteButton = document.createElement("Button");
+    var buttonText2 = document.createTextNode("Remove");
+    deleteButton.className = "btn btn-danger"
+    deleteButton.appendChild(buttonText2);
+    deleteButton.onclick = function()
+    {
+        if (confirm("Do you really want to delete " + imageName + "?") == true) {
+        	var args = new RemoveImageArgs();
+	        args.name = image.ID;
+	        node.CallRPCFunction("EdgeNodeHandler.RemoveImage", args, edgeNode);
+	        table.deleteRow(nr);
+	        setImagesHeaderText(table.tBodies.length);
+        }
     }
     
     cell1.appendChild(nrtab);
@@ -54,29 +68,29 @@ function populateImageList(tbody, nr, image, edgeNode, imageName){
     cell4.appendChild(createdTab);
     cell5.appendChild(sizeTab);
     cell6.appendChild(createButton);
+    cell6.appendChild(deleteButton);
     row.appendChild(cell1);
     row.appendChild(cell2);
     row.appendChild(cell3);
     row.appendChild(cell4);
     row.appendChild(cell5);
     row.appendChild(cell6);
-    tbody.appendChild(row);
+    table.tBodies.item("images_body").appendChild(row);
 }
 
 function CreateContainerList(json, node){
 	console.log("Created container list");
-	var tbody = document.getElementById("containers_body");
-	var header = document.getElementById("avail_cont_head");
+	var table = document.getElementById("container_table");
 	var edgeNode = document.getElementById("edgeNode_id").innerHTML
+	setContainerHeaderText(json.Containers.length);
 	$("#containers_body").empty();
-	header.innerHTML = "Containers available: "+ json.Containers.length;
 	for (var i = 0; i < json.Containers.length; i++)
     {
-		populateContainerList(tbody, i+1, json.Containers[i], node, edgeNode, json);
+		populateContainerList(i+1, json.Containers[i], node, edgeNode, json, table);
     }
 }
 
-function populateContainerList(tbody, nr, container, node, edgeNode, json){
+function populateContainerList(nr, container, node, edgeNode, json, table){
 	var row = document.createElement("tr");
     var cell1 = document.createElement("td");
     var cell2 = document.createElement("td");
@@ -141,11 +155,15 @@ function populateContainerList(tbody, nr, container, node, edgeNode, json){
     deleteButton.setAttribute('style', 'margin: 0px 2px 0px 0px');
     deleteButton.onclick = function()
     {
-        var args = new RemoveContainerArgs();
-        args.ID = container.ID;
-        args.RemoveVolumes = true;
-        args.Force = true;
-        node.CallRPCFunction("EdgeNodeHandler.RemoveContainer", args, edgeNode);
+    	if (confirm("Do you really want to delete " + container.ID + "?") == true) {
+	        var args = new RemoveContainerArgs();
+	        args.ID = container.ID;
+	        args.RemoveVolumes = true;
+	        args.Force = true;
+	        node.CallRPCFunction("EdgeNodeHandler.RemoveContainer", args, edgeNode);
+	        table.deleteRow(nr);
+	        setContainerHeaderText(table.tBodies.length);
+    	}
     }
     
     cell1.appendChild(nrtab);
@@ -161,7 +179,7 @@ function populateContainerList(tbody, nr, container, node, edgeNode, json){
     row.appendChild(cell5);
     row.appendChild(cell6);
     
-    tbody.appendChild(row);
+    table.tBodies.item("containers_body").appendChild(row);
 }
 
 function CreateContainerPopup(row, nr, edgeNode, imageName){
@@ -213,7 +231,7 @@ function CreateContainerPopup(row, nr, edgeNode, imageName){
     	var args = new CreateContainerArgs();
         args.ContainerName = inputField.value;
         args.ImageName = imageName;
-        node.CallRPCFunction("EdgeNodeHandler.CreateContainer", args, edgeNode);                
+        node.CallRPCFunction("EdgeNodeHandler.CreateContainer", args, edgeNode);
     }
     CreateButton.setAttribute('data-dismiss', 'modal');
     
@@ -234,17 +252,128 @@ function CreateContainerPopup(row, nr, edgeNode, imageName){
 	
 }
 
+function PullImagePopup(edgeNode, node){
+	var row = document.getElementById('images_body');
+	var modalDiv = document.createElement("div");
+	modalDiv.className = "modal fade";
+	modalDiv.id = "pull_image_modal";
+		
+	var modalHeaderDiv = document.createElement("div");
+	modalHeaderDiv.className = "modal-header";
+	
+	var closeX = document.createElement("a");
+	var closeXtext = document.createTextNode('x');
+	closeX.className = "close";
+	closeX.setAttribute('data-dismiss', 'modal')
+	closeX.appendChild(closeXtext);
+	
+	var header = document.createElement("h3");
+	header.innerHTML = "Pull new Image";
+	
+	modalHeaderDiv.appendChild(closeX);
+	modalHeaderDiv.appendChild(header);
+	
+	var modalBodyDiv = document.createElement("div"); 
+	modalBodyDiv.className = "modal-body";
+	
+	/*var addressInfoP = document.createElement("p");
+    var addressInfoText = document.createTextNode("Type in address of repo <IP:PORT>");
+    addressInfoP.appendChild(addressInfoText);
+	var addrInputDiv = document.createElement("div");
+	addrInputDiv.className = "input-group input-group-lg";
+	var addrInputField = document.createElement("input");
+	addrInputField.className = "form-control";
+	addrInputDiv.appendChild(addrInputField)
+	addrInputDiv.setAttribute('placeholder', 'IP:PORT');
+
+	modalBodyDiv.appendChild(addressInfoP);
+	modalBodyDiv.appendChild(addrInputDiv);*/
+	
+	var repoInfoP = document.createElement("p");
+    var repoInfoText = document.createTextNode("Type in name of repo");
+    repoInfoP.appendChild(repoInfoText);
+	var nameInputDiv = document.createElement("div");
+	nameInputDiv.className = "input-group input-group-lg";
+	var nameInputField = document.createElement("input");
+	nameInputField.className = "form-control";
+	nameInputDiv.appendChild(nameInputField)
+	nameInputDiv.setAttribute('placeholder', 'Repo name');
+
+	modalBodyDiv.appendChild(repoInfoP);
+	modalBodyDiv.appendChild(nameInputDiv);
+	
+		
+	var modalFooterDiv = document.createElement("div"); 
+	modalFooterDiv.className = "modal-footer";
+	
+	var pullButton = document.createElement("a");
+	pullButton.className = "btn btn-primary";
+    var pullButtonText = document.createTextNode("Pull Image");
+    pullButton.appendChild(pullButtonText);
+    pullButton.setAttribute('data-dismiss', 'modal'); 
+    pullButton.onclick = function()
+    {
+    	var args = new ImageArgs();
+        args.Repository = nameInputField.value;
+        //args.Registry = addrInputField.value;
+        node.CallRPCFunction("EdgeNodeHandler.PullImage", args, edgeNode);                
+    }
+    
+	var CloseButton = document.createElement("a");
+    var closeText = document.createTextNode("Cancel");
+    CloseButton.appendChild(closeText);
+	CloseButton.className = "btn";
+	CloseButton.setAttribute('data-dismiss', 'modal');
+	
+	modalFooterDiv.appendChild(pullButton);
+	modalFooterDiv.appendChild(CloseButton);
+	
+	modalDiv.appendChild(modalHeaderDiv);
+	modalDiv.appendChild(modalBodyDiv);
+	modalDiv.appendChild(modalFooterDiv);
+	
+	row.appendChild(modalDiv);
+	
+}
+
+function setImagesHeaderText(count){
+	document.getElementById("avail_img_head").innerHTML = "Images available: " + count;
+}
+function setContainerHeaderText(count){
+	document.getElementById("avail_cont_head").innerHTML = "Containers available: "+ count;
+}
+
+/*
+    ErrorCode :  0,
+    CreateContainer : 1,
+    StartContainer : 2,
+    StopContainer : 3,
+    KillContainer : 4,
+    RestartContainer : 5,
+    RemoveContainer : 6,
+    ListContainers : 7,
+    PullImage : 8,
+    RemoveImage : 9,
+    ListImages : 10
+ */
 var NodeReceiveCallback = function(reply)
 {
 	var node = this;
+    var edgeNode = document.getElementById('edgeNode_id').innerHTML
     var json = eval ("(" + reply + ")");
     
     if(json.ReplyCode == 10){
     	CreateImageList(json, node)
     } else if(json.ReplyCode == 7) {
     	CreateContainerList(json, node)
+    } else if(json.ReplyCode > 0 && json.ReplyCode < 6){
+    	listContainers(edgeNode);
+    	alert(json.Content);
+    } else if(json.ReplyCode == 8){
+    	listImages(edgeNode);
+    	alert(json.Content);
     } else {
-    	alert(json.Content)
+    	alert(json.Content);
     }
     
 }

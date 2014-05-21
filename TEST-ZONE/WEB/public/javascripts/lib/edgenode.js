@@ -25,6 +25,16 @@ function RemoveContainerArgs(){
 	this.Force = false;
 }
 
+function RemoveImageArgs(){
+	this.Name = "";
+}
+
+function ImageArgs(){
+	this.ID = "";
+	this.Registry = "";
+	this.Repository = "";
+}
+
 function DockerListArgs()
 {
 	this.ShowAll = true;
