@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<ul class="nav nav-pills">
+  <li>
+    <a href="/" >Home</a>
+  </li>
+  <li class="active"> 
+  	<a href="/servers">Servers</a>
+  </li>
+  <li>
+  	<a href="/images">Images</a>
+  </li>
+</ul>
+
+<html>	                	 
+    <body>
+        <section>
+            <article>  
+                          
+			<h1><%= title %> management page </h1>
+			<p>Edge nodes</p>
+
+			<body>
+			
+			<table class="table table-hover table-bordered" id="edgenodelist">
+			<tr>
+			  <th><center>ID</center></th>
+			  <th><center>Tags</center></th>
+			  <th><center>Manage</center></th>
+			</tr>			
+			
+			<script>
+				SetupEdgeNodes('edgenodelist');
+			</script>
+			
+			
+			</table>
+			</body>               
+
+            </article>
+        </section>
+    </body>
+</html>
+
+
+
+
+
+

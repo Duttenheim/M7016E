@@ -112,7 +112,7 @@ func getCpuInfo(name string) CpuStat {
 }
 
 func main() {
-	fmt.Println(getMemInfo(os.Args[1]).Cache, getCpuInfo(os.Args[1]).User)
+	fmt.Println(getMemInfo(os.Args[1]).Cache, getCpuInfo(os.Args[1]).System)
 }
 	
 

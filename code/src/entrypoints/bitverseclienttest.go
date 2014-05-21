@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"bitverse"
+    "os"
+    "strconv"
+    "strings"
 )
 
 type TestObserver struct {}
@@ -46,6 +49,7 @@ func main() {
 	// create transport and channel
 	transport := bitverse.MakeWSTransport()
 	var done chan int
+	var port int = 0
 	
 	// make edge node
 	node, done := bitverse.MakeEdgeNode(transport, new(TestObserver))
@@ -54,8 +58,18 @@ func main() {
 	if (serviceError != nil) {
 		panic(serviceError)
 	}
-
-	// connect node and wait until done (which is forever)
-	go node.Connect("localhost:2020")
-	<- done	
+	
+	if (len(os.Args) > 1){
+		port,_ = strconv.Atoi(os.Args[1])
+	}
+	if ((port > 1023) && (port < 49151)){
+		s := []string{"localhost", os.Args[1]};
+		var address string = strings.Join(s, ":");
+		fmt.Println("address = ", address )
+		// connect node and wait until done (which is forever)
+		go node.Connect(address)
+		<- done	
+	}
+	fmt.Println("usage : ./bitverseclient port   with 1023<port<49151")
+	os.Exit(2)
 }

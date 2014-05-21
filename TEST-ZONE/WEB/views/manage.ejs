@@ -1,50 +1,102 @@
 <!DOCTYPE html>
 
+<script type="text/javascript">
+var node;
+$( document ).ready(function() {
+    var addr = document.getElementById('server_addr').innerHTML
+    var edgeNode = document.getElementById('edgeNode_id').innerHTML
+    node = CreateWebNode("ws://"+addr+"/node");
+    node.messageReceivedCallback = NodeReceiveCallback;
+    node.connectedCallback = function() { 
+    	listImages(edgeNode);  
+    	listContainers(edgeNode); 
+    };
+});
+
+function listImages(edgeNode) 
+{
+    var args = new DockerListArgs();
+    args.ShowAll = true;
+    node.CallRPCFunction("EdgeNodeHandler.ListImages", args, edgeNode); 
+}
+
+function listContainers(edgeNode){
+	var args = new DockerListArgs();
+    args.ShowAll = true;
+    node.CallRPCFunction("EdgeNodeHandler.ListContainers", args, edgeNode); 
+}
+
+function PullImage(edgeNode){
+	PullImagePopup(edgeNode,node);
+}
+
+</script>
+
 <ul class="nav nav-pills">
   <li>
     <a href="/" >Home</a>
   </li>
-  <li > 
+  <li class="active"> 
   	<a href="/servers">Servers</a>
   </li>
-  <li class="active">
-  	<a href="/manage">Manage</a>
+  <li>
+  	<a href="/images">Images</a>
   </li>
 </ul>
 
 
 <html>
-	<h1><%= title %></h1>
-  	<p>Welcome to <%= title %></p>
+	
+	<!-- Used in javascripts to manage edge-node --!>
+  	<p id="edgeNode_id" class="hidden"><%= node_id %></p>
+  	<p id="server_addr" class="hidden"><%= serv_addr %></p>
+
+	<h1>Super-node: <%= serv_addr %> </h1>
+	<h1>Edge-node:  <%= node_id %></h1>
+	<br/>
+  	<h3 id="avail_img_head"> Images available: 0</h3>
+  	<button class="btn btn-primary" type="button" onclick="listImages('<%= node_id %>')"> 
+  		<span class="glyphicon glyphicon-refresh"></span> Refresh
+  	</button>
+  	<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#images_div"> Show table</button>
   	
-  	<h3> Images </h3>
-  	<button class="btn btn-primary" type="button" onclick="CreateImageList()">Get images</button>
-     <table class="table table-striped">
-     	<thead>
-     		<tr>
-     			<th>#</th>
-     			<th>Name</th>
-     			<th></th>
-     		</tr>
-     	</thead>
-     	<tbody id="images_body">
-     	</tbody>
-     </table>
-     
-     <h3> Containers </h3>
-     <button class="btn btn-primary" type="button" onclick="CreateContainerList()">Get containers</button>
-      <table class="table table-striped">
-     	<thead>
-     		<tr>
-     			<th>#</th>
-     			<th>Name</th>
-     			<th>ID</th>
-     			<th></th>
-     		</tr>
-     	</thead>
-     	<tbody id="containers_body">
-     	</tbody>
-     </table>
+	<div id="images_div" class="collapse" style="margin: 10px 0px 0px 0px">
+		 <button href="#pull_image_modal" data-toggle="modal" type="button" class="btn btn-primary" onclick="PullImage('<%= node_id %>')">Pull new Image</button>
+	     <table class="table table-striped" id="images_table">
+	     	<thead>
+	     		<tr>
+	     			<th>#</th>
+	     			<th>ID</th>
+	     			<th>Repo</th>
+	     			<th>Created</th>
+	     			<th>Size in MB</th>
+	     			<th></th>
+	     		</tr>
+	     	</thead>
+	     	<tbody id="images_body">
+	     	</tbody>
+	     </table>
+     </div>
+     <br/>
+     <h3 id="avail_cont_head"> Containers available: 0 </h3>
+     <button class="btn btn-primary" type="button" onclick="listContainers('<%= node_id %>')">Refresh containers</button>
+     <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#containers_div"> Show table</button>
+     <div id="containers_div" class="collapse">
+	     <table class="table table-striped" id="container_table">
+	     	<thead>
+	     		<tr>
+	     			<th>#</th>
+	     			<th>ID</th>
+	     			<th>Image</th>
+	     			<th>Created</th>
+	     			<th>Status</th>
+	     			<th></th>
+	     		</tr>
+	     	</thead>
+	     	<tbody id="containers_body">
+	     	</tbody>
+	     </table>
+     </div>
      
 </html>
 

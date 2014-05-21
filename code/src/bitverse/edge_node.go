@@ -20,6 +20,7 @@ type EdgeNode struct {
 	repoServices      map[string]*RepoService
 	bitverseObserver  BitverseObserver
 	replyTable        map[string]*msgReplyType
+	done			  chan int
 }
 
 func MakeEdgeNode(transport Transport, bitverseObserver BitverseObserver) (*EdgeNode, chan int) {
@@ -32,7 +33,7 @@ func MakeEdgeNode(transport Transport, bitverseObserver BitverseObserver) (*Edge
 
 	edgeNode.transport.SetLocalNodeId(edgeNode.nodeId)
 
-	done := make(chan int)
+	edgeNode.done = make(chan int)
 	edgeNode.msgChannel = make(chan Msg)
 	edgeNode.remoteNodeChannel = make(chan *RemoteNode, 10)
 	edgeNode.msgServices = make(map[string]*MsgService)
@@ -157,7 +158,7 @@ func MakeEdgeNode(transport Transport, bitverseObserver BitverseObserver) (*Edge
 		}
 	}()
 
-	return edgeNode, done
+	return edgeNode, edgeNode.done
 }
 
 // DEBUG
@@ -174,6 +175,11 @@ func (edgeNode *EdgeNode) Id() string {
 
 func (edgeNode *EdgeNode) Connect(remoteAddress string) {
 	edgeNode.transport.ConnectToNode(remoteAddress, edgeNode.remoteNodeChannel, edgeNode.msgChannel)
+}
+
+func (edgeNode *EdgeNode) Unconnect () { // better not launch this one
+	//close(edgeNode.done)
+	edgeNode.done <- 1
 }
 
 func (edgeNode *EdgeNode) SendHeartbeat() {

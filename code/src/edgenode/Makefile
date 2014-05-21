@@ -1,2 +1,2 @@
 build:
-	go build -o ${GOPATH}/bin/edgenode dockerlistener.go;
+	go build -o ${GOPATH}/bin/dockerlistener dockerlistener.go;
