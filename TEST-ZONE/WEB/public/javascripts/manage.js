@@ -11,11 +11,10 @@ function CreateImageList(json, node){
     {
 		var repo = json.Images[i].RepoTags[0].split(":");
 		if(repo[0] != "<none>"){
-			populateImageList(count+1, json.Images[i], edgeNode, repo[0], node, table);
+			populateImageList(count+1, json.Images[i], edgeNode, repo, node, table);
 			count++;
 		}
     }
-	console.log("Size: " + table.tBodies.length);
 	setImagesHeaderText(count);
 }
 
@@ -44,7 +43,7 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
     createButton.setAttribute('style', 'margin: 0px 2px 0px 0px');
     createButton.onclick = function()
     {
-    	CreateContainerPopup(row, nr, edgeNode, image.ID);
+    	CreateContainerPopup(row, nr, edgeNode, image.ID, imageName);
     }
     
     var deleteButton = document.createElement("Button");
@@ -58,7 +57,6 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
 	        args.name = image.ID;
 	        node.CallRPCFunction("EdgeNodeHandler.RemoveImage", args, edgeNode);
 	        table.deleteRow(nr);
-	        setImagesHeaderText(table.tBodies.length);
         }
     }
     
@@ -79,7 +77,6 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
 }
 
 function CreateContainerList(json, node){
-	console.log("Created container list");
 	var table = document.getElementById("container_table");
 	var edgeNode = document.getElementById("edgeNode_id").innerHTML
 	setContainerHeaderText(json.Containers.length);
@@ -162,7 +159,6 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
 	        args.Force = true;
 	        node.CallRPCFunction("EdgeNodeHandler.RemoveContainer", args, edgeNode);
 	        table.deleteRow(nr);
-	        setContainerHeaderText(table.tBodies.length);
     	}
     }
     
@@ -182,7 +178,7 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     table.tBodies.item("containers_body").appendChild(row);
 }
 
-function CreateContainerPopup(row, nr, edgeNode, imageName){
+function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
 	var modalDiv = document.createElement("div");
 	modalDiv.className = "modal fade";
 	modalDiv.id = "test_modal_"+nr;
@@ -230,7 +226,7 @@ function CreateContainerPopup(row, nr, edgeNode, imageName){
     {
     	var args = new CreateContainerArgs();
         args.ContainerName = inputField.value;
-        args.ImageName = imageName;
+        args.ImageName = image_ID;
         node.CallRPCFunction("EdgeNodeHandler.CreateContainer", args, edgeNode);
     }
     CreateButton.setAttribute('data-dismiss', 'modal');
@@ -362,14 +358,20 @@ var NodeReceiveCallback = function(reply)
     var edgeNode = document.getElementById('edgeNode_id').innerHTML
     var json = eval ("(" + reply + ")");
     
-    if(json.ReplyCode == 10){
+    if(json.ReplyCode == 10){ // ListImages
     	CreateImageList(json, node)
-    } else if(json.ReplyCode == 7) {
+    } else if(json.ReplyCode == 7) { // ListContainers
     	CreateContainerList(json, node)
-    } else if(json.ReplyCode > 0 && json.ReplyCode < 6){
+    } else if(json.ReplyCode > 0 && json.ReplyCode < 6){ // Create, Start, Stop, Kill, Restart containers
     	listContainers(edgeNode);
     	alert(json.Content);
-    } else if(json.ReplyCode == 8){
+    } else if(json.ReplyCode == 6){ // Remove container
+    	setContainerHeaderText(document.getElementById("container_table").rows.length-1) //Use -1 since the header-row is counted here
+    	alert(json.Content);
+    } else if(json.ReplyCode == 9){ // Remove Image
+    	setImagesHeaderText(document.getElementById("images_table").rows.length-1) //Use -1 since the header-row is counted here
+    	alert(json.Content);
+    } else if(json.ReplyCode == 8){ // Pull image
     	listImages(edgeNode);
     	alert(json.Content);
     } else {
