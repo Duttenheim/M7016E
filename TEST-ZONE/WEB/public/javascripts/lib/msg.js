@@ -7,7 +7,11 @@ var MsgTypeEnum =
 	Children : 3,
 	ChildJoined : 4,
 	ChildLeft : 5,
-	Bye : 6	
+	UpdateTags : 6,
+	SearchTags : 7,
+	GetTags : 8,
+	MakeSupernode : 9,
+	Bye : 10	
 }
 
 function Msg()
@@ -17,6 +21,7 @@ function Msg()
 	this.PayloadType;
 	this.Src;
 	this.Dst;
+	this.Origin;
 	this.Id;
     this.MsgServiceName;
 }

@@ -5,7 +5,7 @@ import (
 	"bitverse"
 	"protocol"
 	"encoding/json"
-    	"flag"
+    "flag"
 	"github.com/fsouza/go-dockerclient"
 )
 
@@ -327,6 +327,7 @@ func (observer* TestObserver) OnSiblingLeft(node* bitverse.EdgeNode, id string) 
 
 var siblings []string
 var reply chan bool
+var nodeName string
 
 func (observer* TestObserver) OnChildrenReply(node* bitverse.EdgeNode, id string, children[] string) {
 	siblings = children
@@ -335,6 +336,14 @@ func (observer* TestObserver) OnChildrenReply(node* bitverse.EdgeNode, id string
 
 func (observer* TestObserver) OnConnected(localNode* bitverse.EdgeNode, remoteNode* bitverse.RemoteNode) {
 	observer.superNode = remoteNode
+	
+	// setup tags
+	tags := make(map[string]string)
+	tags["Name"] = nodeName
+	tags["Service"] = "Docker"
+	
+	// change tags
+	localNode.UpdateTags(tags)
 }
 
 var secret string = "3e606ad97e0a738d8da4c4c74e8cd1f1f2e016c74d85f17ac2fc3b5dab4ed6c4"
@@ -361,10 +370,18 @@ func main() {
 		panic(serviceError)
 	}
 
-	// connect node and wait until done (which is forever)
+	// get address and port
     addr := flag.String("address", "localhost", "Bitverse server IP-address")
+	port := flag.Int("port", 2020, "Bitverse server port")
+	
+	name := flag.String("name", "StandardClientName", "The tag value to be used for 'Name' when this node connects")
     flag.Parse()
+	
+	// set node name
+	nodeName = *name
+	
+	portString := fmt.Sprintf("%d", (*port));
 
-	go node.Connect(*addr + ":2020")
+	go node.Connect(*addr + ":" + portString)
 	<- done	
 }

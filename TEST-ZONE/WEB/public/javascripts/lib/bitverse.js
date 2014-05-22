@@ -51,6 +51,11 @@ function WebNode()
     {
         alert(JSON.stringify(message));
     }
+	
+	this.tagsReceivedCallback = function(node, tags)
+	{
+		alert(tags)
+	}
 
     this.connectedCallback = function()
     {
@@ -107,6 +112,26 @@ WebNode.prototype.OnMessage = function(msg)
         obj = JSON.parse(decrypted);
         this.messageReceivedCallback(obj);
     }
+	else if (message.Type == MsgTypeEnum.GetTags)
+	{
+		var tags = JSON.parse(message.Payload);
+		this.tagsReceivedCallback(message.Dst, tags);
+	}
+}
+
+
+//------------------------------------------------------------------------------
+/**
+*/
+WebNode.prototype.GetTags = function(node)
+{
+	// create message
+	var message = new Msg();
+	message.Type = MsgTypeEnum.GetTags;
+	message.Dst = node;
+	
+	// send message
+	this.Send(message);
 }
 
 //------------------------------------------------------------------------------

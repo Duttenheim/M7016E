@@ -14,18 +14,20 @@
 
 			<body>
 			
-			<table class="table table-hover table-bordered" id="edgenodelist">
-			<tr>
-			  <th><center>ID</center></th>
-			  <th><center>Tags</center></th>
-			  <th><center>Manage</center></th>
-			</tr>			
-			
-			<script>
-				SetupEdgeNodes('edgenodelist');
-			</script>
-			
-			
+			<table class="table table-bordered table-striped">
+				<thead>
+					<tr>
+					  <th><center>ID</center></th>
+					  <th><center>Tags</center></th>
+					  <th><center>Manage</center></th>
+					</tr>	
+				</thead>
+				
+				<tbody id="edgenodelist">
+					<script>
+						SetupEdgeNodes('edgenodelist');
+					</script>
+				</tbody>
 			</table>
 			</body>               
 

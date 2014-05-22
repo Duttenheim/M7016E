@@ -40,6 +40,33 @@ func MakeEdgeNode(transport Transport, bitverseObserver BitverseObserver) (*Edge
 	edgeNode.repoServices = make(map[string]*RepoService)
 	edgeNode.replyTable = make(map[string]*msgReplyType)
 
+	
+	heartbeatTicker := time.NewTicker(time.Millisecond * HEARTBEAT_RATE * 1000)
+	go func() {
+		for t := range heartbeatTicker.C {
+			debug("edgenode: sending heartbeat " + t.String())
+			edgeNode.SendHeartbeat()
+		}
+	}()
+
+	msgServiceGCTicker := time.NewTicker(time.Millisecond * MSG_SERVICE_GC_RATE * 1000)
+	go func() {
+		for t := range msgServiceGCTicker.C {
+			for msgId, reply := range edgeNode.replyTable {
+				debug("edgenode: running msg service callback listener garbage collector" + t.String())
+				currentTime := int32(time.Now().Unix())
+				elapsedTime := currentTime - reply.timestamp
+				timeLeft := reply.timeout - elapsedTime
+
+				if timeLeft <= 0 {
+					reply.callback(errors.New("timeout"), nil) // notify the callback closure about this timeout
+					delete(edgeNode.replyTable, msgId)
+				}
+
+			}
+		}
+	}()
+	
 	go func() {
 		for {
 			select {
@@ -119,8 +146,11 @@ func MakeEdgeNode(transport Transport, bitverseObserver BitverseObserver) (*Edge
 				}
 			case remoteNode := <-edgeNode.remoteNodeChannel:
 				if remoteNode.state == Dead {
-					debug("edgenode: ERROR we just lost our connection to the super node <" + remoteNode.Id() + ">")
+					debug("edgenode: we just lost our connection to the super node <" + remoteNode.Id() + ">")
+					heartbeatTicker.Stop()
+					msgServiceGCTicker.Stop()
 					edgeNode.superNode = nil
+					edgeNode.done <- 1
 				} else {
 					debug("edgenode: adding link to super node <" + remoteNode.Id() + ">")
 					edgeNode.superNode = remoteNode
@@ -128,32 +158,6 @@ func MakeEdgeNode(transport Transport, bitverseObserver BitverseObserver) (*Edge
 						bitverseObserver.OnConnected(edgeNode, edgeNode.superNode)
 					}
 				}
-			}
-		}
-	}()
-
-	hearbeatTicker := time.NewTicker(time.Millisecond * HEARTBEAT_RATE * 1000)
-	go func() {
-		for t := range hearbeatTicker.C {
-			debug("edgenode: sending heartbeat " + t.String())
-			edgeNode.SendHeartbeat()
-		}
-	}()
-
-	msgServiceGCTicker := time.NewTicker(time.Millisecond * MSG_SERVICE_GC_RATE * 1000)
-	go func() {
-		for t := range msgServiceGCTicker.C {
-			for msgId, reply := range edgeNode.replyTable {
-				debug("edgenode: running msg service callback listener garbage collector" + t.String())
-				currentTime := int32(time.Now().Unix())
-				elapsedTime := currentTime - reply.timestamp
-				timeLeft := reply.timeout - elapsedTime
-
-				if timeLeft <= 0 {
-					reply.callback(errors.New("timeout"), nil) // notify the callback clousure about this timeout
-					delete(edgeNode.replyTable, msgId)
-				}
-
 			}
 		}
 	}()
@@ -177,14 +181,26 @@ func (edgeNode *EdgeNode) Connect(remoteAddress string) {
 	edgeNode.transport.ConnectToNode(remoteAddress, edgeNode.remoteNodeChannel, edgeNode.msgChannel)
 }
 
-func (edgeNode *EdgeNode) Unconnect () { // better not launch this one
-	//close(edgeNode.done)
-	edgeNode.done <- 1
+func (edgeNode *EdgeNode) Disconnect () {
+	edgeNode.superNode.state = Dead
+	edgeNode.remoteNodeChannel <- edgeNode.superNode	
 }
 
 func (edgeNode *EdgeNode) SendHeartbeat() {
 	msg := composeHeartbeatMsg(edgeNode.Id(), edgeNode.superNode.Id())
 	edgeNode.superNode.deliver(msg)
+}
+
+func (edgeNode *EdgeNode) UpdateTags(tags map[string]string) {
+	
+	data, err := json.Marshal(&tags)
+	if (err != nil) {
+		debug("edgenode: failed to marshal tags structure")
+	}
+	
+	// compose and send message
+	msg := composeUpdateTagsMsg(edgeNode.Id(), string(data))
+	edgeNode.superNode.deliver(msg)	
 }
 
 // MSG SERVICE MANAGEMENT
@@ -199,7 +215,7 @@ func (edgeNode *EdgeNode) CreateMsgService(aesEncryptionKey string, serviceId st
 		edgeNode.msgServices[serviceId] = msgService
 		return msgService, nil
 	} else {
-		return nil, errors.New("service id <" + serviceId + "> already exists")
+		return nil, errors.New("edgenode: service id <" + serviceId + "> already exists")
 	}
 }
 
@@ -224,12 +240,12 @@ func (edgeNode *EdgeNode) ClaimOwnership(repoId string, aesEncryptionKey string,
 
 	msg := composeRepoClaimMsg(edgeNode.Id(), edgeNode.superNode.Id(), repoId, pubPemKey)
 	repoMsgService.sendMsgAndGetReply(msg, timeout, func(err error, reply interface{}) {
-		info("got a reply")
+		info("edgenode: got a reply")
 		if err != nil {
-			info("failed to get a claim request reply back")
+			info("edgenode: failed to get a claim request reply back")
 			callback(err, nil)
 		} else {
-			info("got a claim request reply back")
+			info("edgenode: got a claim request reply back")
 			repoService := composeRepoService(aesEncryptionKey, prv, pub, repoId, edgeNode, repoMsgService)
 			callback(nil, repoService)
 		}
@@ -249,6 +265,6 @@ func (edgeNode *EdgeNode) registerReplyCallback(msgId string, timeout int32, cal
 }
 
 func (edgeNode *EdgeNode) send(msg *Msg) {
-	debug("Sending from <" + msg.Src + "> to <" + msg.Dst + "> with Id <" + msg.Id + ">")	
+	debug("edgenode: sending from <" + msg.Src + "> to <" + msg.Dst + "> with Id <" + msg.Id + ">")	
 	edgeNode.superNode.deliver(msg)
 }

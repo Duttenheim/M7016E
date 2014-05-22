@@ -33,15 +33,17 @@ func (wsClient *wsClientType) connect(ipAddress string) {
 		os.Exit(0)
 	}
 
+	// setup remote node
 	remoteNode := wsClient.handshake()
-
 	wsClient.remoteNodeChannel <- remoteNode
 
 	for {
 		msg := wsClient.receive()
 		if msg == nil {
 			// TODO: remove the link
-			return
+			remoteNode.state = Dead
+			wsClient.remoteNodeChannel <- remoteNode
+			break
 		}
 		wsClient.msgChannel <- *msg
 	}

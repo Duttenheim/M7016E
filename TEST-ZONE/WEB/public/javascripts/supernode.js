@@ -30,6 +30,8 @@ function SetupEdgeNodes(edgenodetable)
 			var cell2 = document.createElement("td");
 			var cell3 = document.createElement("td");
 			
+			cell2.id = child + "_tags"
+			
 			var cell1Contents = document.createTextNode(child);
 			var cell3Contents = document.createElement("button");
 			cell3Contents.className = "btn";
@@ -43,6 +45,28 @@ function SetupEdgeNodes(edgenodetable)
 			tr.appendChild(cell2);
 			tr.appendChild(cell3);
 			table.appendChild(tr);
+			
+			// get tags
+			node.GetTags(child);
+		}
+	}
+	
+	// get node tags
+	node.tagsReceivedCallback = function(node, tags)
+	{
+		// get node tags element
+		element = document.getElementById(node + "_tags");
+		
+		for (var key in tags)
+		{
+			var keyElement = document.createTextNode(key);			
+			var tagElement = document.createTextNode(tags[key]);
+			var boldElement = document.createElement("b");
+			element.appendChild(boldElement);
+			boldElement.appendChild(keyElement);
+			element.appendChild(document.createTextNode(" : "));
+			element.appendChild(tagElement);
+			element.appendChild(document.createElement("br"));
 		}
 	}
 }

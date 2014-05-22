@@ -18,6 +18,7 @@ type RemoteNode struct {
 	id                string
 	remoteId          string
 	state             RemoteNodeState
+	imposter		  bool
 }
 
 func makeRemoteNode(remoteNodeChannel chan *RemoteNode, writer io.Writer, remoteId string, id string) *RemoteNode {
@@ -27,6 +28,7 @@ func makeRemoteNode(remoteNodeChannel chan *RemoteNode, writer io.Writer, remote
 	remoteNode.id = id
 	remoteNode.remoteId = remoteId
 	remoteNode.state = Alive
+	remoteNode.imposter = false
 
 	return remoteNode
 }

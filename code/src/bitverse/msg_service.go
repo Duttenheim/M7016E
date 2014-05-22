@@ -39,7 +39,7 @@ func (msgService *MsgService) SendAndGetReply(dst string, data string, timeout i
 
 func (msgService *MsgService) reply(msg *Msg, data string) {
 	encryptedData := encryptAes(msgService.aesEncryptionKey, data)
-	replyMsg := composeMsgServiceMsg(msgService.edgeNode.Id(), msg.Src, msgService.id, encryptedData)
+	replyMsg := composeMsgServiceMsg(msgService.edgeNode.Id(), msg.Origin, msgService.id, encryptedData)
 	replyMsg.Id = msg.Id // use the same id as the sender
 	msgService.edgeNode.send(replyMsg)
 }
