@@ -1,0 +1,47 @@
+2020 :96a82b54a389285c1f6a43c0e2dabd852e038905
+4040 :1a7e3a515cec65f9ca29f0ec592d2d9f59fd837f
+
+ask for 2020 :
+deleting node id :  a302613154e3a28cd85c0bd5d386ce3ee874aac0         supernode id : 0x401e60
+2014/05/15 17:11:03 edgenode: my id is d32dc15f0bf04120122c739cc638deaf953f3b47
+creating node id :  d32dc15f0bf04120122c739cc638deaf953f3b47         supernode
+id : 0x401e60
+
+2014/05/15 17:11:05 edgenode: received msg[type:children to:d32dc15f0bf04120122c739cc638deaf953f3b47 from:fd435d1f71a8ce9ccf0ec7220304429799e1ae77 payload:["a302613154e3a28cd85c0bd5d386ce3ee874aac0","96a82b54a389285c1f6a43c0e2dabd852e038905","d32dc15f0bf04120122c739cc638deaf953f3b47"]]
+0. a302613154e3a28cd85c0bd5d386ce3ee874aac0 ---old
+1. 96a82b54a389285c1f6a43c0e2dabd852e038905 ---answer
+2. d32dc15f0bf04120122c739cc638deaf953f3b47 ---new
+
+
+ask for 4040 :
+deleting node id :  d32dc15f0bf04120122c739cc638deaf953f3b47         supernode id : 0x401e60
+2014/05/15 17:11:42 edgenode: my id is f77299ee9792e1c1345b828c28705b72dede672a
+creating node id :  f77299ee9792e1c1345b828c28705b72dede672a         supernode id : 0x401e60
+
+2014/05/15 17:11:44 edgenode: received msg[type:children to:f77299ee9792e1c1345b828c28705b72dede672a from:f975f9a1808ecf97f77097551f514acdec88d4b6 payload:["f77299ee9792e1c1345b828c28705b72dede672a","1a7e3a515cec65f9ca29f0ec592d2d9f59fd837f"]]
+0. f77299ee9792e1c1345b828c28705b72dede672a ---new
+1. 1a7e3a515cec65f9ca29f0ec592d2d9f59fd837f ---answer
+
+
+ask for 2020 :
+deleting node id :  f77299ee9792e1c1345b828c28705b72dede672a         supernode id : 0x401e60
+2014/05/15 17:12:09 edgenode: my id is 0099153bae8d5a6e07ec4f1d8c734bb6a4d657a3
+creating node id :  0099153bae8d5a6e07ec4f1d8c734bb6a4d657a3         supernode id : 0x401e60
+
+2014/05/15 17:12:11 edgenode: received msg[type:children to:0099153bae8d5a6e07ec4f1d8c734bb6a4d657a3 from:fd435d1f71a8ce9ccf0ec7220304429799e1ae77 payload:["a302613154e3a28cd85c0bd5d386ce3ee874aac0","96a82b54a389285c1f6a43c0e2dabd852e038905","d32dc15f0bf04120122c739cc638deaf953f3b47","0099153bae8d5a6e07ec4f1d8c734bb6a4d657a3"]]
+0. a302613154e3a28cd85c0bd5d386ce3ee874aac0 ---old old
+1. 96a82b54a389285c1f6a43c0e2dabd852e038905 ---answer
+2. d32dc15f0bf04120122c739cc638deaf953f3b47 ---old
+3. 0099153bae8d5a6e07ec4f1d8c734bb6a4d657a3 ---new
+
+
+ask for 4040 :
+deleting node id :  0099153bae8d5a6e07ec4f1d8c734bb6a4d657a3         supernode id : 0x401e60
+2014/05/15 17:12:37 edgenode: my id is fa6c26d06ef70e4579939a63f389c6e88e100aad
+creating node id :  fa6c26d06ef70e4579939a63f389c6e88e100aad         supernode id : 0x401e60
+
+2014/05/15 17:12:39 edgenode: received msg[type:children to:fa6c26d06ef70e4579939a63f389c6e88e100aad from:f975f9a1808ecf97f77097551f514acdec88d4b6 payload:["f77299ee9792e1c1345b828c28705b72dede672a","1a7e3a515cec65f9ca29f0ec592d2d9f59fd837f","fa6c26d06ef70e4579939a63f389c6e88e100aad"]]
+0. f77299ee9792e1c1345b828c28705b72dede672a ---old
+1. 1a7e3a515cec65f9ca29f0ec592d2d9f59fd837f ---answer
+2. fa6c26d06ef70e4579939a63f389c6e88e100aad ---new
+

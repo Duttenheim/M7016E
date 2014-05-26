@@ -177,7 +177,7 @@ func (edgeNode *EdgeNode) Connect(remoteAddress string) {
 	edgeNode.transport.ConnectToNode(remoteAddress, edgeNode.remoteNodeChannel, edgeNode.msgChannel)
 }
 
-func (edgeNode *EdgeNode) Unconnect () { // better not launch this one
+func (edgeNode *EdgeNode) Unconnect () {
 	//close(edgeNode.done)
 	edgeNode.done <- 1
 }

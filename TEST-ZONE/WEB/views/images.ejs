@@ -17,5 +17,64 @@
 
 
 <html>
+     <body>
+		 <table class="table table-striped table-hover table-bordered">
+			 <tr>
+				  <th><center>Name</center></th>
+				  <th><center>Description</center></th>
+			 </tr>
+			 <% for(var i=0; i<images.num_results; i++) {%>
+				 <tr>
+					<td><center><%= images.results[i].name %></center></td>
+					<td><center><%= images.results[i].description %></center></td>
+				</tr>
+			 <% } %>
+			</table>
+     </body>
      
+     <script language="javascript" type="text/javascript">
+		 /*var images = document.getElementById("images").innerHTML;
+		 
+		 //treating a docker ps command
+		 var images = images.replace('\n',' ')
+		 var nonformated = images.split(" ");
+		 var formated = [];
+		 for (var i=0; i<nonformated.length; i++){
+			 if (nonformated[i] != ""){
+				 formated.push(nonformated[i]);
+			 }
+		 }
+			 
+		 
+		 var row = 7;
+		 var colum = ((formated.length-9)/14) +1;
+		 var index = 0;
+         var body = document.body;
+         var tbl  = document.createElement('table');
+         tbl.style.width='80%';
+		 for(var i = 0; i < colum; i++){
+			 var tr = tbl.insertRow(-1);
+			 for(var j = 0; j < row; j++){
+					var td = tr.insertCell(-1);
+					if((i==0)&&(j==0)){
+						td.appendChild(document.createTextNode(formated[index]+" "+formated[index+1]));
+						index += 2 ;
+					}else if ((i!=0)&&(j==2)){
+						td.appendChild(document.createTextNode(formated[index]+" "+formated[index+1]+" "+formated[index+2]+" "+formated[index+3]));
+						index += 4 ;
+					}else if ((i!=0)&&(j==3)){
+						td.appendChild(document.createTextNode(formated[index]+" "+formated[index+1]+" "+formated[index+2]));
+						index += 3 ;
+					}else if ((i!=0)&&(j==4)){
+						td.appendChild(document.createTextNode(formated[index]+" "+formated[index+1]+" "+formated[index+2]));
+						index += 3 ;
+					}else{
+						td.appendChild(document.createTextNode(formated[index]));
+						index++ ;
+					}
+					
+				}
+			}
+		body.appendChild(tbl);*/
+	 </script> 
 </html>

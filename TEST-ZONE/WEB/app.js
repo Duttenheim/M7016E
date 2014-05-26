@@ -8,6 +8,7 @@ var express = require('express')
   , servers = require('./routes/servers')
   , manage = require('./routes/manage')
   , images = require('./routes/images')
+  , shelljs = require('shelljs/global');
 
 var app = module.exports = express.createServer();
 
