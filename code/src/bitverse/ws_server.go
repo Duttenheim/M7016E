@@ -21,7 +21,9 @@ func (wsServer *wsServerType) WsHandler(ws *websocket.Conn) {
 		dec := json.NewDecoder(ws)
 		err = dec.Decode(&msg)
 		if err != nil {
-			debug("wsserver: Incorrect message structure.")
+			debug("wsserver: lost connection.")
+			remoteNode.state = Dead
+			wsServer.remoteNodeChannel <- remoteNode
 			break
 		}
 		if msg.Type == Handshake {

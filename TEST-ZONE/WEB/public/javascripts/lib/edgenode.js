@@ -19,6 +19,28 @@ function CreateContainerArgs()
     this.ImageName = "";
 }
 
+function RemoveContainerArgs(){
+	this.ID = "";
+	this.RemoveVolumes = false;
+	this.Force = false;
+}
+
+function RemoveImageArgs(){
+	this.Name = "";
+}
+
+function ImageArgs(){
+	this.ID = "";
+	this.Registry = "";
+	this.Repository = "";
+}
+
+function DockerListArgs()
+{
+	this.ShowAll = true;
+}
+
+
 function ContainerArgs()
 {
     this.ID = "";

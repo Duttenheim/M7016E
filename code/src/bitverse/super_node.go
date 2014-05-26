@@ -19,8 +19,13 @@ type SuperNode struct {
 	localAddr              string
 	localPort              string
 	transport              Transport
+	successorTransport	   Transport
+	successorNodeChannel   chan *RemoteNode
+	successorMsgChannel    chan Msg
+	successorNode		   *RemoteNode
 	repoAutenticationTable map[string]*string    // repoid:public key
 	repositories           map[repokey_t]*string // global key-value store
+	tags				   map[string]map[string]string
 }
 
 func MakeSuperNode(transport Transport, localAddress string, localPort string) (*SuperNode, chan int) {
@@ -29,6 +34,11 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 	superNode.localPort = localPort
 	superNode.children = make(map[string]*RemoteNode)
 	superNode.transport = transport
+	superNode.successorTransport = nil
+	superNode.successorNodeChannel = nil
+	superNode.successorMsgChannel = nil
+	superNode.successorNode = nil
+	superNode.tags = make(map[string]map[string]string)
 
 	superNode.repoAutenticationTable = make(map[string]*string)
 	superNode.repositories = make(map[repokey_t]*string)
@@ -188,8 +198,20 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 						superNode.sendToChild(msg)
 					}
 
-				} else if msg.Type == Heartbeat {
+				} else if msg.Type == Heartbeat || msg.Type == ChildJoined || msg.Type == ChildLeft {
 					superNode.forwardToChildren(msg)
+					
+				} else if msg.Type == UpdateTags {
+					superNode.updateTags(msg)
+				
+				} else if msg.Type == SearchTags {
+					superNode.searchTags(msg)				
+					
+				} else if msg.Type == GetTags {
+					superNode.getTags(msg)
+					
+				} else if msg.Type == MakeImposter {
+					superNode.makeSupernode(msg)
 
 				} else if msg.Type == Children {
 					superNode.sendChildrenReply(msg.Src)
@@ -200,6 +222,7 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 			case remoteNode := <-superNode.remoteNodeChannel:
 				if remoteNode.state == Dead {
 					delete(superNode.children, remoteNode.Id())
+					delete(superNode.tags, remoteNode.Id())
 
 					str := fmt.Sprintf("supernode: removing remote node %s, number of remote nodes are now %d", remoteNode.Id(), len(superNode.children))
 					fmt.Println(str)
@@ -208,6 +231,7 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 					superNode.forwardToChildren(*msg)
 				} else {
 					superNode.children[remoteNode.Id()] = remoteNode
+					superNode.tags[remoteNode.Id()] = make(map[string]string)
 
 					str := fmt.Sprintf("supernode: adding remote node %s, number of remote nodes are now %d", remoteNode.Id(), len(superNode.children))
 					info(str)
@@ -220,6 +244,39 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 	}()
 
 	return superNode, done
+}
+
+// Connects this supernode to another in order to form a P2P ring, call in separate go-function
+func(superNode* SuperNode) ConnectSuccessor(addr string, port string) {
+	superNode.successorTransport = MakeWSTransport()
+	superNode.successorTransport.SetLocalNodeId(superNode.nodeId)
+	superNode.successorMsgChannel = make(chan Msg)
+	superNode.successorNodeChannel = make(chan *RemoteNode, 10)
+	
+	go func() {
+		for {
+			select {
+			case msg := <-superNode.successorMsgChannel:
+				debug("supernode: relaying " + msg.String())
+				superNode.msgChannel <- msg
+			case remoteNode := <-superNode.successorNodeChannel:
+				if remoteNode.state == Dead {
+					debug("supernode: we just lost our connection to the successor <" + remoteNode.Id() + ">")
+					superNode.successorNode = nil
+					break
+				} else {
+					debug("supernode: adding link to successor node <" + remoteNode.Id() + ">")
+					superNode.successorNode = remoteNode
+					
+					// make this supernode an imposter
+					msg := composeMakeImposterMsg(superNode.Id())
+					superNode.successorNode.deliver(msg)
+				}
+			}
+		}
+	}()
+	
+	go superNode.successorTransport.ConnectToNode(addr + ":" + port, superNode.successorNodeChannel, superNode.successorMsgChannel)		
 }
 
 // BITVERSE MANAGEMENT
@@ -238,41 +295,163 @@ func (superNode *SuperNode) Debug() {
 
 func (superNode *SuperNode) sendChildrenReply(nodeId string) {
 	debug("supernode: sending children reply to " + nodeId)
-	childrenIds := make([]string, len(superNode.children))
+	var childIds []string
 	i := 0
-	for childNodeId, _ := range superNode.children {
-		childrenIds[i] = childNodeId
-		i++
+	for childNodeId, node := range superNode.children {
+		if node.imposter == false {
+			childIds = append(childIds, childNodeId)
+			i++
+		}
 	}
 
-	json, _ := json.Marshal(childrenIds)
+	json, _ := json.Marshal(childIds)
 	reply := composeChildrenReplyMsg(superNode.Id(), nodeId, string(json))
 
-	remoteNode := superNode.children[nodeId]
-
-	if remoteNode != nil {
+	if remoteNode, ok := superNode.children[nodeId]; ok {
 		remoteNode.deliver(reply)
 	}
 }
 
 func (superNode *SuperNode) sendToChild(msg Msg) {
-	for _, remoteNode := range superNode.children {
-		if msg.Src != remoteNode.Id() && msg.Dst == remoteNode.Id() { // do not forward messages to a remote node where it came from
-			debug("supernode: forwarding " + msg.String() + " to " + remoteNode.Id())
-			msg.Dst = remoteNode.Id()
-			remoteNode.deliver(&msg)
+	if val, ok := superNode.children[msg.Dst]; ok {
+		debug("supernode: forwarding " + msg.String() + " to " + val.Id())
+		val.deliver(&msg)
+	} else {
+		if superNode.successorNode != nil && msg.Src != superNode.successorNode.Id() && len(msg.Dst) != 0 {
+			debug("supernode: failed to deliver to " + msg.Dst + ", relaying to successor supernode " + superNode.successorNode.Id())			
+			superNode.successorNode.deliver(&msg)
 		} else {
-			debug("failed to forward message to child from: " + msg.Src + " to: " + msg.Dst)
+			debug("supernode: failed to forward message to child from: " + msg.Src + " to: " + msg.Dst)
 		}
 	}
 }
 
 func (superNode *SuperNode) forwardToChildren(msg Msg) {
 	for _, remoteNode := range superNode.children {
-		if msg.Src != remoteNode.Id() { // do not forward messages to a remote node where it came from
+		if msg.Src != remoteNode.Id() && msg.Origin != remoteNode.Id() { // do not forward messages to a remote node where it came from
 			debug("supernode: forwarding " + msg.String() + " to " + remoteNode.Id())
-
+			msg.Src = superNode.Id()
 			remoteNode.deliver(&msg)
 		}
+	}
+}
+
+//------------------------------------------------------------------------------
+/**
+	Tags
+*/
+func (superNode *SuperNode) updateTags(msg Msg) {
+
+	// find node
+	if val, ok := superNode.children[msg.Src]; ok {
+	
+		// decode message contents into tag dictionary
+		tags := make(map[string]string)
+		err := json.Unmarshal([]byte(msg.Payload), &tags)
+		
+		if (err != nil) {
+			debug(err.Error())
+			return
+		}
+		
+		// notify
+		debug("supernode: updated tags for " + msg.Src + " with " + msg.Payload)
+		
+		// set tags for node
+		superNode.tags[val.Id()] = tags
+	} else {
+		debug("supernode: failed to update tags for " + msg.Src)
+	}
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+func (superNode *SuperNode) searchTags(msg Msg) {
+
+	// decode tags from message
+	tags := new(SearchTagsType)
+	err := json.Unmarshal([]byte(msg.Payload), tags)
+	
+	if (err != nil) {
+		debug("supernode: failed to decode message into tags, should be map[string]string")
+		return
+	}
+		
+	for remoteNode, nodeTags := range superNode.tags {
+	
+		// go through all the decoded tags and find if we have a full match
+		for key, val := range tags.tags {
+			if match, ok := nodeTags[key]; ok {
+				if val == match {
+					// append to list
+					tags.nodes = append(tags.nodes, remoteNode)
+				}
+			}
+		}
+	}
+	
+	// encode to json again and send to the rest of the children
+	data, err := json.Marshal(tags)
+	if (err != nil) {
+		debug("supernode: failed to encode to string, this should never happen")
+		return
+	}
+	
+	// set contents in message
+	msg.Payload = string(data)
+	
+	// send to next supernode
+	if (superNode.successorNode != nil) {
+		superNode.successorNode.deliver(&msg)
+	} else {
+		debug("supernode: could relay search message at supernode: " + superNode.Id())
+	}
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+func (superNode *SuperNode) getTags(msg Msg) {
+	// decode tags from message
+	tags := make(map[string]string)
+	
+	// find node
+	if val, ok := superNode.tags[msg.Dst]; ok {
+		tags = val
+	} else {
+		debug("supernode: no node named " + msg.Dst + " found")
+		return
+	}
+	
+	// encode to json again and send to the rest of the children
+	data, err := json.Marshal(tags)
+	if (err != nil) {
+		debug("supernode: failed to reencode to string, this should never happen")
+		return
+	}
+	
+	// notify
+	debug("supernode: replying with tags " + string(data) + " for node " + msg.Dst)
+	
+	// get [ay;pad
+	msg.Payload = string(data)
+	
+	// send back
+	superNode.children[msg.Src].deliver(&msg)
+}
+
+
+//------------------------------------------------------------------------------
+/**
+*/
+func (superNode *SuperNode) makeSupernode(msg Msg) {
+	// find node
+	if val, ok := superNode.children[msg.Src]; ok {
+		debug("supernode: making " + msg.Src + " into an imposter remote node")
+		val.imposter = true
+	} else {
+		debug("supernode: no supernode named " + msg.Src + " found")
+		return
 	}
 }

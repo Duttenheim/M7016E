@@ -9,7 +9,7 @@ import (
 	"strings"
 	"os"
 	"bufio"
-	"time"
+	"flag"
 )
 
 type TestRpcInterface struct {}
@@ -57,10 +57,6 @@ func main() {
 	// create transport and channel
 	transport := bitverse.MakeWSTransport()
 	var done chan int
-	addresses := make(chan string)
-	stop := make(chan string)
-	var oldID [100]string
-	var numberOfId = 0
 	
 	// make edge node
 	observer := new(TestObserver)
@@ -97,24 +93,6 @@ func main() {
 					for index, value := range siblings {
 						fmt.Printf("%d. %s\n", index, value)
 					}
-				} else if (components[0] == "display") {
-					if (len(components) != 3) {
-						fmt.Println("display address port\n")
-						continue
-					}else {
-						s := []string{components[1], components[2]};
-						var address string = strings.Join(s, ":");
-						node.Unconnect()
-						addresses <- address
-						time.Sleep(2)
-						<- addresses
-						
-						
-					}
-				}else if (components[0] == "ids") {
-					for i := 0; i<numberOfId; i++ {
-						fmt.Println(oldID[i])
-					}
 				} else if (components[0] == "run") {
 					if (len(components) != 2) {
 						fmt.Printf("'run' command must be supplied with a sibling node index!\n")
@@ -144,47 +122,15 @@ func main() {
 			}
 		}
 	}()
+
+		// get address and port
+    addr := flag.String("address", "localhost", "Bitverse server IP-address")
+	port := flag.Int("port", 2020, "Bitverse server port")
+    flag.Parse()
 	
-	go func(){
-		for {
-			address := <- addresses
-			//fmt.Println("address = ", address )
-			oldID[numberOfId] = node.Id()
-			numberOfId += 1
-			if(numberOfId >= len(oldID)){
-				numberOfId = 0
-			}
-			fmt.Println("deleting node id : ", node.Id(), "        supernode id :", observer.superNode.Id)
-			node, done = bitverse.MakeEdgeNode(transport, observer)
-			fmt.Println("creating node id : ", node.Id(), "        supernode id :", observer.superNode.Id)
-			go node.Connect(address)
-			addresses <- "OK"
-			fmt.Println("connected to", address)
-			
-			time.Sleep(2 * time.Second)
-			reply = make(chan bool)
-			observer.superNode.SendChildrenRequest()
-			<-reply
-			for index, value := range siblings {
-				show := true
-				for i := 0; i<numberOfId; i++ { 
-					//fmt.Println("comparing ",value," and ",oldID[i])
-					if(value == oldID[i]){
-						show = false
-						break
-					}
-				}
-				if(show){
-					fmt.Printf("%d. %s\n", index, value)
-				}
-			}
-			<- done
-		}
-	}()
-	
-	// connect node and wait until done (which is forever)
-	go node.Connect("localhost:2020")
-	//go node.Connect("130.240.233.93:2020")
-	<- done
-	<- stop	
+	portString := fmt.Sprintf("%d", (*port));
+
+	// connect and wait for connection to die
+	go node.Connect(*addr + ":" + portString)
+	<- done	
 }

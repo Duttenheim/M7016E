@@ -1,23 +1,33 @@
-function CheckOnline(addrid, elementid)
+//------------------------------------------------------------------------------
+/**
+*/
+function CheckOnline(addrid, elementid, buttonid)
 {
-	
 	var img = document.body.appendChild(document.createElement("img"));
 	
-	statusElement = document.getElementById(elementid);
-	statusElement.innerHTML = "Unknown";
-	addrElement = document.getElementById(addrid);
+	var addrElement = document.getElementById(addrid);
+	var statusElement = document.getElementById(elementid);
+	var buttonElement = document.getElementById(buttonid);
+	statusElement.innerHTML = "Pending";	
+	buttonElement.disabled = true;
 	
+	var loaded = false;
 	img.onload = function()
 	{
 		status = "<font color='green'>Online</font>";
 		statusElement.innerHTML = status;
+		buttonElement.disabled = false;
+		loaded = true;
 	}
 	
-	failFunction = function()
+	var failFunction = function()
 	{
-		status = "<font color='red'>Offline</font>";
-		statusElement.innerHTML = status;
-		img.src = "";
+		if (!loaded)
+		{
+			status = "<font color='red'>Offline</font>";
+			statusElement.innerHTML = status;
+			img.src = "";
+		}
 	}
 	
 	img.src = "http://" + addrElement.innerHTML + "/ping.bmp";
@@ -25,6 +35,14 @@ function CheckOnline(addrid, elementid)
 	setTimeout
 	(
 		failFunction,
-		1000
+		3000
 	);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+function RedirectToSupernode(serverip)
+{
+	window.location.href = "/supernode" + "?ip=" + serverip;
 }

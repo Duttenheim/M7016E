@@ -5,7 +5,7 @@ import (
 	"bitverse"
 	"protocol"
 	"encoding/json"
-    	"flag"
+    "flag"
 	"github.com/fsouza/go-dockerclient"
 )
 
@@ -53,7 +53,7 @@ type DockerListArgs struct {
 
 type ImageArgs struct {
 	ID string
-	Name string
+	Registry string
 	Repository string
 }
 
@@ -85,7 +85,7 @@ type Image struct {
 	Created string
 	Size string
 	VirtualSize string
-	//RepoTags []string
+	RepoTags []string
 }
 
 type ImageCollection struct {
@@ -228,10 +228,10 @@ func (obj* EdgeNodeHandler) ListContainers(args* DockerListArgs, output* string)
 		list := []Container{}
 		for _, img := range imgs {
 			cont := Container{}
-			cont.ID = img.ID
-			cont.Image = img.Image
-			cont.Created = string(img.Created)
-			cont.Status = img.Status
+			cont.ID += fmt.Sprintf(img.ID)
+			cont.Image += fmt.Sprintf(img.Image)
+			cont.Created += fmt.Sprintf("%v",img.Created)
+			cont.Status += fmt.Sprintf(img.Status)
 			list = append(list,cont)
 		}
 		containerColl := ContainerCollection{ReplyCode: ListContainers, Containers: list}
@@ -247,12 +247,12 @@ func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* string) error {
 	client, _ := docker.NewClient(endpoint)
 	rpcOutput := RpcOutput{}
 	rpcOutput.Content = ""
-	err := client.PullImage(docker.PullImageOptions{Repository: args.Repository}, docker.AuthConfiguration{})
+	err := client.PullImage(docker.PullImageOptions{Repository: args.Repository, Registry: args.Registry}, docker.AuthConfiguration{})
 	if err != nil {
 		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
 		rpcOutput.ReplyCode = ErrorCode
 	} else {
-		rpcOutput.Content += fmt.Sprintf("Pulled container")
+		rpcOutput.Content += fmt.Sprintf("Pulled Image: " + args.Registry+"/"+args.Repository)
 		rpcOutput.ReplyCode = PullImage
 	}
 	b, _ := json.Marshal(rpcOutput)
@@ -295,10 +295,10 @@ func (obj* EdgeNodeHandler) ListImages(args* DockerListArgs, output* string) err
 		for _, img := range imgs {
 			image := Image{}
 		        image.ID += fmt.Sprintf(img.ID)
-		        //image.RepoTags += fmt.Sprintf(img.RepoTags)
-		        image.Created += fmt.Sprintf(string(img.Created))
-		        image.Size += fmt.Sprintf(string(img.Size))
-		        image.VirtualSize += fmt.Sprintf(string(img.VirtualSize))
+		        image.RepoTags = img.RepoTags
+		        image.Created += fmt.Sprintf("%v", img.Created)
+		        image.Size += fmt.Sprintf("%d",img.Size)
+		        image.VirtualSize += fmt.Sprintf("%d", img.VirtualSize)
 			list = append(list, image)
         	}
 		imageColl := ImageCollection{ReplyCode: ListImages, Images: list}
@@ -327,6 +327,7 @@ func (observer* TestObserver) OnSiblingLeft(node* bitverse.EdgeNode, id string) 
 
 var siblings []string
 var reply chan bool
+var nodeName string
 
 func (observer* TestObserver) OnChildrenReply(node* bitverse.EdgeNode, id string, children[] string) {
 	siblings = children
@@ -335,6 +336,14 @@ func (observer* TestObserver) OnChildrenReply(node* bitverse.EdgeNode, id string
 
 func (observer* TestObserver) OnConnected(localNode* bitverse.EdgeNode, remoteNode* bitverse.RemoteNode) {
 	observer.superNode = remoteNode
+	
+	// setup tags
+	tags := make(map[string]string)
+	tags["Name"] = nodeName
+	tags["Service"] = "Docker"
+	
+	// change tags
+	localNode.UpdateTags(tags)
 }
 
 var secret string = "3e606ad97e0a738d8da4c4c74e8cd1f1f2e016c74d85f17ac2fc3b5dab4ed6c4"
@@ -361,10 +370,18 @@ func main() {
 		panic(serviceError)
 	}
 
-	// connect node and wait until done (which is forever)
+	// get address and port
     addr := flag.String("address", "localhost", "Bitverse server IP-address")
+	port := flag.Int("port", 2020, "Bitverse server port")
+	
+	name := flag.String("name", "StandardClientName", "The tag value to be used for 'Name' when this node connects")
     flag.Parse()
+	
+	// set node name
+	nodeName = *name
+	
+	portString := fmt.Sprintf("%d", (*port));
 
-	go node.Connect(*addr + ":2020")
+	go node.Connect(*addr + ":" + portString)
 	<- done	
 }

@@ -13,6 +13,10 @@ const (
 	Children
 	ChildJoined
 	ChildLeft
+	UpdateTags
+	SearchTags
+	GetTags
+	MakeImposter
 	Bye
 )
 
@@ -51,6 +55,7 @@ type Msg struct {
 	PayloadType    int    // payload format, e.g nil or string
 	Src            string // source
 	Dst            string // desintation
+	Origin		   string // original source (remains unchanged when sent between supernodes)
 	Id             string // unique id as calculated by sender
 	ServiceType    int    // service type
 	Signature      string // rsa signature
@@ -72,12 +77,20 @@ func (msg *Msg) String() string {
 		return "msg[type:children to:" + msg.Dst + " from:" + msg.Src + " payload:" + msg.Payload + "]"
 	} else if msg.Type == ChildJoined {
 		return "msg[type:childjoined to:" + msg.Dst + " from:" + msg.Src + " payload:" + msg.Payload + "]"
-	} else if msg.Type == ChildJoined {
+	} else if msg.Type == ChildLeft {
 		return "msg[type:childleft to:" + msg.Dst + " from:" + msg.Src + " payload:" + msg.Payload + "]"
 	} else if msg.Type == Data {
 		return "msg[type:data to:" + msg.Dst + " from:" + msg.Src + " payload:" + msg.Payload + " msgchannelid:" + msg.MsgServiceName + "]"
+	} else if msg.Type == UpdateTags {
+		return "msg[type:updatetags to:" + msg.Dst + " from:" + msg.Src + " payload:" + msg.Payload + "]"
+	} else if msg.Type == SearchTags {
+		return "msg[type:searchtags to:" + msg.Dst + " from:" + msg.Src + " payload:" + msg.Payload + "]"
+	} else if msg.Type == GetTags {
+		return "msg[type:gettags to:" + msg.Dst + " from:" + msg.Src + "]"
+	} else if msg.Type == MakeImposter {
+		return "msg[type:makeimposter to:" + msg.Dst + " from:" + msg.Src + "]"	
 	} else {
-		return "msg[type:unkown]"
+		return "msg[type:unknown]"
 	}
 }
 
@@ -91,6 +104,7 @@ func composeMsgServiceMsg(src string, dst string, serviceId string, payload stri
 	msg.Payload = payload
 	msg.PayloadType = String
 	msg.Src = src
+	msg.Origin = src
 	msg.Dst = dst
 	msg.Id = msg.Src + ":" + fmt.Sprintf("%d", getSeqNr())
 
@@ -108,6 +122,7 @@ func composeRepoClaimMsg(src string, superNodeId string, repoId string, publicKe
 	msg := new(Msg)
 	msg.Type = Data
 	msg.Src = src
+	msg.Origin = src
 	msg.Dst = superNodeId
 	msg.Id = msg.Src + ":" + fmt.Sprintf("%d", getSeqNr())
 	msg.Signature = publicKey
@@ -127,6 +142,7 @@ func composeRepoStoreMsg(src string, superNodeId string, repoId string, key stri
 	msg := new(Msg)
 	msg.Type = Data
 	msg.Src = src
+	msg.Origin = src
 	msg.Dst = superNodeId
 	msg.Id = msg.Src + ":" + fmt.Sprintf("%d", getSeqNr())
 
@@ -149,6 +165,7 @@ func composeRepoLookupMsg(src string, superNodeId string, repoId string, key str
 	msg := new(Msg)
 	msg.Type = Data
 	msg.Src = src
+	msg.Origin = src
 	msg.Dst = superNodeId
 	msg.Id = msg.Src + ":" + fmt.Sprintf("%d", getSeqNr())
 
@@ -178,6 +195,7 @@ func composeHeartbeatMsg(src string, dst string) *Msg {
 	msg := new(Msg)
 	msg.Type = Heartbeat
 	msg.Src = src
+	msg.Origin = src
 	msg.Dst = dst
 	msg.ServiceType = Control
 	return msg
@@ -187,6 +205,7 @@ func composeChildrenRequestMsg(src string, dst string) *Msg {
 	msg := new(Msg)
 	msg.Type = Children
 	msg.Src = src
+	msg.Origin = src
 	msg.Dst = dst
 	msg.ServiceType = Control
 	return msg
@@ -197,6 +216,7 @@ func composeChildrenReplyMsg(src string, dst string, json string) *Msg {
 	msg.Type = Children
 	msg.Payload = json
 	msg.Src = src
+	msg.Origin = src
 	msg.Dst = dst
 	msg.ServiceType = Control
 	return msg
@@ -207,6 +227,7 @@ func composeChildJoin(src string, childId string) *Msg {
 	msg.Type = ChildJoined
 	msg.Payload = childId
 	msg.Src = src
+	msg.Origin = src
 	msg.ServiceType = Control
 	return msg
 }
@@ -216,6 +237,7 @@ func composeChildLeft(src string, childId string) *Msg {
 	msg.Type = ChildLeft
 	msg.Payload = childId
 	msg.Src = src
+	msg.Origin = src
 	msg.ServiceType = Control
 	return msg
 }
@@ -224,6 +246,7 @@ func composeHandshakeMsg(src string) *Msg {
 	msg := new(Msg)
 	msg.Type = Handshake
 	msg.Src = src
+	msg.Origin = src
 	msg.ServiceType = Control
 	return msg
 }
@@ -233,4 +256,57 @@ func getSeqNr() int {
 	seqNrCounter++
 	mutex.Unlock()
 	return seqNrCounter
+}
+
+//------------------------------------------------------------------------------
+/**
+	Tags
+*/
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+/**
+*/
+type SearchTagsType struct {
+	nodes	[]string
+	tags 	map[string]string
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+func composeSearchTagsMsg(src string, json string) *Msg {
+	msg := new(Msg)
+	msg.Type = SearchTags
+	msg.Payload = json
+	msg.Src = src
+	msg.Origin = src
+	msg.ServiceType = Control
+	return msg
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+func composeUpdateTagsMsg(src string, json string) *Msg {
+	msg := new(Msg)
+	msg.Type = UpdateTags
+	msg.Payload = json
+	msg.Src = src
+	msg.Origin = src
+	msg.ServiceType = Control
+	return msg
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+func composeMakeImposterMsg(src string) *Msg {
+	msg := new(Msg)
+	msg.Type = MakeImposter
+	msg.Src = src
+	msg.Origin = src
+	msg.ServiceType = Control
+	return msg
 }
