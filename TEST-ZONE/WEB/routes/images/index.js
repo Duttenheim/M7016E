@@ -22,7 +22,7 @@ exports.index = function(req, res){
 		}
 		else {
 			console.log(error)
-			res.end()
+			res.render('noImages', { title: 'Private repository images' , images: error })
 		}
 	})
     
