@@ -1,6 +1,7 @@
 V=0
 
 build:
+	mkdir -p code/bin
 	export GOPATH=${CURDIR}/code; cd code/src; make
 
 setup:

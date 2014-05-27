@@ -19,10 +19,9 @@ type SuperNode struct {
 	localAddr              string
 	localPort              string
 	transport              Transport
-	successorTransport	   Transport
-	successorNodeChannel   chan *RemoteNode
-	successorMsgChannel    chan Msg
-	successorNode		   *RemoteNode
+		
+	superNodes		       map[string]*RemoteNode
+	
 	repoAutenticationTable map[string]*string    // repoid:public key
 	repositories           map[repokey_t]*string // global key-value store
 	tags				   map[string]map[string]string
@@ -34,10 +33,7 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 	superNode.localPort = localPort
 	superNode.children = make(map[string]*RemoteNode)
 	superNode.transport = transport
-	superNode.successorTransport = nil
-	superNode.successorNodeChannel = nil
-	superNode.successorMsgChannel = nil
-	superNode.successorNode = nil
+	superNode.superNodes = make(map[string]*RemoteNode)
 	superNode.tags = make(map[string]map[string]string)
 
 	superNode.repoAutenticationTable = make(map[string]*string)
@@ -247,36 +243,39 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 }
 
 // Connects this supernode to another in order to form a P2P ring, call in separate go-function
-func(superNode* SuperNode) ConnectSuccessor(addr string, port string) {
-	superNode.successorTransport = MakeWSTransport()
-	superNode.successorTransport.SetLocalNodeId(superNode.nodeId)
-	superNode.successorMsgChannel = make(chan Msg)
-	superNode.successorNodeChannel = make(chan *RemoteNode, 10)
+func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
+
+	for _, addr := range addrs {
+		transport := MakeWSTransport()
+		transport.SetLocalNodeId(superNode.nodeId)
+		msgChannel := make(chan Msg)
+		nodeChannel := make(chan *RemoteNode, 10)	
 	
-	go func() {
-		for {
-			select {
-			case msg := <-superNode.successorMsgChannel:
-				debug("supernode: relaying " + msg.String())
-				superNode.msgChannel <- msg
-			case remoteNode := <-superNode.successorNodeChannel:
-				if remoteNode.state == Dead {
-					debug("supernode: we just lost our connection to the successor <" + remoteNode.Id() + ">")
-					superNode.successorNode = nil
-					break
-				} else {
-					debug("supernode: adding link to successor node <" + remoteNode.Id() + ">")
-					superNode.successorNode = remoteNode
-					
-					// make this supernode an imposter
-					msg := composeMakeImposterMsg(superNode.Id())
-					superNode.successorNode.deliver(msg)
+		go func() {
+			for {
+				select {
+				case msg := <-msgChannel:
+					debug("supernode: relaying " + msg.String())
+					msgChannel <- msg
+				case remoteNode := <-nodeChannel:
+					if remoteNode.state == Dead {
+						debug("supernode: we just lost our connection to the successor <" + remoteNode.Id() + ">")
+						delete(superNode.superNodes, remoteNode.Id())
+						break
+					} else {
+						debug("supernode: adding link to successor node <" + remoteNode.Id() + ">")
+						superNode.superNodes[remoteNode.Id()] = remoteNode
+						
+						// make this supernode an imposter
+						msg := composeMakeImposterMsg(superNode.Id())
+						remoteNode.deliver(msg)
+					}
 				}
 			}
-		}
-	}()
+		}()
 	
-	go superNode.successorTransport.ConnectToNode(addr + ":" + port, superNode.successorNodeChannel, superNode.successorMsgChannel)		
+		go transport.ConnectToNode(addr + ":" + port, nodeChannel, msgChannel)	
+	}
 }
 
 // BITVERSE MANAGEMENT
@@ -317,12 +316,14 @@ func (superNode *SuperNode) sendToChild(msg Msg) {
 		debug("supernode: forwarding " + msg.String() + " to " + val.Id())
 		val.deliver(&msg)
 	} else {
-		if superNode.successorNode != nil && msg.Src != superNode.successorNode.Id() && len(msg.Dst) != 0 {
-			debug("supernode: failed to deliver to " + msg.Dst + ", relaying to successor supernode " + superNode.successorNode.Id())			
-			superNode.successorNode.deliver(&msg)
-		} else {
+		if len(superNode.superNodes) == 0 {
 			debug("supernode: failed to forward message to child from: " + msg.Src + " to: " + msg.Dst)
-		}
+		} else {
+			for _, node := range superNode.superNodes {
+				debug("supernode: failed to deliver to " + msg.Dst + ", relaying to supernode " + node.Id())			
+				node.deliver(&msg)
+			}
+		}	
 	}
 }
 
@@ -401,11 +402,10 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 	// set contents in message
 	msg.Payload = string(data)
 	
-	// send to next supernode
-	if (superNode.successorNode != nil) {
-		superNode.successorNode.deliver(&msg)
-	} else {
-		debug("supernode: could relay search message at supernode: " + superNode.Id())
+	// send to other supernodes
+	for _, node := range superNode.superNodes {
+		debug("supernode: failed to deliver to " + msg.Dst + ", relaying to supernode " + node.Id())			
+		node.deliver(&msg)
 	}
 }
 

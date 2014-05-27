@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"bufio"
 	"os"
+	"strings"
 )
 
 
@@ -22,8 +23,8 @@ func main() {
 
 	port := flag.Int("port", 2020, "Server port, should be in the range 1023 - 49151");
 	
-	ringAddress := flag.String("ringAddress", "127.0.0.1", "Next super node address");
-	ringPort := flag.Int("ringPort", 2021, "Next super node port")
+	ringAddress := flag.String("ringAddress", "127.0.0.1", "Supernodes to connect to, separate with comma");
+	ringPort := flag.Int("ringPort", 2020, "Supernode port for all supernodes")
 	flag.Parse();
 
 	portString := fmt.Sprintf("%d", (*port));
@@ -34,6 +35,8 @@ func main() {
 	// wait for input, whenever enter gets pressed, we connect this supernode to another
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
-	node.ConnectSuccessor(*ringAddress, ringPortString)
+	
+	addrList := strings.Split(*ringAddress, ",")
+	node.ConnectSuccessor(addrList, ringPortString)
 	<- done
 }
