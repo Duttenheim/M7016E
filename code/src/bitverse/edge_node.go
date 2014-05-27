@@ -181,6 +181,10 @@ func (edgeNode *EdgeNode) Connect(remoteAddress string) {
 	edgeNode.transport.ConnectToNode(remoteAddress, edgeNode.remoteNodeChannel, edgeNode.msgChannel)
 }
 
+func (edgeNode *EdgeNode) Unconnect () {
+	//close(edgeNode.done)
+	edgeNode.done <- 1
+}
 func (edgeNode *EdgeNode) Disconnect () {
 	edgeNode.superNode.state = Dead
 	edgeNode.remoteNodeChannel <- edgeNode.superNode	
