@@ -9,6 +9,8 @@ import (
 
 //------------------------------------------------------------------------------
 /**
+	This type serves as a connection to a service providing server.
+	Connect this whenever you have decided to to connect to through bitverse
 */
 type ServiceClient struct {
 	debug 				bool
@@ -45,7 +47,11 @@ func (client *ServiceClient) Connect(ip string, connected func(client *ServiceCl
 	}
 	
 	fmt.Printf("ServiceClient: Connected to %s\n", ip)
-	connected(client, url)
+	
+	// run callback if its been set
+	if (connected != nil) {
+		connected(client, url)
+	}
 	
 	// handle messages until either the message receiving fails or the application is quit
 	for {

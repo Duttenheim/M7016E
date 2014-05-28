@@ -40,6 +40,7 @@ func main() {
 	if (*openServer) {
 		serverChannel := make(chan protocol.ServiceMsg)
 		server = protocol.MakeServiceServer(serverChannel)
+		rpc.Register(server)
 		
 		// listen on server-related messages
 		go func() {

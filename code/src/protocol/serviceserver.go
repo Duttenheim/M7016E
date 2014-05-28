@@ -75,3 +75,18 @@ func (server *ServiceServer) Start(port int) {
 	
 	server.Done <- 1
 }
+
+
+type RequestIpInput struct {}
+type RequestIpOutput struct {
+	ip string
+}
+
+//------------------------------------------------------------------------------
+/**
+	RPC-complaint call which sends back the IP of the service server
+*/
+func (server *ServiceServer) RequestIp(input *RequestIpInput, output *RequestIpOutput) error {
+	output.ip = server.ws.Config().Origin.Host
+	return nil
+}

@@ -55,7 +55,7 @@ func (server* RpcServer) Register(v interface{}) {
 
 		// assert that method has two exported fields (input and output)
 		if (methodRef.Type.NumIn() != 3 || methodRef.Type.NumOut() != 1) {
-			fmt.Printf("Method '%s' doesn't fit the criteria for RPC serialization (object, input and reply args, and error return)\n", name)			
+			if (server.debug) { fmt.Printf("Method '%s' doesn't fit the criteria for RPC serialization (object, input and reply args, and error return)\n", name) }			
 			continue
 		}
 
@@ -138,7 +138,9 @@ func (server* RpcServer) Process(call string) (string, error) {
 
 //------------------------------------------------------------------------------
 /**
-	Convenience function which takes function name and arguments and converts into string
+	Convenience function which takes function name and arguments and converts into JSON package.
+	Basically, the RPC call ends up as
+	{ functionName : string, args : string of { arg 1 : string, ... arg n : string} }
 */
 func ComposeRPC(name string, args interface{}) (string, error) {
 	var data []byte
