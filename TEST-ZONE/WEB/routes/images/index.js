@@ -9,8 +9,9 @@ exports.index = function(req, res){
 	//ssh -i yacs.pem.mdlp ubuntu@130.240.134.116 sudo docker ps
 	
 	//var images = exec("curl -XGET 130.240.134.116:5000/v1/search, {silent:true}").output;
-	
-	var url = 'http://130.240.134.118:5000/v1/search';
+
+	var IP = '130.240.134.118';	
+	var url = 'http://'+IP+':5000/v1/search';
 	request({
 		url: url,
 		json: true
@@ -24,7 +25,7 @@ exports.index = function(req, res){
 			console.log(error)
 			zeImages = error;
 		}
-		res.render('images', { title: 'Private repository images' , images: zeImages })
+		res.render('images', { title: 'Private repository images' , images: zeImages, server_addr: IP })
 	})
     
 };

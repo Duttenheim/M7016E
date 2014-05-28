@@ -4,7 +4,7 @@
      <body>
      <% if(images.code) { %>
      	<p>We are currently experiencing some problems with the service.</p>
-		 <p>cause : <%= images.code %></p>
+		<p>cause : <%= images.code %></p>
      
      <% } else { %>
 		 <table class="table table-striped">
@@ -17,7 +17,7 @@
 		 <tbody>
 			 <% for(var i=0; i<images.num_results; i++) {%>
 				 <tr>
-					<td><%= images.results[i].name %></td>
+					<td><%= images.results[i].name.replace('library', server_addr) %></td>
 					<td><%= images.results[i].description %></td>
 				</tr>
 			 <% } %>

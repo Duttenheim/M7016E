@@ -74,6 +74,8 @@ WebNode.prototype.OnOpen = function()
     message.Src = this.id;
 
     this.Send(message);
+    message.Type = MsgTypeEnum.MakeImposter;
+    this.Send(message);
 
     // call callback
     this.connectedCallback();
