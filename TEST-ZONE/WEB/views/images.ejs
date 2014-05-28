@@ -2,9 +2,9 @@
 
 <html>
      <body>
-     <% if(images.code) { %>
+     <% if(errorMsg!==null) { %>
      	<p>We are currently experiencing some problems with the service.</p>
-		 <p>cause : <%= images.code %></p>
+		<p>cause : <%= images.code %></p>
      
      <% } else { %>
 		 <table class="table table-striped">
