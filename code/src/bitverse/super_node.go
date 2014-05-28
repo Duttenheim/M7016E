@@ -263,6 +263,7 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 					} else if msg.Type == Heartbeat {
 						// keep this super node local
 					} else {
+						msg.Src = msg.Origin
 						superNode.msgChannel <- msg
 					}
 				case remoteNode := <-nodeChannel:
@@ -379,13 +380,13 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 	}
 		
 	for remoteNode, nodeTags := range superNode.tags {
-	
 		// go through all the decoded tags and find if we have a full match
 		for key, val := range tags.tags {
 			if match, ok := nodeTags[key]; ok {
 				if val == match {
 					// append to list
 					tags.nodes = append(tags.nodes, remoteNode)
+					debug("supernode: found matching node " + remoteNode)
 				}
 			}
 		}
@@ -407,14 +408,19 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 */
 func (superNode *SuperNode) getTags(msg Msg) {
 	// decode tags from message
-	tags := make(map[string]string)
+	tags := make(map[string]map[string]string)
 	
-	// find node
-	if val, ok := superNode.tags[msg.Dst]; ok {
-		tags = val
+	// if we have a specific node we want to get the tags for
+	if len(msg.Dst) == 0 {
+		tags = superNode.tags
 	} else {
-		debug("supernode: no node named " + msg.Dst + " found")
-		return
+		// find node
+		if val, ok := superNode.tags[msg.Dst]; ok {
+			tags[msg.Dst] = val
+		} else {
+			debug("supernode: no node named " + msg.Dst + " found")
+			return
+		}
 	}
 	
 	// encode to json again and send to the rest of the children
@@ -433,7 +439,6 @@ func (superNode *SuperNode) getTags(msg Msg) {
 	// send back
 	superNode.children[msg.Src].deliver(&msg)
 }
-
 
 //------------------------------------------------------------------------------
 /**
