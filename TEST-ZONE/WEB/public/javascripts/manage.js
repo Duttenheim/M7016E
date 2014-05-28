@@ -141,8 +141,16 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
 	        node.CallRPCFunction("EdgeNodeHandler.KillContainer", args, edgeNode);            
 	    }
 
+	    var graphButton = document.createElement("Button");
+	    var graphBText = document.createTextNode("Graph");
+	    graphButton.className = "btn btn-info";
+	    graphButton.appendChild(graphBText);
+	    graphButton.setAttribute('data-toggle', 'collapse');
+	    graphButton.setAttribute('data-target', '#container_'+nr);
+	    
 	    cell6.appendChild(stopButton);
 	    cell6.appendChild(killButton);
+	    cell6.appendChild(graphButton);
     }
     
     var deleteButton = document.createElement("Button");
@@ -162,6 +170,16 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     	}
     }
     
+    var graphDiv = document.createElement("div");
+    graphDiv.className = "collapse";
+    graphDiv.id = "container_"+nr;
+    
+    var gtext = document.createElement("p");
+    gtext.innerHTML = "Heia din dritt";
+    
+    graphDiv.appendChild(gtext);
+    
+    
     cell1.appendChild(nrtab);
     cell2.appendChild(idTab);
     cell3.appendChild(imageTab);
@@ -176,6 +194,7 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     row.appendChild(cell6);
     
     table.tBodies.item("containers_body").appendChild(row);
+    table.tBodies.item("containers_body").appendChild(graphDiv);
 }
 
 function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){

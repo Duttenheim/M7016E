@@ -267,6 +267,7 @@ WebNode.prototype.CallRPCFunction = function(name, args, node)
     message.MsgServiceName = "RPCMessageService";
     message.Dst = node;
     message.Src = this.id;
+    message.Origin = message.Src;
 
     // send message
     this.Send(message);    
