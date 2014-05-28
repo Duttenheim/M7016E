@@ -14,6 +14,7 @@ type ServiceServer struct {
 	debug			bool
 	msgChannel      chan ServiceMsg
 	ws				*websocket.Conn
+	Done			chan int
 }
 
 //------------------------------------------------------------------------------
@@ -23,6 +24,7 @@ type ServiceServer struct {
 func MakeServiceServer(msgChannel chan ServiceMsg) *ServiceServer {
 	server := new(ServiceServer)
 	server.msgChannel = msgChannel
+	server.Done = make(chan int)
 	return server
 }
 
@@ -34,7 +36,7 @@ func (server *ServiceServer) Handler(ws *websocket.Conn) {
 	var err error
 	var msg ServiceMsg
 	
-	fmt.Printf("ServiceServer: New connection established to %s\n", ws.Config().Location.Path)
+	fmt.Printf("ServiceServer: New connection established from %s\n", ws.Config().Origin.Host)
 	
 	for {
 		dec := json.NewDecoder(ws)
@@ -42,12 +44,12 @@ func (server *ServiceServer) Handler(ws *websocket.Conn) {
 		msg.ws = ws
 			
 		if err != nil {
-			fmt.Printf("ServiceServer: Lost connection to %s\n", ws.Config().Location.Path)
+			fmt.Printf("ServiceServer: Lost connection to %s\n", ws.Config().Origin.Host)
 			break
 		}
 		if msg.Type == Disconnect {
 			// graceful disconnect, say goodbye
-			fmt.Printf("ServiceServer: %s disconnected\n", ws.Config().Location.Path)
+			fmt.Printf("ServiceServer: Client %s disconnected gracefully\n", ws.Config().Origin.Host)
 			break
 		} else {
 			server.msgChannel <- msg
@@ -70,4 +72,6 @@ func (server *ServiceServer) Start(port int) {
 		fmt.Printf("ServiceServer: Failed to open on port %d\n", port)
 		return
 	}
+	
+	server.Done <- 1
 }

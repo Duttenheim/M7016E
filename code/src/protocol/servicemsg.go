@@ -4,6 +4,7 @@ import (
 	"code.google.com/p/go.net/websocket"	
 	"encoding/json"
 	"fmt"
+	"sync"
 )
 
 const (
@@ -13,8 +14,12 @@ const (
 
 const (
 	RPC = iota
+	Reply
 	Unknown
 )
+
+var MsgSequenceNumber int = 0
+var mutex sync.Mutex
 
 //------------------------------------------------------------------------------
 /**
@@ -22,10 +27,29 @@ const (
 	Keeps a pointer to its socket so that we might send a reply.
 */
 type ServiceMsg struct {
+	Id				int
 	Type			int
 	ServiceDataType int
 	Payload			string
 	ws				*websocket.Conn
+}
+
+//------------------------------------------------------------------------------
+/**
+	Create new message. Messages must be created with this function to propery work!
+*/
+func MakeServiceMsg(msgType int, service int, payload string) *ServiceMsg {
+	msg := new(ServiceMsg)
+	msg.Type = msgType
+	msg.ServiceDataType = service
+	msg.Payload = payload
+	
+	mutex.Lock()
+	msg.Id = MsgSequenceNumber
+	MsgSequenceNumber++
+	mutex.Unlock()
+	
+	return msg
 }
 
 //------------------------------------------------------------------------------
@@ -39,4 +63,34 @@ func (msg *ServiceMsg) Reply(reply *ServiceMsg) {
 		fmt.Printf("ServiceMsg: Failed to encode message\n");
 		return
 	}
+}
+
+//------------------------------------------------------------------------------
+/**
+	Converts to readable string
+*/
+func (msg *ServiceMsg) ToString() string {
+	var retval string
+	retval = "Message [type:"
+	
+	if msg.Type == Disconnect {
+		retval += "Disconnect"
+	} else if msg.Type == Data {
+		retval += "Data"	
+	} else {
+		retval += "Unknown"
+	}
+	
+	retval += " service:"
+	if msg.ServiceDataType == RPC {
+		retval += "RPC"
+	} else if msg.ServiceDataType == Reply {
+		retval += "Reply"
+	} else {
+		retval += "Unknown"
+	}
+	
+	retval += " payload:" + msg.Payload
+	retval += "]"
+	return retval
 }

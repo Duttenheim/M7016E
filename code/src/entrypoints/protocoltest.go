@@ -61,14 +61,16 @@ func main() {
 	// make edge node
 	observer := new(TestObserver)
 	node, done := bitverse.MakeEdgeNode(transport, observer)
-
-	// make message observer
-	msgObserver := new(protocol.RpcMessageObserver)
-	msgObserver.Open()
+	
+	// create our special RPC server
+	server := protocol.MakeRpcServer()
 
 	// make a docker RPC-callable object
 	test := new(TestRpcInterface)
-	msgObserver.Register(test)
+	server.Register(test)
+
+	// make message observer
+	msgObserver := protocol.MakeRpcMessageObserver(server)	
 	
 	service, serviceError := node.CreateMsgService(secret, "RPCMessageService", msgObserver)
 	if (serviceError != nil) {

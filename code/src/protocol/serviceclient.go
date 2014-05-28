@@ -14,6 +14,7 @@ type ServiceClient struct {
 	debug 				bool
 	msgChannel			chan ServiceMsg
 	ws					*websocket.Conn
+	Done				chan int
 }
 
 //------------------------------------------------------------------------------
@@ -23,14 +24,16 @@ type ServiceClient struct {
 func MakeServiceClient(msgChannel chan ServiceMsg) *ServiceClient {
 	client := new(ServiceClient)
 	client.msgChannel = msgChannel
+	client.Done = make(chan int)
 	return client
 }
 
 //------------------------------------------------------------------------------
 /**
-	Connect to address, call in go-function since it will never return
+	Connect to address, call in go-function since it will never return.
+	Takes a callback which gets run whenever the client connects to the server, this is required since we might run the client in a go routine.
 */
-func (client *ServiceClient) Connect(ip string) {
+func (client *ServiceClient) Connect(ip string, connected func(client *ServiceClient, ip string)) {
 	origin := "http://localhost/"
 	url := "ws://" + ip + "/service"
 	
@@ -41,10 +44,14 @@ func (client *ServiceClient) Connect(ip string) {
 		return
 	}
 	
+	fmt.Printf("ServiceClient: Connected to %s\n", ip)
+	connected(client, url)
+	
 	// handle messages until either the message receiving fails or the application is quit
 	for {
 		msg := client.receive()
 		if msg == nil {
+			client.Done <- 1
 			break
 		}
 		client.msgChannel <- *msg
