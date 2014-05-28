@@ -16,16 +16,15 @@ exports.index = function(req, res){
 		json: true
 	}, function (error, response, body) {
 		var zeImages;
-		var zeError;
 		if (!error && response.statusCode == 200) {
 			zeImages = body;
 			console.log(body)
 		}
 		else {
 			console.log(error)
-			zeError = error;
+			zeImages = error;
 		}
-		res.render('images', { title: 'Private repository images' , images: zeImages, errorMsg: zeError  })
+		res.render('images', { title: 'Private repository images' , images: zeImages })
 	})
     
 };
