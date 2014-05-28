@@ -10,20 +10,21 @@ exports.index = function(req, res){
 	
 	//var images = exec("curl -XGET 130.240.134.116:5000/v1/search, {silent:true}").output;
 	
-	var url = 'http://130.240.134.116:5000/v1/search';
+	var url = 'http://130.240.134.118:5000/v1/search';
 	request({
 		url: url,
 		json: true
 	}, function (error, response, body) {
-
+		var zeImages;
 		if (!error && response.statusCode == 200) {
+			zeImages = body;
 			console.log(body)
-			res.render('images', { title: 'Private repository images' , images: body })
 		}
 		else {
 			console.log(error)
-			res.render('noImages', { title: 'Private repository images' , images: error })
+			zeImages = error;
 		}
+		res.render('images', { title: 'Private repository images' , images: zeImages })
 	})
     
 };
