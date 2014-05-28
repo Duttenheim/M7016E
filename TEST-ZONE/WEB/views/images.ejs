@@ -2,12 +2,12 @@
 
 <html>
      <body>
-     <% if images.code %>
+     <% if(images.code) { %>
      	<p>We are currently experiencing some problems with the service.</p>
 		 <p>cause : <%= images.code %></p>
      
-     <% else %>
-		 <table class="table table-striped table-hover table-bordered">
+     <% } else { %>
+		 <table class="table table-striped">
 		 <thead>
 			 <tr>
 				  <th>Name</th>
@@ -23,6 +23,6 @@
 			 <% } %>
 		 </tbody>
 	 </table>
-	 <%end%>
+	 <% } %>
      </body>
 </html>
