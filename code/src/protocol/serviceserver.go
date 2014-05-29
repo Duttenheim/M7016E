@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"net/http"
-	"net"
+    "net"
 )
 
 //------------------------------------------------------------------------------
@@ -14,7 +14,6 @@ import (
 type ServiceServer struct {
 	debug			bool
 	msgChannel      chan ServiceMsg
-	ws				*websocket.Conn
 	Done			chan int
 }
 
@@ -80,7 +79,7 @@ func (server *ServiceServer) Start(port int) {
 
 type RequestIpInput struct {}
 type RequestIpOutput struct {
-	ip string
+	IP string
 }
 
 //------------------------------------------------------------------------------
@@ -88,17 +87,25 @@ type RequestIpOutput struct {
 	RPC-complaint call which sends back the IP of the service server
 */
 func (server *ServiceServer) RequestIp(input *RequestIpInput, output *RequestIpOutput) error {
-	output.ip = "unknown"
-	addrs, err := net.InterfaceAddrs()
+	output.IP = "localhost"
+	inter, err := net.InterfaceByName("eth0")
 	if err != nil {
 		return err
 	}
+
+    var addrs []net.Addr
+    addrs, err = inter.Addrs()
 	
 	for _, a := range addrs {
-		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-			output.ip = ipnet.IP.String()
-		}
+        switch ip := a.(type) {
+        case *net.IPNet:
+            if ip.IP.DefaultMask() != nil {
+                output.IP = ip.IP.String()
+                break
+            }
+        }
 	}
-	
+
+    fmt.Printf("ServiceServer: Sending back ip: %s\n", output.IP)
 	return nil
 }
