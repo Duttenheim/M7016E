@@ -7,22 +7,43 @@
 		<p>cause : <%= images.code %></p>
      
      <% } else { %>
-		 <table class="table table-striped">
-		 <thead>
-			 <tr>
-				  <th>Name</th>
-				  <th>Description</th>
-			 </tr>
-		 </thead>
-		 <tbody>
-			 <% for(var i=0; i<images.num_results; i++) {%>
+		 <form name="input" method="get">
+			 <input type="text" name="search" placeholder="search" autofocus>
+			 <button class="btn btn-default" type="button" style="position: absolute; left: -9999px" ><span class="glyphicon glyphicon-search"></span></button>
+		 </form>
+<!--
+		<form name="input" method="get">
+		<div class="row">
+		  <div class="col-lg-6">
+			<div class="form-horizontal">
+			  <input type="text" class="form-control" name="search" placeholder="search" autofocus>
+			  <span class="input-group-btn">
+				<button class="btn btn-default" type="button" style="position: absolute; left: -9999px" ><span class="glyphicon glyphicon-search"></span></button>
+				<button class="btn btn-default" type="button" onclick="goBack()" >back</button>
+			  </span>
+			</div>
+		  </div>
+		  </div>
+		  </form>
+-->
+		  <p><%= text %></p>
+			 <table class="table table-striped">
+			 <thead>
 				 <tr>
-					<td><%= images.results[i].name.replace('library', server_addr) %></td>
-					<td><%= images.results[i].description %></td>
-				</tr>
-			 <% } %>
+					  <th>Name</th>
+					  <th>Description</th>
+				 </tr>
+			 </thead>
+			 <tbody>
+				 <% for(var i=0; i<images.num_results; i++) {%>
+					 <tr>
+						<td><%= images.results[i].name.replace('library', server_addr) %></td>
+						<td><%= images.results[i].description %></td>
+					</tr>
+				 <% } %>
 		 </tbody>
 	 </table>
 	 <% } %>
      </body>
 </html>
+
