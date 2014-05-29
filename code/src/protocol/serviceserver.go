@@ -88,6 +88,7 @@ type RequestIpOutput struct {
 */
 func (server *ServiceServer) RequestIp(input *RequestIpInput, output *string) error {
     var reply RequestIpOutput 
+    /*
 	reply.IP = "localhost"
 	inter, err := net.InterfaceByName("eth0")
 	if err != nil {
@@ -114,6 +115,14 @@ func (server *ServiceServer) RequestIp(input *RequestIpInput, output *string) er
     }
 
     *output = string(data)
+    */
+
+    resp, err := http.Get("http://myexternalip.com/raw")
+    if err != nil {
+        return err
+    }
+    defer resp.Body.Close()
+    *output = string(resp.Body)
 
 	return nil
 }
