@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"net/http"
-//    "net"
+    "net"
 )
 
 //------------------------------------------------------------------------------
@@ -79,7 +79,9 @@ func (server *ServiceServer) Start(port int) {
 }
 
 
-type RequestIpInput struct {}
+type RequestIpInput struct {
+	RequestLocal bool
+}
 type RequestIpOutput struct {
 	IP string
 }
@@ -91,24 +93,43 @@ type RequestIpOutput struct {
 func (server *ServiceServer) RequestIp(input *RequestIpInput, output *string) error {
     var reply RequestIpOutput 
 
-    resp, err := http.Get("http://" + server.bitverse + "/globalip")
-    if err != nil {
-        return err
-    }
-    bytes := make([]byte, 255)
-    num, err := resp.Body.Read(bytes)
-    bytes = bytes[:num]
-    defer resp.Body.Close()
+	if input.RequestLocal {
+		inter, err := net.InterfaceByName("eth0")
+		
+		var addrs []net.Addr
+		addrs, err = inter.Addrs()
+		if err != nil {
+			return err
+		}
+		
+		for _, addr := range addrs {
+			switch ip := addr.(type) {
+			case *net.IPNet:
+				if ip.IP.DefaultMask() != nil {
+					*output = ip.IP.String()
+				}
+			}
+		}
+	} else {
+		resp, err := http.Get("http://" + server.bitverse + "/globalip")
+		if err != nil {
+			return err
+		}
+		bytes := make([]byte, 255)
+		num, err := resp.Body.Read(bytes)
+		bytes = bytes[:num]
+		defer resp.Body.Close()
 
-    reply.IP = string(bytes)
-    
-    var data []byte
-    data, err = json.Marshal(reply)
-    if err != nil {
-        return err
-    }
+		reply.IP = string(bytes)
+		
+		var data []byte
+		data, err = json.Marshal(reply)
+		if err != nil {
+			return err
+		}
 
-    *output = string(data)
+		*output = string(data)
+	}
 
 	return nil
 }
