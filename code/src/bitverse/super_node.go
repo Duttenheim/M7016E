@@ -196,6 +196,7 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 					
 				} else if msg.Type == UpdateTags {
 					superNode.updateTags(msg)
+					superNode.forwardToChildren(msg)
 				
 				} else if msg.Type == SearchTags {
 					superNode.searchTags(msg)				
@@ -262,6 +263,8 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 						debug("supernode: remote child " + msg.Origin)
 					} else if msg.Type == Heartbeat {
 						// keep this super node local
+					} else if msg.Type == UpdateTags {
+						superNode.updateTags(msg)				
 					} else {
 						msg.Src = msg.Origin
 						superNode.msgChannel <- msg
@@ -376,44 +379,11 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 	if err != nil {
 		debug("supernode: failed to decode search tags criteria")
 		return
-	}
-
-	// get tags by sending a message to all imposters
-	spam := new(Msg)
-	spam.Type = GetTags
+	}	
 	
 	// create map of tags and of matching nodes
-	nodeTags := 		make(map[string]map[string]string)
-	var matchingNodes 	[]string
-	
-	for id, node := range superNode.children {
-		if node.imposter == true {
-		
-			// deliver message
-			node.deliver(spam)
-			
-			// get response
-			response := node.receive()
-			
-			var nodeTags map[string]map[string]string
-			err := json.Unmarshal([]byte(response.Payload), nodeTags)
-			
-			if err != nil {
-				debug("supernode: failed to decode tags from " + id)
-				continue
-			}
-			
-			// merge with current
-			for val, key := range nodeTags {
-				nodeTags[val] = key
-			}
-		}
-	}
-	
-	// merge other node tags with ours
-	for val, key := range superNode.tags {
-		nodeTags[val] = key
-	}
+	nodeTags := 			superNode.tags
+	var matchingNodes		[]string
 	
 	// go through nodes
 	for node, tags := range nodeTags {
@@ -447,19 +417,14 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 */
 func (superNode *SuperNode) getTags(msg Msg) {
 	// decode tags from message
-	tags := make(map[string]map[string]string)
+	tags := make(map[string]string)
 	
-	// if we have a specific node we want to get the tags for
-	if len(msg.Dst) == 0 {
-		tags = superNode.tags
+	// find node
+	if val, ok := superNode.tags[msg.Dst]; ok {
+		tags = val
 	} else {
-		// find node
-		if val, ok := superNode.tags[msg.Dst]; ok {
-			tags[msg.Dst] = val
-		} else {
-			debug("supernode: no node named " + msg.Dst + " found")
-			return
-		}
+		debug("supernode: no node named " + msg.Dst + " found")
+		return
 	}
 	
 	// encode to json again and send to the rest of the children
@@ -472,11 +437,11 @@ func (superNode *SuperNode) getTags(msg Msg) {
 	// notify
 	debug("supernode: replying with tags " + string(data) + " for node " + msg.Dst)
 	
-	// get [ay;pad
+	// get payload
 	msg.Payload = string(data)
 	
 	// send back
-	superNode.children[msg.Src].deliver(&msg)
+	superNode.children[msg.Origin].deliver(&msg)
 }
 
 //------------------------------------------------------------------------------

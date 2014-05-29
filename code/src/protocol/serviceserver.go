@@ -88,6 +88,7 @@ type RequestIpOutput struct {
 	RPC-complaint call which sends back the IP of the service server
 */
 func (server *ServiceServer) RequestIp(input *RequestIpInput, output *RequestIpOutput) error {
+	output.ip = "unknown"
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return err
