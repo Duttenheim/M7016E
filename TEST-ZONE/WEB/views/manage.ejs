@@ -23,6 +23,7 @@ function updateGraph()
 function getEdgeIP(edgeNode)
 {
 	var args = new RequestIpInput();
+    args.RequestLocal = true;
 	node.CallRPCFunction("ServiceServer.RequestIp", args, edgeNode);
 }
 

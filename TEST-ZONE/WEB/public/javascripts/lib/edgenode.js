@@ -68,4 +68,5 @@ function ContainerCommitArgs(){
 }
 
 function  RequestIpInput(){
+    this.RequestLocal = false;
 }
