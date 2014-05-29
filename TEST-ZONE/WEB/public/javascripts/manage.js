@@ -340,6 +340,10 @@ function setImagesHeaderText(count){
 function setContainerHeaderText(count){
 	document.getElementById("avail_cont_head").innerHTML = "Containers available: "+ count;
 }
+function setImageSrc(IP) {
+	document.getElementById("graphImg").src = "http://"+IP+"/zabbix/tst/test.php?ip=127.0.0.1&item=system.cpu.load[percpu,avg5]&span=14400"
+}
+
 
 /*
     ErrorCode :  0,
@@ -359,9 +363,11 @@ var NodeReceiveCallback = function(reply)
 {
 	var node = this;
     var edgeNode = document.getElementById('edgeNode_id').innerHTML
-    var json = eval ("(" + reply + ")");
-    
-    if(json.ReplyCode == 10){ // ListImages
+    var json = JSON.parse(reply);
+    if(reply.IP) {
+    	setImageSrc(reply.IP)
+    	alert("Setting src");
+    }else if(json.ReplyCode == 10){ // ListImages
     	CreateImageList(json, node)
     } else if(json.ReplyCode == 7) { // ListContainers
     	CreateContainerList(json, node)

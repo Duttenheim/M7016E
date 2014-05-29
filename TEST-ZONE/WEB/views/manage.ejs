@@ -11,7 +11,7 @@ $( document ).ready(function() {
     node.connectedCallback = function() { 
     	listImages(edgeNode);  
     	listContainers(edgeNode);
-    	//getEdgeIP(edgeNode);
+    	getEdgeIP(edgeNode);
     };
 });
 
@@ -41,9 +41,8 @@ function listContainers(edgeNode){
 
 function PullImage(edgeNode){
 	var repo = document.getElementById("repoNameField").value;
-	if(repo == null) {
-		alert("Please fill in name")
-		return false
+	if(repo.length == 0) {
+		alert("Connot pull empty")
 	} else {
 		var args = new ImageArgs();
 	    args.Repository = repo;
@@ -70,10 +69,9 @@ function PullImage(edgeNode){
 	<h1>Edge-node:  <%= node_id %></h1>
 	<br/>
 	
-	<button class="btn btn-primary" onclick="updateGraph()" >Refresh Graph</Button>
+	<button class="btn btn-primary hidden" onclick="updateGraph()" >Refresh Graph</Button>
 	<div id="graphDiv">
-		<img id="graphImg" src="http://130.240.134.115/zabbix/tst/test.php?ip=127.0.0.1&it
-em=system.cpu.load[percpu,avg5]&span=14400"  width="600" align="center" border="0"> </img>
+		<img id="graphImg" src=""  width="600" align="center" border="0"> </img>
 	</div>
 	
   	<h3 id="avail_img_head"> Images available: 0</h3>
