@@ -10,7 +10,8 @@ var RPCReplyCode =
     ListContainers : 7,
     PullImage : 8,
     RemoveImage : 9,
-    ListImages : 10
+    ListImages : 10,
+    CommitContainer: 11
 }
 
 function CreateContainerArgs()
@@ -50,4 +51,21 @@ function DockerResponse()
 {
     this.Content = "";
     this.ReplyCode = 0
+}
+/*
+ * ContainerID string
+	Repository  string
+	Tag string
+	Message string
+	Author string
+ */
+function ContainerCommitArgs(){
+	this.ContainerID = "";
+	this.Repository = "";
+	this.Tag = "";
+	this.Message = "";
+	this.Author = "";
+}
+
+function  RequestIpInput(){
 }
