@@ -14,17 +14,17 @@ const (
 
 type RemoteNode struct {
 	remoteNodeChannel chan *RemoteNode
-	readWriter        io.ReadWriter
+	writer            io.Writer
 	id                string
 	remoteId          string
 	state             RemoteNodeState
 	imposter		  bool
 }
 
-func makeRemoteNode(remoteNodeChannel chan *RemoteNode, readWriter io.ReadWriter, remoteId string, id string) *RemoteNode {
+func makeRemoteNode(remoteNodeChannel chan *RemoteNode, writer io.Writer, remoteId string, id string) *RemoteNode {
 	remoteNode := new(RemoteNode)
 	remoteNode.remoteNodeChannel = remoteNodeChannel
-	remoteNode.readWriter = readWriter
+	remoteNode.writer = writer
 	remoteNode.id = id
 	remoteNode.remoteId = remoteId
 	remoteNode.state = Alive
@@ -49,7 +49,7 @@ func (remoteNode *RemoteNode) RemoteId() string {
 /// PRIVATE
 
 func (remoteNode *RemoteNode) deliver(msg *Msg) {
-	enc := json.NewEncoder(remoteNode.readWriter)
+	enc := json.NewEncoder(remoteNode.writer)
 	err := enc.Encode(msg)
 
 	if err != nil {
@@ -57,18 +57,4 @@ func (remoteNode *RemoteNode) deliver(msg *Msg) {
 		debug("link: detecting dead link")
 		remoteNode.remoteNodeChannel <- remoteNode // notify the node so it can remove it
 	}
-}
-
-func (remoteNode *RemoteNode) receive() Msg {
-	var msg Msg
-	dec := json.NewDecoder(remoteNode.readWriter)
-	err := dec.Decode(&msg)
-	
-	if err != nil {
-		remoteNode.state = Dead
-		debug("link: detecting dead link")
-		remoteNode.remoteNodeChannel <- remoteNode // notify the node so it can remove it
-	}
-	
-	return msg
 }
