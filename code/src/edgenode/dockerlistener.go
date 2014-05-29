@@ -221,7 +221,7 @@ func (obj* EdgeNodeHandler) RemoveContainer(args* RemoveContainerArgs, output* s
 }
 
 
-
+/*
 	Repository  string
 	Tag string
 	Message string
