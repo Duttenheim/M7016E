@@ -95,6 +95,7 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     var cell4 = document.createElement("td");
     var cell5 = document.createElement("td");
     var cell6 = document.createElement("td");
+    var cell7 = document.createElement("td");
     
     var nrtab = document.createTextNode(nr);
     var idTab = document.createTextNode(container.ID);
@@ -140,17 +141,9 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
 	        args.ID = container.ID;
 	        node.CallRPCFunction("EdgeNodeHandler.KillContainer", args, edgeNode);            
 	    }
-
-	    var graphButton = document.createElement("Button");
-	    var graphBText = document.createTextNode("Graph");
-	    graphButton.className = "btn btn-info";
-	    graphButton.appendChild(graphBText);
-	    graphButton.setAttribute('data-toggle', 'collapse');
-	    graphButton.setAttribute('data-target', '#container_'+nr);
 	    
 	    cell6.appendChild(stopButton);
 	    cell6.appendChild(killButton);
-	    cell6.appendChild(graphButton);
     }
     
     var deleteButton = document.createElement("Button");
@@ -169,16 +162,7 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
 	        table.deleteRow(nr);
     	}
     }
-    
-    var graphDiv = document.createElement("div");
-    graphDiv.className = "collapse";
-    graphDiv.id = "container_"+nr;
-    
-    var gtext = document.createElement("p");
-    gtext.innerHTML = "Heia din dritt";
-    
-    graphDiv.appendChild(gtext);
-    
+       
     
     cell1.appendChild(nrtab);
     cell2.appendChild(idTab);
@@ -194,7 +178,6 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     row.appendChild(cell6);
     
     table.tBodies.item("containers_body").appendChild(row);
-    table.tBodies.item("containers_body").appendChild(graphDiv);
 }
 
 function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
@@ -266,7 +249,7 @@ function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
 	row.appendChild(modalDiv);
 	
 }
-
+/*
 function PullImagePopup(edgeNode, node){
 	var row = document.getElementById('images_body');
 	var modalDiv = document.createElement("div");
@@ -291,7 +274,7 @@ function PullImagePopup(edgeNode, node){
 	var modalBodyDiv = document.createElement("div"); 
 	modalBodyDiv.className = "modal-body";
 	
-	/*var addressInfoP = document.createElement("p");
+	var addressInfoP = document.createElement("p");
     var addressInfoText = document.createTextNode("Type in address of repo <IP:PORT>");
     addressInfoP.appendChild(addressInfoText);
 	var addrInputDiv = document.createElement("div");
@@ -302,7 +285,7 @@ function PullImagePopup(edgeNode, node){
 	addrInputDiv.setAttribute('placeholder', 'IP:PORT');
 
 	modalBodyDiv.appendChild(addressInfoP);
-	modalBodyDiv.appendChild(addrInputDiv);*/
+	modalBodyDiv.appendChild(addrInputDiv);
 	
 	var repoInfoP = document.createElement("p");
     var repoInfoText = document.createTextNode("Type in name of repo");
@@ -350,7 +333,7 @@ function PullImagePopup(edgeNode, node){
 	row.appendChild(modalDiv);
 	
 }
-
+*/
 function setImagesHeaderText(count){
 	document.getElementById("avail_img_head").innerHTML = "Images available: " + count;
 }
@@ -369,7 +352,8 @@ function setContainerHeaderText(count){
     ListContainers : 7,
     PullImage : 8,
     RemoveImage : 9,
-    ListImages : 10
+    ListImages : 10,
+    CommitContainer: 11
  */
 var NodeReceiveCallback = function(reply)
 {
@@ -391,6 +375,9 @@ var NodeReceiveCallback = function(reply)
     	setImagesHeaderText(document.getElementById("images_table").rows.length-1) //Use -1 since the header-row is counted here
     	alert(json.Content);
     } else if(json.ReplyCode == 8){ // Pull image
+    	listImages(edgeNode);
+    	alert(json.Content);
+    } else if(json.ReplyCode == 11){ //Commit container
     	listImages(edgeNode);
     	alert(json.Content);
     } else {

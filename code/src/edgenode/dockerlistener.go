@@ -45,6 +45,7 @@ const (
     PullImage		= 8
     RemoveImage		= 9
     ListImages		= 10
+    CommitContainer 	= 11
 )
 
 type DockerListArgs struct {
@@ -61,7 +62,15 @@ type RemoveImageArgs struct {
 	Name string
 }
 
+type ContainerCommitArgs struct {
+	ContainerID string
+	Repository  string
+	Tag string
+	Message string
+	Author string
+}
 //Reply codes are used to define what method that it returns from
+// 
 // 
 type RpcOutput struct {
 	Content string
@@ -212,6 +221,34 @@ func (obj* EdgeNodeHandler) RemoveContainer(args* RemoveContainerArgs, output* s
 }
 
 
+
+	Repository  string
+	Tag string
+	Message string
+	Author string
+*/
+func (obj* EdgeNodeHandler) CommitContainer(args* ContainerCommitArgs, output* string) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	image, err := client.CommitContainer(docker.CommitContainerOptions{Container: args.ContainerID, 
+						Repository: args.Repository,
+						Tag: args.Tag,
+						Message: args.Message,
+						Author: args.Author})
+	rpcOutput := RpcOutput{}
+	if err != nil {
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
+		b, _ := json.Marshal(rpcOutput)
+		*output += fmt.Sprintf(string(b))
+	} else {
+		rpcOutput.Content += fmt.Sprintf("Commited container %s with new Image ID: %s", args.ContainerID, image.ID)
+		rpcOutput.ReplyCode = CommitContainer
+	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
+	return nil
+}
 
 func (obj* EdgeNodeHandler) ListContainers(args* DockerListArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
