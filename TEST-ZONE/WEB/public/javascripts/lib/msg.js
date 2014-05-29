@@ -10,7 +10,7 @@ var MsgTypeEnum =
 	UpdateTags : 6,
 	SearchTags : 7,
 	GetTags : 8,
-	MakeSupernode : 9,
+	MakeImposter : 9,
 	Bye : 10	
 }
 

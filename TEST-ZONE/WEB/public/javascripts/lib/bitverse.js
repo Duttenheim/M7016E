@@ -74,6 +74,8 @@ WebNode.prototype.OnOpen = function()
     message.Src = this.id;
 
     this.Send(message);
+    message.Type = MsgTypeEnum.MakeImposter;
+    this.Send(message);
 
     // call callback
     this.connectedCallback();
@@ -267,6 +269,7 @@ WebNode.prototype.CallRPCFunction = function(name, args, node)
     message.MsgServiceName = "RPCMessageService";
     message.Dst = node;
     message.Src = this.id;
+    message.Origin = message.Src;
 
     // send message
     this.Send(message);    

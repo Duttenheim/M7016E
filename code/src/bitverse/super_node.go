@@ -19,9 +19,7 @@ type SuperNode struct {
 	localAddr              string
 	localPort              string
 	transport              Transport
-		
-	superNodes		       map[string]*RemoteNode
-	
+			
 	repoAutenticationTable map[string]*string    // repoid:public key
 	repositories           map[repokey_t]*string // global key-value store
 	tags				   map[string]map[string]string
@@ -33,7 +31,6 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 	superNode.localPort = localPort
 	superNode.children = make(map[string]*RemoteNode)
 	superNode.transport = transport
-	superNode.superNodes = make(map[string]*RemoteNode)
 	superNode.tags = make(map[string]map[string]string)
 
 	superNode.repoAutenticationTable = make(map[string]*string)
@@ -250,21 +247,32 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 		transport.SetLocalNodeId(superNode.nodeId)
 		msgChannel := make(chan Msg)
 		nodeChannel := make(chan *RemoteNode, 10)	
+		var SN *RemoteNode
 	
 		go func() {
 			for {
 				select {
 				case msg := <-msgChannel:
 					debug("supernode: relaying " + msg.String())
-					msgChannel <- msg
+					if msg.Type == ChildJoined {
+						superNode.children[msg.Origin] = SN
+						debug("supernode: remote child joined on another supernode, mapped " + msg.Origin + " to: " + SN.Id())
+					} else if msg.Type == ChildLeft {
+						delete(superNode.children, msg.Origin)
+						debug("supernode: remote child " + msg.Origin)
+					} else if msg.Type == Heartbeat {
+						// keep this super node local
+					} else {
+						msg.Src = msg.Origin
+						superNode.msgChannel <- msg
+					}
 				case remoteNode := <-nodeChannel:
 					if remoteNode.state == Dead {
 						debug("supernode: we just lost our connection to the successor <" + remoteNode.Id() + ">")
-						delete(superNode.superNodes, remoteNode.Id())
 						break
 					} else {
 						debug("supernode: adding link to successor node <" + remoteNode.Id() + ">")
-						superNode.superNodes[remoteNode.Id()] = remoteNode
+						SN = remoteNode
 						
 						// make this supernode an imposter
 						msg := composeMakeImposterMsg(superNode.Id())
@@ -314,16 +322,8 @@ func (superNode *SuperNode) sendChildrenReply(nodeId string) {
 func (superNode *SuperNode) sendToChild(msg Msg) {
 	if val, ok := superNode.children[msg.Dst]; ok {
 		debug("supernode: forwarding " + msg.String() + " to " + val.Id())
+		msg.Src = superNode.Id()
 		val.deliver(&msg)
-	} else {
-		if len(superNode.superNodes) == 0 {
-			debug("supernode: failed to forward message to child from: " + msg.Src + " to: " + msg.Dst)
-		} else {
-			for _, node := range superNode.superNodes {
-				debug("supernode: failed to deliver to " + msg.Dst + ", relaying to supernode " + node.Id())			
-				node.deliver(&msg)
-			}
-		}	
 	}
 }
 
@@ -380,13 +380,13 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 	}
 		
 	for remoteNode, nodeTags := range superNode.tags {
-	
 		// go through all the decoded tags and find if we have a full match
 		for key, val := range tags.tags {
 			if match, ok := nodeTags[key]; ok {
 				if val == match {
 					// append to list
 					tags.nodes = append(tags.nodes, remoteNode)
+					debug("supernode: found matching node " + remoteNode)
 				}
 			}
 		}
@@ -401,12 +401,6 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 	
 	// set contents in message
 	msg.Payload = string(data)
-	
-	// send to other supernodes
-	for _, node := range superNode.superNodes {
-		debug("supernode: failed to deliver to " + msg.Dst + ", relaying to supernode " + node.Id())			
-		node.deliver(&msg)
-	}
 }
 
 //------------------------------------------------------------------------------
@@ -414,14 +408,19 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 */
 func (superNode *SuperNode) getTags(msg Msg) {
 	// decode tags from message
-	tags := make(map[string]string)
+	tags := make(map[string]map[string]string)
 	
-	// find node
-	if val, ok := superNode.tags[msg.Dst]; ok {
-		tags = val
+	// if we have a specific node we want to get the tags for
+	if len(msg.Dst) == 0 {
+		tags = superNode.tags
 	} else {
-		debug("supernode: no node named " + msg.Dst + " found")
-		return
+		// find node
+		if val, ok := superNode.tags[msg.Dst]; ok {
+			tags[msg.Dst] = val
+		} else {
+			debug("supernode: no node named " + msg.Dst + " found")
+			return
+		}
 	}
 	
 	// encode to json again and send to the rest of the children
@@ -440,7 +439,6 @@ func (superNode *SuperNode) getTags(msg Msg) {
 	// send back
 	superNode.children[msg.Src].deliver(&msg)
 }
-
 
 //------------------------------------------------------------------------------
 /**

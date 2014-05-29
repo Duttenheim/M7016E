@@ -346,8 +346,86 @@ func (observer* TestObserver) OnConnected(localNode* bitverse.EdgeNode, remoteNo
 	localNode.UpdateTags(tags)
 }
 
-var secret string = "3e606ad97e0a738d8da4c4c74e8cd1f1f2e016c74d85f17ac2fc3b5dab4ed6c4"
+//------------------------------------------------------------------------------
+/**
+*/
+func SetupServiceServer(rpc* protocol.RpcServer, port int) {
+	serverChannel := make(chan protocol.ServiceMsg)
+	server := protocol.MakeServiceServer(serverChannel)
+	
+	// RPC register the server, it has some useful functions for finding the IP through bitverse
+	rpc.Register(server)
+	
+	// listen on server-related messages
+	go func() {
+		for {
+			select {
+			case msg := <- serverChannel:
+				if msg.ServiceDataType == protocol.RPC {
+					reply, err := rpc.Process(msg.Payload)
+					if err != nil {
+						fmt.Printf("Server: RPC failed with %s\n", err.Error())
+						continue
+					}
+					
+					// create response and reply
+					response := new(protocol.ServiceMsg)
+					response.Type = protocol.Data
+					response.ServiceDataType = protocol.Reply
+					response.Payload = reply
+					msg.Reply(response)
+				} else {
+					fmt.Printf("Server: Received %s\n", msg.ToString())
+				}
+			}
+		}
+	}()
+	
+	// start server
+	go server.Start(port)
+}
 
+//------------------------------------------------------------------------------
+/**
+*/
+func StartServiceClient(rpc* protocol.RpcServer, ip string) {
+	clientChannel := make(chan protocol.ServiceMsg)
+	client := protocol.MakeServiceClient(clientChannel)
+	
+	// listen on client-related messages
+	go func() {
+		for {
+			select {
+			case msg := <- clientChannel:
+				if msg.ServiceDataType == protocol.RPC {
+					reply, err := rpc.Process(msg.Payload)
+					if err != nil {
+						fmt.Printf("Client: RPC failed with %s\n", err.Error())
+						continue
+					}
+					
+					// create response and reply
+					response := new(protocol.ServiceMsg)
+					response.Type = protocol.Data
+					response.ServiceDataType = protocol.Reply
+					response.Payload = reply
+					msg.Reply(response)
+				} else {
+					fmt.Printf("Client: Received %s\n", msg.ToString())
+				}					
+			}
+		}
+	}()
+	
+	// start client without callback func
+	go client.Connect(ip, nil)
+}
+
+
+//------------------------------------------------------------------------------
+/**
+*/
+var secret string = "3e606ad97e0a738d8da4c4c74e8cd1f1f2e016c74d85f17ac2fc3b5dab4ed6c4"
 func main() {
 	// create transport and channel
 	transport := bitverse.MakeWSTransport()
@@ -358,15 +436,15 @@ func main() {
 	node, done := bitverse.MakeEdgeNode(transport, observer)
 
 	// create our special RPC server
-	server := protocol.MakeRpcServer()
+	rpc := protocol.MakeRpcServer()
 	
 	// make message observer
-	msgObserver := protocol.MakeRpcMessageObserver(server)
+	msgObserver := protocol.MakeRpcMessageObserver(rpc)
 
 	// make a docker RPC-callable object
 	test := new(EdgeNodeHandler)
-	server.Register(test)
-	
+	rpc.Register(test)
+		
 	_, serviceError := node.CreateMsgService(secret, "RPCMessageService", msgObserver)
 	if (serviceError != nil) {
 		panic(serviceError)
@@ -379,11 +457,12 @@ func main() {
 	name := flag.String("name", "StandardClientName", "The tag value to be used for 'Name' when this node connects")
     flag.Parse()
 	
+	// create ServiceServer
+	SetupServiceServer(rpc, *port + 1)
+	
 	// set node name
 	nodeName = *name
-	
-	portString := fmt.Sprintf("%d", (*port));
-
+	portString := fmt.Sprintf("%d", *port);
 	go node.Connect(*addr + ":" + portString)
 	<- done	
 }
