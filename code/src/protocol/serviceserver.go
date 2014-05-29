@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"net/http"
-    "net"
+//    "net"
 )
 
 //------------------------------------------------------------------------------
@@ -13,6 +13,7 @@ import (
 */
 type ServiceServer struct {
 	debug			bool
+    bitverse        string
 	msgChannel      chan ServiceMsg
 	Done			chan int
 }
@@ -21,8 +22,9 @@ type ServiceServer struct {
 /**
 	Creates new server, this doesn't start the server, but merely creates a new one, messages received are passed to the channel.
 */
-func MakeServiceServer(msgChannel chan ServiceMsg) *ServiceServer {
+func MakeServiceServer(msgChannel chan ServiceMsg, bitverseAddr string) *ServiceServer {
 	server := new(ServiceServer)
+    server.bitverse = bitverseAddr
 	server.msgChannel = msgChannel
 	server.Done = make(chan int)
 	return server
@@ -88,26 +90,18 @@ type RequestIpOutput struct {
 */
 func (server *ServiceServer) RequestIp(input *RequestIpInput, output *string) error {
     var reply RequestIpOutput 
-    /*
-	reply.IP = "localhost"
-	inter, err := net.InterfaceByName("eth0")
-	if err != nil {
-		return err
-	}
 
-    var addrs []net.Addr
-    addrs, err = inter.Addrs()
-	
-	for _, a := range addrs {
-        switch ip := a.(type) {
-        case *net.IPNet:
-            if ip.IP.DefaultMask() != nil {
-                reply.IP = ip.IP.String()
-                break
-            }
-        }
-	}
+    resp, err := http.Get("http://" + server.bitverse + "/globalip")
+    if err != nil {
+        return err
+    }
+    bytes := make([]byte, 255)
+    num, err := resp.Body.Read(bytes)
+    bytes = bytes[:num]
+    defer resp.Body.Close()
 
+    reply.IP = string(bytes)
+    
     var data []byte
     data, err = json.Marshal(reply)
     if err != nil {
@@ -115,14 +109,6 @@ func (server *ServiceServer) RequestIp(input *RequestIpInput, output *string) er
     }
 
     *output = string(data)
-    */
-
-    resp, err := http.Get("http://myexternalip.com/raw")
-    if err != nil {
-        return err
-    }
-    defer resp.Body.Close()
-    *output = string(resp.Body)
 
 	return nil
 }

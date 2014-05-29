@@ -39,7 +39,7 @@ func main() {
 	// open server if requested
 	if (*openServer) {
 		serverChannel := make(chan protocol.ServiceMsg)
-		server = protocol.MakeServiceServer(serverChannel)
+		server = protocol.MakeServiceServer(serverChannel, "")
 		rpc.Register(server)
 		
 		// listen on server-related messages

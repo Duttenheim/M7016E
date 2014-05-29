@@ -386,9 +386,9 @@ func (observer* TestObserver) OnConnected(localNode* bitverse.EdgeNode, remoteNo
 //------------------------------------------------------------------------------
 /**
 */
-func SetupServiceServer(rpc* protocol.RpcServer, port int) {
+func SetupServiceServer(rpc* protocol.RpcServer, bitverseAddr string, port int) {
 	serverChannel := make(chan protocol.ServiceMsg)
-	server := protocol.MakeServiceServer(serverChannel)
+	server := protocol.MakeServiceServer(serverChannel, bitverseAddr)
 	
 	// RPC register the server, it has some useful functions for finding the IP through bitverse
 	rpc.Register(server)
@@ -493,13 +493,14 @@ func main() {
 	
 	name := flag.String("name", "StandardClientName", "The tag value to be used for 'Name' when this node connects")
     flag.Parse()
+
+	portString := fmt.Sprintf("%d", *port);
 	
 	// create ServiceServer
-	SetupServiceServer(rpc, *port + 1)
+	SetupServiceServer(rpc, *addr + ":" + portString, *port + 1)
 	
 	// set node name
 	nodeName = *name
-	portString := fmt.Sprintf("%d", *port);
 	go node.Connect(*addr + ":" + portString)
 	<- done	
 }

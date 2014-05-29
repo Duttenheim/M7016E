@@ -10,6 +10,16 @@ import (
 	"strings"
 )
 
+type IPHandler struct {}
+
+func (iphandler* IPHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+    fmt.Printf("IPHandler: Sending back IP %s\n", request.RemoteAddr)
+    response.WriteHeader(http.StatusOK)
+
+    // just extract IP
+    ip := strings.Split(request.RemoteAddr, ":")
+    response.Write([]byte(ip[0]))
+}
 
 func main() {
 	// create websocket transpot and channel
@@ -20,6 +30,7 @@ func main() {
 
 	// implicitly make this server work as a web server too
 	http.Handle("/", http.FileServer(http.Dir(".")))
+    http.Handle("/globalip", new(IPHandler))
 
 	port := flag.Int("port", 2020, "Server port, should be in the range 1023 - 49151");
 	
