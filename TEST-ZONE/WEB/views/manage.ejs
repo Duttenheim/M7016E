@@ -2,6 +2,7 @@
 
 <script type="text/javascript">
 var node;
+var edgeIP;
 $( document ).ready(function() {
     var addr = document.getElementById('server_addr').innerHTML
     var edgeNode = document.getElementById('edgeNode_id').innerHTML
@@ -9,9 +10,21 @@ $( document ).ready(function() {
     node.messageReceivedCallback = NodeReceiveCallback;
     node.connectedCallback = function() { 
     	listImages(edgeNode);  
-    	listContainers(edgeNode); 
+    	listContainers(edgeNode);
+    	//getEdgeIP(edgeNode);
     };
 });
+
+function updateGraph()
+{
+	
+}
+
+function getEdgeIP(edgeNode)
+{
+	var args = new RequestIpInput();
+	node.CallRPCFunction("ServiceServer.RequestIp", args, edgeNode);
+}
 
 function listImages(edgeNode) 
 {
@@ -27,7 +40,16 @@ function listContainers(edgeNode){
 }
 
 function PullImage(edgeNode){
-	PullImagePopup(edgeNode,node);
+	var repo = document.getElementById("repoNameField").value;
+	if(repo == null) {
+		alert("Please fill in name")
+		return false
+	} else {
+		var args = new ImageArgs();
+	    args.Repository = repo;
+	    //args.Registry = addrInputField.value;
+	    node.CallRPCFunction("EdgeNodeHandler.PullImage", args, edgeNode);
+    }
 }
 
 </script>
@@ -47,14 +69,20 @@ function PullImage(edgeNode){
 	<h1>Super-node: <%= serv_addr %> </h1>
 	<h1>Edge-node:  <%= node_id %></h1>
 	<br/>
+	
+	<button class="btn btn-primary" onclick="updateGraph()" >Refresh Graph</Button>
+	<div id="graphDiv">
+		<img id="graphImg" src="http://130.240.134.115/zabbix/tst/test.php?ip=127.0.0.1&it
+em=system.cpu.load[percpu,avg5]&span=14400"  width="600" align="center" border="0"> </img>
+	</div>
+	
   	<h3 id="avail_img_head"> Images available: 0</h3>
-  	
   	<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#images_div"> Toggle table</button>
   	<button class="btn btn-primary" type="button" onclick="listImages('<%= node_id %>')"> 
   		<span class="glyphicon glyphicon-refresh"></span> Refresh
   	</button>
 	<div id="images_div" class="collapse" style="margin: 10px 0px 0px 0px">
-		 <button href="#pull_image_modal" data-toggle="modal" type="button" class="btn btn-primary" onclick="PullImage('<%= node_id %>')">Pull new Image</button>
+		 <button data-toggle="modal" data-target="#pull_image_modal" class="btn btn-primary">Pull new Image</button>
 	     <table class="table table-striped" id="images_table">
 	     	<thead>
 	     		<tr>
@@ -90,7 +118,28 @@ function PullImage(edgeNode){
 	     	</tbody>
 	     </table>
      </div>
-     
+   
+   <div class="modal fade" id="pull_image_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	  <div class="modal-dialog">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        <h4 class="modal-title" id="myModalLabel">Pull new Image</h4>
+	      </div>
+	      <div class="modal-body">
+	      	<p> Type in Image repository </p>
+	      	<div class="input-group input-group-lg">
+	      		<input class="form-control" placeholder="Repo name" id="repoNameField" />
+	      	</div>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="PullImage('<%= node_id %>')">Pull Image</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+   
 </html>
 
 
