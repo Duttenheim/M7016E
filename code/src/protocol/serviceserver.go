@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"encoding/json"
 	"net/http"
+	"net"
 )
 
 //------------------------------------------------------------------------------
@@ -87,6 +88,16 @@ type RequestIpOutput struct {
 	RPC-complaint call which sends back the IP of the service server
 */
 func (server *ServiceServer) RequestIp(input *RequestIpInput, output *RequestIpOutput) error {
-	output.ip = server.ws.Config().Origin.Host
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return err
+	}
+	
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			output.ip = ipnet.IP.String()
+		}
+	}
+	
 	return nil
 }

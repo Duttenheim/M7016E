@@ -370,37 +370,76 @@ func (superNode *SuperNode) updateTags(msg Msg) {
 */
 func (superNode *SuperNode) searchTags(msg Msg) {
 
-	// decode tags from message
-	tags := new(SearchTagsType)
-	err := json.Unmarshal([]byte(msg.Payload), tags)
-	
-	if (err != nil) {
-		debug("supernode: failed to decode message into tags, should be map[string]string")
+	// decode match tags
+	search := new(SearchTagsType)
+	err := json.Unmarshal([]byte(msg.Payload), search)
+	if err != nil {
+		debug("supernode: failed to decode search tags criteria")
 		return
 	}
+
+	// get tags by sending a message to all imposters
+	spam := new(Msg)
+	spam.Type = GetTags
+	
+	// create map of tags and of matching nodes
+	nodeTags := 		make(map[string]map[string]string)
+	var matchingNodes 	[]string
+	
+	for id, node := range superNode.children {
+		if node.imposter == true {
 		
-	for remoteNode, nodeTags := range superNode.tags {
-		// go through all the decoded tags and find if we have a full match
-		for key, val := range tags.tags {
-			if match, ok := nodeTags[key]; ok {
-				if val == match {
-					// append to list
-					tags.nodes = append(tags.nodes, remoteNode)
-					debug("supernode: found matching node " + remoteNode)
+			// deliver message
+			node.deliver(spam)
+			
+			// get response
+			response := node.receive()
+			
+			var nodeTags map[string]map[string]string
+			err := json.Unmarshal([]byte(response.Payload), nodeTags)
+			
+			if err != nil {
+				debug("supernode: failed to decode tags from " + id)
+				continue
+			}
+			
+			// merge with current
+			for val, key := range nodeTags {
+				nodeTags[val] = key
+			}
+		}
+	}
+	
+	// merge other node tags with ours
+	for val, key := range superNode.tags {
+		nodeTags[val] = key
+	}
+	
+	// go through nodes
+	for node, tags := range nodeTags {
+		// go through tags in node
+		for key, val := range tags {
+			
+			// see if tags exist in the search criteria
+			if tag, ok := search.tags[key]; ok {
+				
+				// if the tag is found and the value matches
+				if tag == val {
+					matchingNodes = append(matchingNodes, node)
 				}
 			}
 		}
 	}
 	
 	// encode to json again and send to the rest of the children
-	data, err := json.Marshal(tags)
+	data, err := json.Marshal(matchingNodes)
 	if (err != nil) {
 		debug("supernode: failed to encode to string, this should never happen")
 		return
 	}
 	
-	// set contents in message
-	msg.Payload = string(data)
+	// reply
+	msg.Reply(string(data))
 }
 
 //------------------------------------------------------------------------------
