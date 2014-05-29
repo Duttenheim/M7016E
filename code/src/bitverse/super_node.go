@@ -266,7 +266,6 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 					} else if msg.Type == UpdateTags {
 						superNode.updateTags(msg)				
 					} else {
-						msg.Src = msg.Origin
 						superNode.msgChannel <- msg
 					}
 				case remoteNode := <-nodeChannel:
@@ -438,7 +437,8 @@ func (superNode *SuperNode) getTags(msg Msg) {
 	debug("supernode: replying with tags " + string(data) + " for node " + msg.Dst)
 	
 	// reply
-	msg.Reply(string(data))
+	msg.Payload = string(data)
+    superNode.children[msg.Src].deliver(&msg)
 }
 
 //------------------------------------------------------------------------------
