@@ -86,8 +86,9 @@ type RequestIpOutput struct {
 /**
 	RPC-complaint call which sends back the IP of the service server
 */
-func (server *ServiceServer) RequestIp(input *RequestIpInput, output *RequestIpOutput) error {
-	output.IP = "localhost"
+func (server *ServiceServer) RequestIp(input *RequestIpInput, output *string) error {
+    var reply RequestIpOutput 
+	reply.IP = "localhost"
 	inter, err := net.InterfaceByName("eth0")
 	if err != nil {
 		return err
@@ -100,12 +101,19 @@ func (server *ServiceServer) RequestIp(input *RequestIpInput, output *RequestIpO
         switch ip := a.(type) {
         case *net.IPNet:
             if ip.IP.DefaultMask() != nil {
-                output.IP = ip.IP.String()
+                reply.IP = ip.IP.String()
                 break
             }
         }
 	}
 
-    fmt.Printf("ServiceServer: Sending back ip: %s\n", output.IP)
+    var data []byte
+    data, err = json.Marshal(reply)
+    if err != nil {
+        return err
+    }
+
+    *output = string(data)
+
 	return nil
 }
