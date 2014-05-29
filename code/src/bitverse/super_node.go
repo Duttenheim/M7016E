@@ -437,11 +437,8 @@ func (superNode *SuperNode) getTags(msg Msg) {
 	// notify
 	debug("supernode: replying with tags " + string(data) + " for node " + msg.Dst)
 	
-	// get payload
-	msg.Payload = string(data)
-	
-	// send back
-	superNode.children[msg.Origin].deliver(&msg)
+	// reply
+	msg.Reply(string(data))
 }
 
 //------------------------------------------------------------------------------
