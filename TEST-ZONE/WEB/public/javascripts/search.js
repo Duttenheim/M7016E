@@ -283,9 +283,9 @@ function PerformSearch(servers)
 			// connect to server
 			var node = CreateWebNode("ws://" + this.server + "/node");
 			
-			node.messageReceivedCallback = function(msg)
+			node.searchTagsCallback = function(nodes)
 			{
-				alert(msg.Payload);
+				alert(nodes);
 			}
 			
 			node.connectedCallback = function()
@@ -293,7 +293,7 @@ function PerformSearch(servers)
 				// create message
 				var msg = new Msg();
 				msg.Type = MsgTypeEnum.SearchTags;
-				msg.Payload = node.Encrypt(JSON.stringify(table));
+				msg.Payload = JSON.stringify(table);
 				this.Send(msg);
 			}
 		}

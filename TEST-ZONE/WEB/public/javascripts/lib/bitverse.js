@@ -54,7 +54,12 @@ function WebNode()
 	
 	this.tagsReceivedCallback = function(node, tags)
 	{
-		alert(tags)
+		alert(tags);
+	}
+	
+	this.searchTagsCallback = function(nodes)
+	{
+		alert(nodes);
 	}
 
     this.connectedCallback = function()
@@ -118,6 +123,11 @@ WebNode.prototype.OnMessage = function(msg)
 	{
 		var tags = JSON.parse(message.Payload);
 		this.tagsReceivedCallback(message.Dst, tags);
+	}
+	else if (message.Type == MsgTypeEnum.SearchTags)
+	{
+		var nodes = JSON.parse(message.Payload);
+		this.searchTagsCallback(nodes);
 	}
 }
 
@@ -268,8 +278,6 @@ WebNode.prototype.CallRPCFunction = function(name, args, node)
     message.Type = MsgTypeEnum.Data;
     message.MsgServiceName = "RPCMessageService";
     message.Dst = node;
-    message.Src = this.id;
-    message.Origin = message.Src;
 
     // send message
     this.Send(message);    
@@ -288,6 +296,8 @@ WebNode.prototype.Encrypt = function(data)
 */
 WebNode.prototype.Send = function(msg)
 {
+	msg.Src = this.id;
+    msg.Origin = msg.Src;
     msg.GenerateMessageId();
     var json = JSON.stringify(msg);
     this.socket.send(json);
