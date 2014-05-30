@@ -40,8 +40,11 @@ function listContainers(edgeNode){
     node.CallRPCFunction("EdgeNodeHandler.ListContainers", args, edgeNode); 
 }
 
-function PullImage(edgeNode){
-	var repo = "130.240.134.118:5000/" + document.getElementById("repoNameField").value;
+function PullImage(edgeNode, privateRepo){
+	var repo = document.getElementById("repoNameField").value;
+	if(privateRepo){
+		repo = "130.240.134.118:5000/" + repo
+	}
 	if(repo.length == 0) {
 		alert("Connot pull empty")
 	} else {
@@ -138,7 +141,8 @@ function PullImage(edgeNode){
 	      </div>
 	      <div class="modal-footer">
 	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-	        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="PullImage('<%= node_id %>')">Pull Image</button>
+	        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="PullImage('<%= node_id %>', false)">Pull Image</button>
+	        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="PullImage('<%= node_id %>', true)">Pull Image from private repository</button>
 	      </div>
 	    </div>
 	  </div>
