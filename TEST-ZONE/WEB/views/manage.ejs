@@ -52,6 +52,7 @@ function PullImage(edgeNode, privateRepo){
 	    args.Repository = repo;
 	    //args.Registry = addrInputField.value;
 	    node.CallRPCFunction("EdgeNodeHandler.PullImage", args, edgeNode);
+	    ShowProcessDialog("Pulling Image: " + repo);
     }
 }
 
@@ -147,6 +148,20 @@ function PullImage(edgeNode, privateRepo){
 	    </div>
 	  </div>
 	</div>
+   
+   <div class="modal hide" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-header">
+            <h1 id="waitDialogH1">Processing...</h1>
+        </div>
+        <div class="modal-body">
+            <div class="progress progress-striped active">
+                <div class="bar" style="width: 100%;"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+	        <button type="button" class="btn btn-info" data-dismiss="modal">Hide</button>
+	    </div>
+    </div>
    
 </html>
 
