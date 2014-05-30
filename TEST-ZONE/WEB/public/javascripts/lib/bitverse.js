@@ -263,7 +263,7 @@ WebNode.prototype.CallRPCFunction = function(name, args, node)
     // create message
     var message = new Msg();
     var jsonPayload = JSON.stringify(rpcInvoke);
-    var encrypted = EncryptAES(jsonPayload);
+    var encrypted = this.Encrypt(jsonPayload);
     message.Payload = encrypted;
     message.Type = MsgTypeEnum.Data;
     message.MsgServiceName = "RPCMessageService";
@@ -273,6 +273,14 @@ WebNode.prototype.CallRPCFunction = function(name, args, node)
 
     // send message
     this.Send(message);    
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+WebNode.prototype.Encrypt = function(data)
+{
+	return EncryptAES(data);
 }
 
 //------------------------------------------------------------------------------

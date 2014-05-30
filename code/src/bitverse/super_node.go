@@ -376,7 +376,7 @@ func (superNode *SuperNode) updateTags(msg Msg) {
 func (superNode *SuperNode) searchTags(msg Msg) {
 
 	// decode match tags
-	search := new(SearchTagsType)
+	search := make(map[string]string)
 	err := json.Unmarshal([]byte(msg.Payload), search)
 	if err != nil {
 		debug("supernode: failed to decode search tags criteria")
@@ -393,7 +393,7 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 		for key, val := range tags {
 			
 			// see if tags exist in the search criteria
-			if tag, ok := search.tags[key]; ok {
+			if tag, ok := search[key]; ok {
 				
 				// if the tag is found and the value matches
 				if tag == val {

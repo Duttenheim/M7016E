@@ -11,21 +11,22 @@ function CheckOnline(addrid, elementid, buttonid)
 	statusElement.innerHTML = "Pending";	
 	buttonElement.disabled = true;
 	
-	var loaded = false;
+	img.loaded = false;
 	img.onload = function()
 	{
 		status = "<font color='green'>Online</font>";
 		statusElement.innerHTML = status;
 		buttonElement.disabled = false;
-		loaded = true;
+		this.loaded = true;
 	}
 	
 	var failFunction = function()
 	{
-		if (!loaded)
+		if (!this.loaded)
 		{
 			status = "<font color='red'>Offline</font>";
 			statusElement.innerHTML = status;
+			this.loaded = true;
 			img.src = "";
 		}
 	}

@@ -16,11 +16,12 @@
 					<% }; %>
 					<script>
 						
-						UpdateTable('[<%= serverList %>]', 'searchtable');
+						UpdateTable('searchtable');
 					</script>
 					</table>
 					
-					<button class="btn btn-default" onclick="PerformSearch()">Search</button>
+					<button class="btn btn-default" onclick="PerformSearch('<%= serverList %>')">Search</button>
+					<label class="hidden" id="serversearchlabel">No server found</label>
 				</div>
 			</body>               
 

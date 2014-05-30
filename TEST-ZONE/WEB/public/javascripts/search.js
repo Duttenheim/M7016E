@@ -5,11 +5,12 @@ var values = [];
 var defaultTags = ['Service', 'Application', 'Location', 'Name'];
 
 var usedTags = [];
+var values = [];
 
 //------------------------------------------------------------------------------
 /**
 */
-function UpdateTable(serverList, tableElement)
+function UpdateTable(tableElement)
 {
 	var table = document.getElementById(tableElement);
 	var header = table.createTHead();
@@ -152,6 +153,7 @@ function NewSearchRow(row, table)
 		if (index == -1 && input2.value.length != 0 && input1.value.length != 0)
 		{
 			usedTags.push(input1.value);
+			values.push(input2.value);
 			buttonAdd.disabled = true;
 			buttonRemove.disabled = false;
 			SetRowEnabled(row, false);
@@ -229,6 +231,7 @@ function ResetRow(row)
 			if (index > -1)
 			{
 				usedTags.splice(index, 1);
+				values.splice(index, 1);
 			}
 		}
 	}
@@ -237,7 +240,80 @@ function ResetRow(row)
 //------------------------------------------------------------------------------
 /**
 */
-function PerformSearch()
+function PerformSearch(servers)
 {
-
+	// create object
+	var table = new Object();
+	
+	for (var i in usedTags)
+	{
+		table[usedTags[i]] = values[i];
+	}
+	
+	// split servers
+	var serverList = servers.split(",");
+	
+	var images = [];
+	var serverFound = false;
+	for (var i in serverList)
+	{
+		// abort early if we get a server before this loop is even done
+		if (serverFound == true) break;
+		
+		var img = document.createElement("img");
+		document.body.appendChild(img);
+		var server = serverList[i];
+		img.loaded = false;	
+		img.server = server;
+		img.onload = function()
+		{
+			// select the first server
+			serverFound = true;
+			this.loaded = true;
+			
+			// abort all other image loads
+			for (var j in images)
+			{
+				if (images[j] != img)
+				{
+					images[j].src = "";
+				}
+			}
+			
+			// connect to server
+			var node = CreateWebNode("ws://" + this.server + "/node");
+			
+			node.messageReceivedCallback = function(msg)
+			{
+				alert(msg.Payload);
+			}
+			
+			node.connectedCallback = function()
+			{
+				// create message
+				var msg = new Msg();
+				msg.Type = MsgTypeEnum.SearchTags;
+				msg.Payload = node.Encrypt(JSON.stringify(table));
+				this.Send(msg);
+			}
+		}
+		
+		var fail = function()
+		{
+			if (!this.loaded)
+			{
+				this.src = "";
+				this.loaded = true;
+			}			
+		}
+		
+		img.onerror = img.onabort = fail;
+		img.src = "http://" + server + "/ping.bmp";		
+		images.push(img);
+		setTimeout
+		(
+			fail,
+			3000
+		);
+	}
 }
