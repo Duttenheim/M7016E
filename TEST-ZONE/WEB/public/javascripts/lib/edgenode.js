@@ -11,7 +11,8 @@ var RPCReplyCode =
     PullImage : 8,
     RemoveImage : 9,
     ListImages : 10,
-    CommitContainer: 11
+    CommitContainer: 11,
+    PushImage:	12,
 }
 
 function CreateContainerArgs()

@@ -46,6 +46,7 @@ const (
     RemoveImage		= 9
     ListImages		= 10
     CommitContainer 	= 11
+    PushImage		= 12
 )
 
 type DockerListArgs struct {
@@ -291,6 +292,24 @@ func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* string) error {
 	} else {
 		rpcOutput.Content += fmt.Sprintf("Pulled Image: " + args.Registry+"/"+args.Repository)
 		rpcOutput.ReplyCode = PullImage
+	}
+	b, _ := json.Marshal(rpcOutput)
+	*output += fmt.Sprintf(string(b))
+	return nil
+}
+
+func (obj* EdgeNodeHandler) PushImage(args* ImageArgs, output* string) error {
+	endpoint := "unix:///var/run/docker.sock"
+	client, _ := docker.NewClient(endpoint)
+	rpcOutput := RpcOutput{}
+	rpcOutput.Content = ""
+	err := client.PushImage(docker.PushImageOptions{Name: args.ID, Registry: args.Registry}, docker.AuthConfiguration{})
+	if err != nil {
+		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
+		rpcOutput.ReplyCode = ErrorCode
+	} else {
+		rpcOutput.Content += fmt.Sprintf("Pushed Image: " + args.Registry+"/"+args.Repository)
+		rpcOutput.ReplyCode = PushImage
 	}
 	b, _ := json.Marshal(rpcOutput)
 	*output += fmt.Sprintf(string(b))
