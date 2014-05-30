@@ -349,7 +349,7 @@ func (superNode *SuperNode) forwardToChildren(msg Msg) {
 func (superNode *SuperNode) updateTags(msg Msg) {
 
 	// find node
-	if val, ok := superNode.children[msg.Src]; ok {
+	if _, ok := superNode.children[msg.Origin]; ok {
 	
 		// decode message contents into tag dictionary
 		tags := make(map[string]string)
@@ -361,12 +361,12 @@ func (superNode *SuperNode) updateTags(msg Msg) {
 		}
 		
 		// notify
-		debug("supernode: updated tags for " + msg.Src + " with " + msg.Payload)
+		debug("supernode: updated tags for " + msg.Origin + " with " + msg.Payload)
 		
 		// set tags for node
-		superNode.tags[val.Id()] = tags
+		superNode.tags[msg.Origin] = tags
 	} else {
-		debug("supernode: failed to update tags for " + msg.Src)
+		debug("supernode: failed to update tags for " + msg.Origin)
 	}
 }
 
@@ -407,6 +407,8 @@ func (superNode *SuperNode) searchTags(msg Msg) {
         // if all tags matched, add to list 
         if tagMatch == len(search) {
   			matchingNodes = append(matchingNodes, node)
+        } else if tagMatch == 0 {
+            debug("supernode: found no values matching: " + msg.Payload)
         }
 	}
 	
