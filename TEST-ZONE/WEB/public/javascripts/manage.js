@@ -29,7 +29,14 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
     
     var nrtab = document.createTextNode(nr);
     var repoTab = document.createTextNode(image.RepoTags);
-    var idTab = document.createTextNode(image.ID);
+    
+    var idTab = document.createTextNode(image.ID.substring(0, 10)+"...");
+    var idCell = document.createElement("p");
+    idCell.setAttribute('data-toggle', 'tooltip')
+    idCell.setAttribute('data-placement', 'top')
+    idCell.setAttribute('title', image.ID)
+    idCell.appendChild(idTab)
+    
     var createdTab = document.createTextNode(image.Created)
     var sizeTab = document.createTextNode(image.Size)
     
@@ -61,7 +68,7 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
     }
     
     cell1.appendChild(nrtab);
-    cell2.appendChild(idTab);
+    cell2.appendChild(idCell);
     cell3.appendChild(repoTab);
     cell4.appendChild(createdTab);
     cell5.appendChild(sizeTab);
@@ -98,7 +105,14 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     var cell7 = document.createElement("td");
     
     var nrtab = document.createTextNode(nr);
-    var idTab = document.createTextNode(container.ID);
+    
+    var idTab = document.createTextNode(container.ID.substring(0, 10)+"...");
+    var idCell = document.createElement("p");
+    idCell.setAttribute('data-toggle', 'tooltip')
+    idCell.setAttribute('data-placement', 'top')
+    idCell.setAttribute('title', container.ID)
+    idCell.appendChild(idTab)
+    
     var imageTab = document.createTextNode(container.Image);
     var createdTab = document.createTextNode(container.Created);
     var statusTab = document.createTextNode(container.Status);
@@ -165,7 +179,7 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
        
     
     cell1.appendChild(nrtab);
-    cell2.appendChild(idTab);
+    cell2.appendChild(idCell);
     cell3.appendChild(imageTab);
     cell4.appendChild(createdTab);
     cell5.appendChild(statusTab);
