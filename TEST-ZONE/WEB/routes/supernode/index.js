@@ -4,5 +4,5 @@
 
 exports.index = function(req, res)
 {
-  res.render('supernode', { title: 'Edge nodes' })
+  res.render('supernode', { title: 'EdgeNodes', server: req.query.ip })
 };

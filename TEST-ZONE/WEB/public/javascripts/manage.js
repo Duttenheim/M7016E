@@ -249,101 +249,24 @@ function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
 	row.appendChild(modalDiv);
 	
 }
-/*
-function PullImagePopup(edgeNode, node){
-	var row = document.getElementById('images_body');
-	var modalDiv = document.createElement("div");
-	modalDiv.className = "modal fade";
-	modalDiv.id = "pull_image_modal";
-		
-	var modalHeaderDiv = document.createElement("div");
-	modalHeaderDiv.className = "modal-header";
-	
-	var closeX = document.createElement("a");
-	var closeXtext = document.createTextNode('x');
-	closeX.className = "close";
-	closeX.setAttribute('data-dismiss', 'modal')
-	closeX.appendChild(closeXtext);
-	
-	var header = document.createElement("h3");
-	header.innerHTML = "Pull new Image";
-	
-	modalHeaderDiv.appendChild(closeX);
-	modalHeaderDiv.appendChild(header);
-	
-	var modalBodyDiv = document.createElement("div"); 
-	modalBodyDiv.className = "modal-body";
-	
-	var addressInfoP = document.createElement("p");
-    var addressInfoText = document.createTextNode("Type in address of repo <IP:PORT>");
-    addressInfoP.appendChild(addressInfoText);
-	var addrInputDiv = document.createElement("div");
-	addrInputDiv.className = "input-group input-group-lg";
-	var addrInputField = document.createElement("input");
-	addrInputField.className = "form-control";
-	addrInputDiv.appendChild(addrInputField)
-	addrInputDiv.setAttribute('placeholder', 'IP:PORT');
 
-	modalBodyDiv.appendChild(addressInfoP);
-	modalBodyDiv.appendChild(addrInputDiv);
-	
-	var repoInfoP = document.createElement("p");
-    var repoInfoText = document.createTextNode("Type in name of repo");
-    repoInfoP.appendChild(repoInfoText);
-	var nameInputDiv = document.createElement("div");
-	nameInputDiv.className = "input-group input-group-lg";
-	var nameInputField = document.createElement("input");
-	nameInputField.className = "form-control";
-	nameInputDiv.appendChild(nameInputField)
-	nameInputDiv.setAttribute('placeholder', 'Repo name');
-
-	modalBodyDiv.appendChild(repoInfoP);
-	modalBodyDiv.appendChild(nameInputDiv);
-	
-		
-	var modalFooterDiv = document.createElement("div"); 
-	modalFooterDiv.className = "modal-footer";
-	
-	var pullButton = document.createElement("a");
-	pullButton.className = "btn btn-primary";
-    var pullButtonText = document.createTextNode("Pull Image");
-    pullButton.appendChild(pullButtonText);
-    pullButton.setAttribute('data-dismiss', 'modal'); 
-    pullButton.onclick = function()
-    {
-    	var args = new ImageArgs();
-        args.Repository = nameInputField.value;
-        //args.Registry = addrInputField.value;
-        node.CallRPCFunction("EdgeNodeHandler.PullImage", args, edgeNode);                
-    }
-    
-	var CloseButton = document.createElement("a");
-    var closeText = document.createTextNode("Cancel");
-    CloseButton.appendChild(closeText);
-	CloseButton.className = "btn";
-	CloseButton.setAttribute('data-dismiss', 'modal');
-	
-	modalFooterDiv.appendChild(pullButton);
-	modalFooterDiv.appendChild(CloseButton);
-	
-	modalDiv.appendChild(modalHeaderDiv);
-	modalDiv.appendChild(modalBodyDiv);
-	modalDiv.appendChild(modalFooterDiv);
-	
-	row.appendChild(modalDiv);
-	
-}
-*/
 function setImagesHeaderText(count){
-	document.getElementById("avail_img_head").innerHTML = "Images available: " + count;
+	$("#avail_img_head").text("Images available: " + count);
 }
 function setContainerHeaderText(count){
-	document.getElementById("avail_cont_head").innerHTML = "Containers available: "+ count;
+	$("#avail_cont_head").text("Containers available: "+ count);
 }
 function setImageSrc(IP) {
 	document.getElementById("graphImg").src = "http://130.240.134.115/zabbix/tst/test.php?ip="+IP+"&item=system.cpu.load[percpu,avg5]&span=14400"
 }
+function ShowProcessDialog(text){
+	$("#waitDialogH1").text(text);
+	$("#pleaseWaitDialog").modal();
+}
 
+function HideProcessDialog(){
+	$("#pleaseWaitDialog").modal('hide');
+}
 
 /*
     ErrorCode :  0,
@@ -381,6 +304,7 @@ var NodeReceiveCallback = function(reply)
     	alert(json.Content);
     } else if(json.ReplyCode == 8){ // Pull image
     	listImages(edgeNode);
+    	HideProcessDialog();
     	alert(json.Content);
     } else if(json.ReplyCode == 11){ //Commit container
     	listImages(edgeNode);

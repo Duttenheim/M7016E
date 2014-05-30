@@ -106,7 +106,7 @@ func (server *ServiceServer) RequestIp(input *RequestIpInput, output *string) er
 			switch ip := addr.(type) {
 			case *net.IPNet:
 				if ip.IP.DefaultMask() != nil {
-					*output = ip.IP.String()
+					reply.IP = ip.IP.String()
 				}
 			}
 		}
@@ -121,15 +121,14 @@ func (server *ServiceServer) RequestIp(input *RequestIpInput, output *string) er
 		defer resp.Body.Close()
 
 		reply.IP = string(bytes)
-		
-		var data []byte
-		data, err = json.Marshal(reply)
-		if err != nil {
-			return err
-		}
-
-		*output = string(data)
 	}
+
+    // marshal and send
+	data, err := json.Marshal(reply)
+	if err != nil {
+		return err
+	}
+	*output = string(data)
 
 	return nil
 }
