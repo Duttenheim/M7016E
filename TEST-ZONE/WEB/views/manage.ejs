@@ -41,7 +41,7 @@ function listContainers(edgeNode){
 }
 
 function PullImage(edgeNode){
-	var repo = document.getElementById("repoNameField").value;
+	var repo = "130.240.134.118:5000/" + document.getElementById("repoNameField").value;
 	if(repo.length == 0) {
 		alert("Connot pull empty")
 	} else {
@@ -62,7 +62,7 @@ function PullImage(edgeNode){
 	  <li> / </li>
 	  <li class="active">EdgeNode</li>
 	</ol>
-	<!-- Used in javascripts to manage edge-node --!>
+    <!--Used in javascripts to manage edge-node-->
   	<p id="edgeNode_id" class="hidden"><%= node_id %></p>
   	<p id="server_addr" class="hidden"><%= serv_addr %></p>
 
@@ -128,7 +128,12 @@ function PullImage(edgeNode){
 	      <div class="modal-body">
 	      	<p> Type in Image repository </p>
 	      	<div class="input-group input-group-lg">
-	      		<input class="form-control" placeholder="Repo name" id="repoNameField" />
+	      		<input class="form-control" placeholder="Repo name" id="repoNameField" list="datalist"/>
+	      		<datalist id="datalist">
+					<% for(var i=0; i<datalist.num_results; i++) {%>
+						<option value=<%=datalist.results[i].name.replace('library/', "")%>>
+					<% } %>
+				</datalist>
 	      	</div>
 	      </div>
 	      <div class="modal-footer">
