@@ -377,9 +377,9 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 
 	// decode match tags
 	search := make(map[string]string)
-	err := json.Unmarshal([]byte(msg.Payload), search)
+	err := json.Unmarshal([]byte(msg.Payload), &search)
 	if err != nil {
-		debug("supernode: failed to decode search tags criteria")
+		debug("supernode: " + err.Error())
 		return
 	}	
 	
@@ -389,18 +389,25 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 	
 	// go through nodes
 	for node, tags := range nodeTags {
+        tagMatch := 0			
+
 		// go through tags in node
 		for key, val := range tags {
-			
+
 			// see if tags exist in the search criteria
 			if tag, ok := search[key]; ok {
 				
 				// if the tag is found and the value matches
-				if tag == val {
-					matchingNodes = append(matchingNodes, node)
-				}
-			}
+   				if tag == val {
+                    tagMatch++
+                }
+			}            
 		}
+
+        // if all tags matched, add to list 
+        if tagMatch == len(search) {
+  			matchingNodes = append(matchingNodes, node)
+        }
 	}
 	
 	// encode to json again and send to the rest of the children
@@ -411,7 +418,8 @@ func (superNode *SuperNode) searchTags(msg Msg) {
 	}
 	
 	// reply
-	msg.Reply(string(data))
+    msg.Payload = string(data)
+    superNode.children[msg.Src].deliver(&msg)
 }
 
 //------------------------------------------------------------------------------
