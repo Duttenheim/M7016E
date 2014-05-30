@@ -45,9 +45,8 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
     createButton.href = "#test_modal_"+nr;
     createButton.setAttribute('data-toggle', 'modal');
     var buttonText = document.createTextNode("Create container");
-    createButton.className = "btn btn-success"
+    createButton.className = "btn btn-success btn-margins"
     createButton.appendChild(buttonText);
-    createButton.setAttribute('style', 'margin: 0px 2px 0px 0px');
     createButton.onclick = function()
     {
     	CreateContainerPopup(row, nr, edgeNode, image.ID, imageName);
@@ -121,9 +120,8 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     if(container.Status == "" || container.Status.indexOf("Exit") > -1 ) {
 	    var startButton = document.createElement("Button");
 	    var buttonText = document.createTextNode("Start");
-	    startButton.className = "btn btn-success"
+	    startButton.className = "btn btn-success btn-margins";
 	    startButton.appendChild(buttonText);
-	    startButton.setAttribute('style', 'margin: 0px 2px 0px 0px');
 	    startButton.onclick = function()
 	    {
 	        var args = new ContainerArgs();
@@ -134,9 +132,8 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     } else {
 	    var stopButton = document.createElement("Button");
 	    var buttonText = document.createTextNode("Stop");
-	    stopButton.className = "btn btn-warning"
+	    stopButton.className = "btn btn-warning btn-margins"
 	    stopButton.appendChild(buttonText);
-	    stopButton.setAttribute('style', 'margin: 0px 2px 0px 0px');
 	    stopButton.onclick = function()
 	    {
 	        var args = new ContainerArgs();
@@ -146,9 +143,8 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
 	    
 	    var killButton = document.createElement("Button");
 	    var buttonText = document.createTextNode("Kill");
-	    killButton.className = "btn btn-danger"
+	    killButton.className = "btn btn-danger btn-margins"
 	    killButton.appendChild(buttonText);
-	    killButton.setAttribute('style', 'margin: 0px 2px 0px 0px');
 	    killButton.onclick = function()
 	    {
 	        var args = new ContainerArgs();
@@ -162,9 +158,8 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     
     var deleteButton = document.createElement("Button");
     var buttonText = document.createTextNode("Delete");
-    deleteButton.className = "btn btn-danger"
+    deleteButton.className = "btn btn-danger btn-margins"
     deleteButton.appendChild(buttonText);
-    deleteButton.setAttribute('style', 'margin: 0px 2px 0px 0px');
     deleteButton.onclick = function()
     {
     	if (confirm("Do you really want to delete " + container.ID + "?") == true) {

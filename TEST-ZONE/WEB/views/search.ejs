@@ -7,21 +7,21 @@
 			<h1><%= title %> page </h1>
 			
 			<body>
-			<div class="form-group has-error">
-				<table id="searchtable" class="table">
-				
-				<% var serverList = []; %>
-				<% for (var server in servers) { %>
-				<% serverList.push(servers[server]); %>
-				<% }; %>
-				<script>
+				<div class="table-responsive">
+					<table id="searchtable" class="table">
 					
-					UpdateTable('[<%= serverList %>]', 'searchtable');
-				</script>
-				</table>
-			</div>
-			
-			<button class='btn' onclick="PerformSearch()">Search</button>
+					<% var serverList = []; %>
+					<% for (var server in servers) { %>
+					<% serverList.push(servers[server]); %>
+					<% }; %>
+					<script>
+						
+						UpdateTable('[<%= serverList %>]', 'searchtable');
+					</script>
+					</table>
+					
+					<button class="btn btn-default" onclick="PerformSearch()">Search</button>
+				</div>
 			</body>               
 
             </article>

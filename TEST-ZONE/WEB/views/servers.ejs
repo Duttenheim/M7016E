@@ -24,9 +24,9 @@
 			<tr>
 				<td>SuperNode-<%= num %></td>
 				<td id='<%= serverIpId %>'><%= serverIp %></td>
-				<td id='<%= serverStatusId %>'>Online</td>
-				<td>
-					<input class="btn" type="button" id='<%= serverButtonId %>' onclick="RedirectToSupernode('<%= serverIp %>')" value="Manage">
+				<td class="text-center" id='<%= serverStatusId %>'>Online</td>
+				<td class="text-center">
+					<input class="btn btn-default" type="button" id='<%= serverButtonId %>' onclick="RedirectToSupernode('<%= serverIp %>')" value="Manage">
 				</td>
 			</tr>
 			<script>

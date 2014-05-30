@@ -31,31 +31,28 @@ function NewSearchRow(row, table)
 	var cell1 = row.insertCell(0);
 	var cell2 = row.insertCell(1);
 	var cell3 = row.insertCell(2);
-	var div = document.createElement("div");
-	var span = document.createElement("span");
-	span.className = "glyphicon form-control-feedback";
-	div.className = "form-group has-success has-feedback";
 	
 	// input field 1
+	var div1 = document.createElement("div");
+	var span1 = document.createElement("span");
+	var label1 = document.createElement("label");
+	span1.innerHTML = "";
+	label1.className = "control-label";
+	span1.className = "glyphicon form-control-feedback";
+	div1.className = "has-feedback";
+	
 	var input1 = document.createElement("input");
 	input1.id = 'tag';
 	input1.type = 'text';
 	input1.className = "form-control";
 	input1.setAttribute('list', 'services');
 	input1.placeholder = 'e.g Service';
-	input1.onchange = function() 
+	input1.onfocus = function()
 	{
-		var index = usedTags.indexOf(self.value);
-		if (index == -1)
-		{
-			self.className = "form-control";
-			span.className = "glyphicon form-control-feedback glyphicon-ok";
-		}
-		else
-		{
-			self.className = "form-control has-error";
-			span.className = "glyphicon form-control-feedback glyphicon-remove";
-		}
+		div1.className = "has-feedback";
+		span1.className = "glyphicon form-control-feedback";
+		label1.innerHTML = "";
+		label1.style.display = "none";
 	}
 	
 	var datalist1 = document.createElement("datalist");
@@ -68,48 +65,113 @@ function NewSearchRow(row, table)
 	}
 	input1.list = datalist1;
 	table.appendChild(datalist1);
-	div.appendChild(input1);
-	div.appendChild(span);
-	cell1.appendChild(div);
+	div1.appendChild(input1);
+	div1.appendChild(span1);
+	div1.appendChild(label1);
+	cell1.appendChild(div1);
 	
 	// input field 2
+	var div2 = document.createElement("div");
+	var span2 = document.createElement("span");
+	var label2 = document.createElement("label");
+	label2.className = "control-label";
+	span2.className = "glyphicon form-control-feedback";
+	div2.className = "has-feedback";
+	
 	var input2 = document.createElement("input");
 	input2.id = 'value';
 	input2.type = 'text';	
-	input2.placeholder = 'e.g Docker, MyEdgeNode...'
-	cell2.appendChild(input2);
+	input2.className = "form-control";
+	input2.placeholder = 'e.g Docker'
+	input2.onfocus = function()
+	{
+		div2.className = "has-feedback";
+		span2.className = "glyphicon form-control-feedback";
+		label2.innerHTML = "";
+		label2.style.display = "none";
+	}
 	
+	div2.appendChild(input2);
+	div2.appendChild(span2);
+	div2.appendChild(label2);
+	cell2.appendChild(div2);
+	
+	var buttonDiv = document.createElement("span");
 	var buttonAdd = document.createElement("button");
-	buttonAdd.className = "btn";
+	buttonAdd.className = "btn btn-default btn-margins";
 	buttonAdd.innerHTML = 'Add';
+	buttonAdd.id = "add";
+	
+	var buttonRemove = document.createElement("button");
+	buttonRemove.className = "btn btn-default btn-margins";
+	buttonRemove.innerHTML = "Remove";
+	buttonRemove.id = "remove";
+	
 	buttonAdd.onclick = function() 
 	{ 		
+		var index = usedTags.indexOf(input1.value);
+		if (index == -1 && input1.value.length != 0)
+		{
+			div1.className = "has-success has-feedback";
+			span1.className = "glyphicon glyphicon-ok form-control-feedback";
+			label1.innerHTML = "";
+			label1.style.display = "none";
+		}
+		else
+		{
+			div1.className = "has-error has-feedback";
+			span1.className = "glyphicon glyphicon-remove form-control-feedback";
+			label1.style.display = "inline-block";
+			if (input1.value.length == 0)
+			{
+				label1.innerHTML = "Search tag empty";
+			}
+			else
+			{
+				label1.innerHTML = "Search tag taken";
+			}
+		}
+		
+		if (input2.value.length != 0)
+		{
+			div2.className = "has-success has-feedback";
+			span2.className = "glyphicon form-control-feedback glyphicon-ok";
+			label2.innerHTML = "";
+			label2.style.display = "none";
+		}
+		else
+		{
+			div2.className = "has-error has-feedback";
+			span2.className = "glyphicon form-control-feedback glyphicon-remove";
+			label2.innerHTML = "Search value empty";
+			label2.style.display = "inline-block";
+		}
+		
 		// only add if tag isn't occupied
 		var index = usedTags.indexOf(input1.value);
-		if (index == -1)
+		if (index == -1 && input2.value.length != 0 && input1.value.length != 0)
 		{
 			usedTags.push(input1.value);
+			buttonAdd.disabled = true;
+			buttonRemove.disabled = false;
 			SetRowEnabled(row, false);
 			var newRow = table.insertRow(-1);
 			NewSearchRow(newRow, table); 
 		}
 	}
-	cell3.appendChild(buttonAdd);	
 	
-	var buttonRemove = document.createElement("button");
-	buttonRemove.className = "btn";
-	buttonRemove.innerHTML = "Remove";
 	buttonRemove.onclick = function()
 	{
-		var index = defaultTags.indexOf(input1.value);
-		if (index > -1)
-		{
-			usedTags.splice(index, 1);
-		}
-		
+		buttonAdd.disabled = false;
+		buttonRemove.disabled = true;
 		RemoveSearchRow(row, table);
 	}	
-	cell3.appendChild(buttonRemove);
+	buttonDiv.appendChild(buttonAdd);
+	buttonDiv.appendChild(buttonRemove);
+	cell3.appendChild(buttonDiv);
+	
+	// finally, move focus to input1
+	input1.focus();
 }
 
 //------------------------------------------------------------------------------
@@ -123,7 +185,9 @@ function RemoveSearchRow(row, table)
 	// enable the previous row
 	if (i > 0)
 	{
-		SetRowEnabled(table.rows[i-1], true);
+		var nextRow = i-1;
+		SetRowEnabled(table.rows[nextRow], true);
+		ResetRow(table.rows[nextRow]);
 	}
 }
 
@@ -132,10 +196,41 @@ function RemoveSearchRow(row, table)
 */
 function SetRowEnabled(row, state)
 {
-	var elements = row.getElementsByTagName('input');
-	for (var element in elements)
+	var inputs = row.getElementsByTagName("input");
+	for (var input in inputs)
 	{
-		elements[element].disabled = !state;
+		inputs[input].disabled = !state;
+	}
+	
+	var buttons = row.getElementsByTagName("button");
+	for (var button in buttons)
+	{
+		buttons[button].disabled = !state;
+		
+		// always disable first remove button
+		if (row.rowIndex == 0 && buttons[button].id == "remove")
+		{
+			buttons[button].disabled = true;
+		}
+	}
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+function ResetRow(row)
+{
+	var inputs = row.getElementsByTagName("input");
+	for (var input in inputs)
+	{
+		if (inputs[input].id == "tag")
+		{
+			var index = usedTags.indexOf(inputs[input].value);
+			if (index > -1)
+			{
+				usedTags.splice(index, 1);
+			}
+		}
 	}
 }
 

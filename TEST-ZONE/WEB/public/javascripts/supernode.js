@@ -29,12 +29,13 @@ function SetupEdgeNodes(edgenodetable)
 			var cell1 = document.createElement("td");
 			var cell2 = document.createElement("td");
 			var cell3 = document.createElement("td");
+			cell3.className = "text-center";
 			
 			cell2.id = childId + "_tags"
 			
 			var cell1Contents = document.createTextNode(childId);
 			var cell3Contents = document.createElement("a");
-			cell3Contents.className = "btn";
+			cell3Contents.className = "btn btn-default";
 			cell3Contents.appendChild(document.createTextNode("Manage"));
 			cell3Contents.href = "/manage" + "?addr=" + ip + "&" + "node=" + childId;
 			

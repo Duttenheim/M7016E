@@ -1,27 +1,5 @@
 /* Eléments principaux de la page */
 
-.breadcrumb {
-    border: 1px none #ddd;
-}
-
-.nav.nav-center {
-    display: inline-block;
-    left: 0;
-    right: 0;
-    text-align:center;width:100%;
-}
-.nav.nav-center li,.nav.nav-center li  a{display:inline;float:none;line-height:40px;}
-
-.navbar .nav > li > a {
-    float: none;
-    line-height: 19px;
-    padding: 9px 10px 11px;
-    text-decoration: none;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-    font-size:medium;
-    color:#FFFF00;
-    font-weight:bold;
-}
 
 body
 {
@@ -29,10 +7,14 @@ body
     color: #181818;
 }
 
-#bloc_page
+div.main
 {
-    width: 900px;
-    margin: auto;
+	margin-left: 100px;	
+}
+
+.btn-margins
+{
+	margin-right: 5px;
 }
 
 section h1, footer h1, nav a
@@ -43,15 +25,6 @@ section h1, footer h1, nav a
 }
 
 /* Header */
-
-header
-{
-    background: url('../images/separateur.png');
-    width: 600px;
-    height: 4px;
-    margin: auto;
-   
-}
 
 #titre_principal
 {
@@ -66,56 +39,13 @@ header
     margin-bottom: 20px;
 }
 
-
-
-/* Navigation */
-
-nav
-{
-    margin-bottom: 10px;
-    margin-top: 20px;
-    display: inline-block;
-    width: 600px;
-    text-align:  center;
-    
-    
-}
-
-nav ul
-{
-    list-style-type: none;  
-
-}
-
-nav li
-{
-    display: inline-block;
-    margin-left: 40px;
-        
-}
-
-nav a
-{
-    font-size: 1.3em;
-    color: #181818;
-    padding-bottom: 3px;
-    text-decoration: none;
-    
-}
-
-nav a:hover
-{
-    color: #760001;
-    border-bottom: 3px solid #760001;
-}
-
-
 #banniere_image
 { 
 	background : transparent url("../images/YACSb.png") no-repeat; 
 	height : 200px; 
 	width : 401px; 
-	margin : 0 auto;
+	margin-left: auto;
+	margin-right: auto;
 	margin-bottom: 20px 
 } 
 
