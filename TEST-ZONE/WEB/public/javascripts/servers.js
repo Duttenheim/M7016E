@@ -12,11 +12,13 @@ function CheckOnline(addrid, elementid, buttonid)
 	buttonElement.disabled = true;
 	
 	img.loaded = false;
+	img.status = statusElement;
+	img.button = buttonElement;
 	img.onload = function()
 	{
 		status = "<font color='green'>Online</font>";
-		statusElement.innerHTML = status;
-		buttonElement.disabled = false;
+		this.status.innerHTML = status;
+		this.button.disabled = false;
 		this.loaded = true;
 	}
 	
@@ -25,7 +27,7 @@ function CheckOnline(addrid, elementid, buttonid)
 		if (!this.loaded)
 		{
 			status = "<font color='red'>Offline</font>";
-			statusElement.innerHTML = status;
+			this.status.innerHTML = status;
 			this.loaded = true;
 			img.src = "";
 		}
