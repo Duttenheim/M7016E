@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>	                	 
+    <body>
+        <section>
+            <article>  
+                          
+			<h1><%= title %> page </h1>
+			
+			<body>
+			<div class="form-group has-error">
+				<table id="searchtable" class="table">
+				
+				<% var serverList = []; %>
+				<% for (var server in servers) { %>
+				<% serverList.push(servers[server]); %>
+				<% }; %>
+				<script>
+					
+					UpdateTable('[<%= serverList %>]', 'searchtable');
+				</script>
+				</table>
+			</div>
+			
+			<button class='btn' onclick="PerformSearch()">Search</button>
+			</body>               
+
+            </article>
+        </section>
+    </body>
+</html>
+
+
+
+
+
+

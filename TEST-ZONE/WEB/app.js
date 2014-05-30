@@ -8,7 +8,8 @@ var express = require('express')
   , servers = require('./routes/servers')
   , manage = require('./routes/manage')
   , images = require('./routes/images')
-  , supernode = require('./routes/supernode');
+  , supernode = require('./routes/supernode')
+  , search = require('./routes/search');
 
 var app = module.exports = express.createServer();
 
@@ -51,6 +52,7 @@ app.get('/servers', servers.index);
 app.get('/images', images.index);
 app.get('/manage', manage.index);
 app.get('/supernode', supernode.index);
+app.get('/search', search.index);
 
 
 app.listen(3000, function(){

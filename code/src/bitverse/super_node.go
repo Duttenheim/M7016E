@@ -257,9 +257,12 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 					debug("supernode: relaying " + msg.String())
 					if msg.Type == ChildJoined {
 						superNode.children[msg.Origin] = SN
+						
 						debug("supernode: remote child joined on another supernode, mapped " + msg.Origin + " to: " + SN.Id())
 					} else if msg.Type == ChildLeft {
 						delete(superNode.children, msg.Origin)
+						delete(superNode.tags, msg.Origin)
+						
 						debug("supernode: remote child " + msg.Origin)
 					} else if msg.Type == Heartbeat {
 						// keep this super node local
