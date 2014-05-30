@@ -23,20 +23,20 @@ function SetupEdgeNodes(edgenodetable)
 	{
 		for (i = 0; i < msg.length; i++)
 		{
-			var child = msg[i];
+			var childId = msg[i];
 			var tr = document.createElement("tr");
 			
 			var cell1 = document.createElement("td");
 			var cell2 = document.createElement("td");
 			var cell3 = document.createElement("td");
 			
-			cell2.id = child + "_tags"
+			cell2.id = childId + "_tags"
 			
-			var cell1Contents = document.createTextNode(child);
-			var cell3Contents = document.createElement("button");
+			var cell1Contents = document.createTextNode(childId);
+			var cell3Contents = document.createElement("a");
 			cell3Contents.className = "btn";
 			cell3Contents.appendChild(document.createTextNode("Manage"));
-			cell3Contents.onclick = function() { RedirectToEdgeNode(ip, child); }
+			cell3Contents.href = "/manage" + "?addr=" + ip + "&" + "node=" + childId;
 			
 			cell1.appendChild(cell1Contents);
 			cell3.appendChild(cell3Contents);
@@ -47,7 +47,7 @@ function SetupEdgeNodes(edgenodetable)
 			table.appendChild(tr);
 			
 			// get tags
-			node.GetTags(child);
+			node.GetTags(childId);
 		}
 	}
 	
@@ -69,12 +69,4 @@ function SetupEdgeNodes(edgenodetable)
 			element.appendChild(document.createElement("br"));
 		}
 	}
-}
-
-//------------------------------------------------------------------------------
-/**
-*/
-function RedirectToEdgeNode(ip, nodeid)
-{
-	window.location.href = "/manage" + "?addr=" + ip + "&" + "node=" + nodeid;
 }
