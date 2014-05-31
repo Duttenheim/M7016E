@@ -9,8 +9,13 @@ body
 
 div.main
 {
-	margin-left: 100px;	
+	margin-left:auto; margin-right:auto; width:70%;	
 }
+
+.main-center {
+	
+}
+
 
 .btn-margins
 {

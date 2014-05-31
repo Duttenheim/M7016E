@@ -38,7 +38,7 @@
 			 <tbody>
 				 <% for(var i=0; i<images.num_results; i++) {%>
 					 <tr>
-						<td><%= images.results[i].name.replace('library/', server_addr+":5000/") %></td>
+						<td><%= images.results[i].name.replace('library/', '') %></td>
 						<td><%= images.results[i].description %></td>
 					</tr>
 				 <% } %>
