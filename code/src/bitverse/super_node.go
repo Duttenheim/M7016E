@@ -258,7 +258,9 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 					if msg.Type == ChildJoined {
                         if msg.Payload != superNode.Id() {
     						superNode.children[msg.Payload] = SN
-	    					debug("supernode: remote child joined on another supernode, mapped " + msg.Payload + " to: " + SN.Id())
+                            
+                            str := fmt.Sprintf("supernode: child %s joined the network to supernode %s, number of remote nodes are now %d", msg.Payload, SN.Id(), len(superNode.children))
+	    					debug(str)
                         } else {
                             debug("supernode: I am not adding myself!")
                         }
@@ -267,7 +269,8 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
     						delete(superNode.children, msg.Payload)
 	    					delete(superNode.tags, msg.Payload)
 		    				
-			    			debug("supernode: remote child " + msg.Origin + " left the network, number of remote nodes are now " + len(superNode.children))
+                            str := fmt.Sprintf("supernode: remote child %s left the network, the number of remote nodes are now %d", msg.Origin, len(superNode.children))   
+                            debug(str)
                         } else {
                            debug("supernode: I am not removing myself!")
                         }
