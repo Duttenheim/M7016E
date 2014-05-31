@@ -196,7 +196,7 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 					
 				} else if msg.Type == UpdateTags {
 					superNode.updateTags(msg)
-					superNode.forwardToChildren(msg)
+                    superNode.forwardToImposters(msg)
 				
 				} else if msg.Type == SearchTags {
 					superNode.searchTags(msg)				
@@ -224,14 +224,14 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 					msg := composeChildLeft(superNode.nodeId.String(), remoteNode.Id())
 					superNode.forwardToChildren(*msg)
 				} else {
-					superNode.children[remoteNode.Id()] = remoteNode
-					superNode.tags[remoteNode.Id()] = make(map[string]string)
+				    superNode.children[remoteNode.Id()] = remoteNode
+			    	superNode.tags[remoteNode.Id()] = make(map[string]string)
 
-					str := fmt.Sprintf("supernode: adding remote node %s, number of remote nodes are now %d", remoteNode.Id(), len(superNode.children))
-					info(str)
+		    		str := fmt.Sprintf("supernode: adding remote node %s, number of remote nodes are now %d", remoteNode.Id(), len(superNode.children))
+	    			info(str)
 
-					msg := composeChildJoin(superNode.nodeId.String(), remoteNode.Id())
-					superNode.forwardToChildren(*msg)
+    				msg := composeChildJoin(superNode.nodeId.String(), remoteNode.Id())
+   					superNode.forwardToChildren(*msg)
 				}
 			}
 		}
@@ -248,28 +248,36 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 		transport.SetLocalNodeId(superNode.nodeId)
 		msgChannel := make(chan Msg)
 		nodeChannel := make(chan *RemoteNode, 10)	
-		var SN *RemoteNode
 	
 		go func() {
+    		var SN *RemoteNode
 			for {
 				select {
 				case msg := <-msgChannel:
 					debug("supernode: relaying " + msg.String())
 					if msg.Type == ChildJoined {
-						superNode.children[msg.Origin] = SN
-						
-						debug("supernode: remote child joined on another supernode, mapped " + msg.Origin + " to: " + SN.Id())
+                        if msg.Payload != superNode.Id() {
+    						superNode.children[msg.Payload] = SN
+	    					debug("supernode: remote child joined on another supernode, mapped " + msg.Payload + " to: " + SN.Id())
+                        } else {
+                            debug("supernode: I am not adding myself!")
+                        }
 					} else if msg.Type == ChildLeft {
-						delete(superNode.children, msg.Origin)
-						delete(superNode.tags, msg.Origin)
-						
-						debug("supernode: remote child " + msg.Origin)
+                        if msg.Payload != superNode.Id() {
+    						delete(superNode.children, msg.Payload)
+	    					delete(superNode.tags, msg.Payload)
+		    				
+			    			debug("supernode: remote child " + msg.Origin + " left the network, number of remote nodes are now " + len(superNode.children))
+                        } else {
+                           debug("supernode: I am not removing myself!")
+                        }
 					} else if msg.Type == Heartbeat {
 						// keep this super node local
 					} else if msg.Type == UpdateTags {
 						superNode.updateTags(msg)				
 					} else {
-						superNode.msgChannel <- msg
+                        debug("supernode: putting message into main channel " + msg.String())
+//						superNode.msgChannel <- msg
 					}
 				case remoteNode := <-nodeChannel:
 					if remoteNode.state == Dead {
@@ -329,6 +337,17 @@ func (superNode *SuperNode) sendToChild(msg Msg) {
 		debug("supernode: forwarding " + msg.String() + " to " + val.Id())
 		msg.Src = superNode.Id()
 		val.deliver(&msg)
+	}
+}
+
+func (superNode *SuperNode) forwardToImposters(msg Msg) {    
+	for _, remoteNode := range superNode.children {
+        // only forward to imposters and avoid ourself
+		if msg.Src != remoteNode.Id() && msg.Origin != remoteNode.Id() && remoteNode.imposter == true {
+			debug("supernode: forwarding " + msg.String() + " to " + remoteNode.Id())
+			msg.Src = superNode.Id()
+			remoteNode.deliver(&msg)
+		}
 	}
 }
 

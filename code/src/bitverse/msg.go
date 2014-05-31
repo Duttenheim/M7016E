@@ -237,7 +237,7 @@ func composeChildLeft(src string, childId string) *Msg {
 	msg.Type = ChildLeft
 	msg.Payload = childId
 	msg.Src = src
-	msg.Origin = src
+	msg.Origin = childId
 	msg.ServiceType = Control
 	return msg
 }

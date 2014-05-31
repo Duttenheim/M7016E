@@ -63,8 +63,8 @@ func (wsClient *wsClientType) handshake() *RemoteNode {
 	wsClient.send(msg)
 	reply := wsClient.receive()
 
-	remoteNodeId := makeNodeIdFromString(reply.Src)
-	remoteNode := makeRemoteNode(wsClient.remoteNodeChannel, wsClient.ws, wsClient.localNodeId.String(), remoteNodeId.String())
+	//remoteNodeId := makeNodeIdFromString(reply.Src)
+	remoteNode := makeRemoteNode(wsClient.remoteNodeChannel, wsClient.ws, wsClient.localNodeId.String(), reply.Src)
 
 	return remoteNode
 }

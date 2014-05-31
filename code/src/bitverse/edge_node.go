@@ -114,21 +114,21 @@ func MakeEdgeNode(transport Transport, bitverseObserver BitverseObserver) (*Edge
 						}
 					}
 				} else if msg.Type == Heartbeat {
-					debug("edgenode: got heartbeat message from <" + msg.Src + ">")
+					debug("edgenode: got heartbeat message from <" + msg.Payload + ">")
 					if bitverseObserver != nil {
 						if msg.Src != edgeNode.nodeId.String() {
 							bitverseObserver.OnSiblingHeartbeat(edgeNode, msg.Src) // note Src and not Payload since super node just forwards the msg
 						}
 					}
 				} else if msg.Type == ChildJoined {
-					debug("edgenode: got child joined message from <" + msg.Src + ">")
+					debug("edgenode: got child joined message from <" + msg.Payload + ">")
 					if bitverseObserver != nil {
 						if msg.Payload != edgeNode.nodeId.String() {
 							bitverseObserver.OnSiblingJoined(edgeNode, msg.Payload)
 						}
 					}
 				} else if msg.Type == ChildLeft {
-					debug("edgenode: got child left message from <" + msg.Src + ">")
+					debug("edgenode: got child left message from <" + msg.Payload + ">")
 					if bitverseObserver != nil {
 						if msg.Payload != edgeNode.nodeId.String() {
 							bitverseObserver.OnSiblingLeft(edgeNode, msg.Payload)
