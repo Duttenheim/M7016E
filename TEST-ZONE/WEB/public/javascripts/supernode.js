@@ -34,10 +34,12 @@ function SetupEdgeNodes(edgenodetable)
 			cell2.id = childId + "_tags"
 			
 			var cell1Contents = document.createTextNode(childId);
-			var cell3Contents = document.createElement("a");
+			var cell3Contents = document.createElement("button");
 			cell3Contents.className = "btn btn-default";
 			cell3Contents.appendChild(document.createTextNode("Manage"));
-			cell3Contents.href = "/manage" + "?addr=" + ip + "&" + "node=" + childId;
+			cell3Contents.ip = ip;
+			cell3Contents.child = childId;
+			cell3Contents.onclick = function() { RedirectToEdgeNode(this.ip, this.child); }
 			
 			cell1.appendChild(cell1Contents);
 			cell3.appendChild(cell3Contents);
@@ -70,4 +72,12 @@ function SetupEdgeNodes(edgenodetable)
 			element.appendChild(document.createElement("br"));
 		}
 	}
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+function RedirectToEdgeNode(ip, nodeid)
+{
+	window.location.href = "/manage" + "?addr=" + ip + "&" + "node=" + nodeid;
 }
