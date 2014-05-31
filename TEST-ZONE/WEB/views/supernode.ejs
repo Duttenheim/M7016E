@@ -1,33 +1,29 @@
 <!DOCTYPE html>
 <html>	                	 
     <body>
-        <section>
-            <article class="center-block">  
+		<section>
+			<article class="center-block">  
 			<ol class="breadcrumb">
 			  <li><a href="/servers">SuperNodes </a></li>
-			  <li> / </li>
 			  <li class="active">SuperNode</li>
 			</ol>
-                          
-			<h1>EdgeNodes of <%= server %></h1>
-			<body>
-			
-			<table class="table table-bordered table-striped">
-				<thead>
-					<tr>
-					  <th><center>ID</center></th>
-					  <th><center>Tags</center></th>
-					  <th><center>Manage</center></th>
-					</tr>	
-				</thead>
-				
-				<tbody id="edgenodelist">
-					<script>
-						SetupEdgeNodes('edgenodelist');
-					</script>
-				</tbody>
-			</table>
-			</body>               
+							  
+				<h1>EdgeNodes of <%= server %></h1>				
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr>
+						  <th><center>ID</center></th>
+						  <th><center>Tags</center></th>
+						  <th><center>Manage</center></th>
+						</tr>	
+					</thead>
+					
+					<tbody id="edgenodelist">
+						<script>
+							SetupEdgeNodes('edgenodelist');
+						</script>
+					</tbody>
+				</table>
 
             </article>
         </section>
