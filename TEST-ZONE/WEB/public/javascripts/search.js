@@ -23,7 +23,7 @@ function SetupSearch(tableElement)
 	headerCell2.innerHTML = 'Value';
 	searchTable = tableElement;
 	
-	var row = header.insertRow(-1);	
+	var row = table.insertRow(-1);	
 	NewSearchRow(row, table);
 }
 
@@ -371,6 +371,11 @@ function SetupNodeList(nodes)
 {
 	// get table
 	var table = document.getElementById(nodeTable);
+	var rows = table.rows;
+	while(table.rows.length > 1)
+	{
+		table.deleteRow(1);
+	}
 	
 	// add a row for each node
 	for (var node in nodes)
@@ -383,11 +388,11 @@ function SetupNodeList(nodes)
 		cell1.innerHTML = nodes[node];
 		var button = document.createElement("button");
 		button.className = "btn btn-default";
-		button.node = nodes[node];
+		button.child = nodes[node];
 		button.innerHTML = "Manage";
 		button.onclick = function()
 		{
-			
+			window.location.href = "/manage" + "?addr=" + this.ip + "&" + "node=" + this.child;
 		}
 		cell2.appendChild(button);
 	}

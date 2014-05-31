@@ -3,41 +3,36 @@
     <body>
         <section>
             <article class="center-block">  
-                          
-			<h1><%= title %> management page </h1>
-			
-			<body>
-			<table class="table table-hover table-bordered" id="serverlist">
-			<tr>
-			  <th><center>Name</center></th>
-			  <th><center>IP</center></th>
-			  <th><center>Status</center></th>
-			  <th><center>Action</center></th>
-			</tr>			
-			
-			<% var num = 1; %>
-			<% for (var server in servers) { %>
-			<% var serverIp = servers[server]; %>
-			<% var serverIpId = server + "ip"; %>
-			<% var serverStatusId = server + "status"; %>
-			<% var serverButtonId = server + "button"; %>
-			<tr>
-				<td>SuperNode-<%= num %></td>
-				<td id='<%= serverIpId %>'><%= serverIp %></td>
-				<td class="text-center" id='<%= serverStatusId %>'>Online</td>
-				<td class="text-center">
-					<input class="btn btn-default" type="button" id='<%= serverButtonId %>' onclick="RedirectToSupernode('<%= serverIp %>')" value="Manage">
-				</td>
-			</tr>
-			<script>
-				CheckOnline('<%= serverIpId %>', '<%= serverStatusId %>', '<%= serverButtonId %>');
-			</script>
-			<% num++; %>
-			<% }; %>
-			
-			</table>
-			</body>               
-
+				<h1><%= title %> management page </h1>
+				<table class="table table-hover table-bordered" style="width:50%;" id="serverlist">
+					<tr>
+					  <th><center>Name</center></th>
+					  <th><center>IP</center></th>
+					  <th><center>Status</center></th>
+					  <th><center>Action</center></th>
+					</tr>			
+					
+					<% var num = 1; %>
+					<% for (var server in servers) { %>
+					<% var serverIp = servers[server]; %>
+					<% var serverIpId = server + "ip"; %>
+					<% var serverStatusId = server + "status"; %>
+					<% var serverButtonId = server + "button"; %>
+					<tr>
+						<td>SuperNode-<%= num %></td>
+						<td id='<%= serverIpId %>'><%= serverIp %></td>
+						<td class="text-center" id='<%= serverStatusId %>'>Online</td>
+						<td class="text-center">
+							<input class="btn btn-default" type="button" id='<%= serverButtonId %>' onclick="RedirectToSupernode('<%= serverIp %>')" value="Manage">
+						</td>
+					</tr>
+					<script>
+						CheckOnline('<%= serverIpId %>', '<%= serverStatusId %>', '<%= serverButtonId %>');
+					</script>
+					<% num++; %>
+					<% }; %>
+				
+				</table>
             </article>
         </section>
     </body>
