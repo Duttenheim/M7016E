@@ -13,7 +13,7 @@ exports.index = function(req, res){
 	var IP = '130.240.134.118';	
 	if(req.query.search != null){
 		var url = 'http://'+IP+':5000/v1/search?q='+req.query.search;
-		var text = "results for "+req.query.search;
+		var text = "Showing results for \'"+req.query.search + "\'";
 	}else{
 		var url = 'http://'+IP+':5000/v1/search?';
 		var text = " "
@@ -28,7 +28,7 @@ exports.index = function(req, res){
 			zeImages = body;
 			//~ console.log(body)
 			if (body.num_results==0){
-				console.log("no images found");
+				console.log("No images found");
 				request({
 				url: 'http://'+IP+':5000/v1/search?',
 				json: true

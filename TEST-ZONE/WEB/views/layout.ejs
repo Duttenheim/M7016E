@@ -24,20 +24,23 @@
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.js"></script> 
   </head>
   <body class="body">
-	<div class="navbar navbar-default navbar-static-top">
+	<div class="navbar navbar-inverse navbar-static-top" role="navigation">
 	  <div class="container">
   		<ul class="nav nav-pills nav-justified">
-            <li><a href="/">Home</a></li>
-			<li><a href="/search">Search</a></li>
-            <li><a href="/servers">SuperNodes</a></li>
-            <li><a href="/images">Images</a></li>			
+            <li><a href="/"><img src="../images/HomeHeader.png" /></a></li>
+			<li><a href="/search"><img src="../images/SearchHeader.png" /></a></li>
+            <li><a href="/servers"><img src="../images/SNHeader.png" /></a></li>
+            <li><a href="/images"><img src="../images/ImageHeader.png" /></a></li>			
         </ul>
 	  </div>
 	</div>
-	
-	<div class="main">
-		<div id="banniere_image"></div>
-		<%- body %>
+	<div class="container-fluid">
+      <div class="row-fluid">
+		<div class="main container-fluid">
+			<div id="banniere_image"></div>
+			<%- body %>
+		</div>
+	  </div>
 	</div>
 	
   </body>

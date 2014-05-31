@@ -6,11 +6,13 @@ var defaultTags = ['Service', 'Application', 'Location', 'Name'];
 
 var usedTags = [];
 var values = [];
+var searchTable;
+var nodeTable;
 
 //------------------------------------------------------------------------------
 /**
 */
-function UpdateTable(tableElement)
+function SetupSearch(tableElement)
 {
 	var table = document.getElementById(tableElement);
 	var header = table.createTHead();
@@ -19,9 +21,25 @@ function UpdateTable(tableElement)
 	var headerCell2 = headerRow.insertCell(1);
 	headerCell1.innerHTML = 'Tag';
 	headerCell2.innerHTML = 'Value';
+	searchTable = tableElement;
 	
-	var row = header.insertRow(-1);	
+	var row = table.insertRow(-1);	
 	NewSearchRow(row, table);
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+function SetupNodes(tableElement)
+{
+	var table = document.getElementById(tableElement);
+	var header = table.createTHead();
+	var headerRow = header.insertRow(0);
+	var headerCell1 = headerRow.insertCell(0);
+	var headerCell2 = headerRow.insertCell(1);
+	headerCell1.innerHTML = "Node";
+	headerCell2.innerHTML = "Action";
+	nodeTable = tableElement;
 }
 
 //------------------------------------------------------------------------------
@@ -38,7 +56,7 @@ function NewSearchRow(row, table)
 	var span1 = document.createElement("span");
 	var label1 = document.createElement("label");
 	span1.innerHTML = "";
-	label1.className = "control-label";
+	label1.className = "control-label hidden";
 	span1.className = "glyphicon form-control-feedback";
 	div1.className = "has-feedback";
 	
@@ -53,7 +71,7 @@ function NewSearchRow(row, table)
 		div1.className = "has-feedback";
 		span1.className = "glyphicon form-control-feedback";
 		label1.innerHTML = "";
-		label1.style.display = "none";
+		label1.className =  "control-label hidden";
 	}
 	
 	var datalist1 = document.createElement("datalist");
@@ -75,7 +93,7 @@ function NewSearchRow(row, table)
 	var div2 = document.createElement("div");
 	var span2 = document.createElement("span");
 	var label2 = document.createElement("label");
-	label2.className = "control-label";
+	label2.className = "control-label hidden";
 	span2.className = "glyphicon form-control-feedback";
 	div2.className = "has-feedback";
 	
@@ -89,7 +107,7 @@ function NewSearchRow(row, table)
 		div2.className = "has-feedback";
 		span2.className = "glyphicon form-control-feedback";
 		label2.innerHTML = "";
-		label2.style.display = "none";
+		label2.className = "control-label hidden";		
 	}
 	
 	div2.appendChild(input2);
@@ -116,13 +134,13 @@ function NewSearchRow(row, table)
 			div1.className = "has-success has-feedback";
 			span1.className = "glyphicon glyphicon-ok form-control-feedback";
 			label1.innerHTML = "";
-			label1.style.display = "none";
+			label1.className = "control-label hidden";
 		}
 		else
 		{
 			div1.className = "has-error has-feedback";
 			span1.className = "glyphicon glyphicon-remove form-control-feedback";
-			label1.style.display = "inline-block";
+			label1.className = "control-label show";
 			if (input1.value.length == 0)
 			{
 				label1.innerHTML = "Search tag empty";
@@ -138,14 +156,14 @@ function NewSearchRow(row, table)
 			div2.className = "has-success has-feedback";
 			span2.className = "glyphicon form-control-feedback glyphicon-ok";
 			label2.innerHTML = "";
-			label2.style.display = "none";
+			label2.className = "control-label hidden";
 		}
 		else
 		{
 			div2.className = "has-error has-feedback";
 			span2.className = "glyphicon form-control-feedback glyphicon-remove";
 			label2.innerHTML = "Search value empty";
-			label2.style.display = "inline-block";
+			label2.className = "control-label show";
 		}
 		
 		// only add if tag isn't occupied
@@ -167,9 +185,10 @@ function NewSearchRow(row, table)
 		buttonAdd.disabled = false;
 		buttonRemove.disabled = true;
 		RemoveSearchRow(row, table);
-	}	
+	}
+	
 	buttonDiv.appendChild(buttonAdd);
-	buttonDiv.appendChild(buttonRemove);
+	if (row.rowIndex > 1) buttonDiv.appendChild(buttonRemove);
 	cell3.appendChild(buttonDiv);
 	
 	// finally, move focus to input1
@@ -255,6 +274,7 @@ function PerformSearch(servers)
 	
 	var images = [];
 	var serverFound = false;
+	var failedCounter = 0;
 	for (var i in serverList)
 	{
 		// abort early if we get a server before this loop is even done
@@ -267,6 +287,8 @@ function PerformSearch(servers)
 		img.server = server;
 		img.onload = function()
 		{
+			HideSearchError();
+			
 			// select the first server
 			serverFound = true;
 			this.loaded = true;
@@ -274,23 +296,21 @@ function PerformSearch(servers)
 			// abort all other image loads
 			for (var j in images)
 			{
-				if (images[j] != img)
-				{
-					images[j].src = "";
-				}
+				document.body.removeChild(images[j]);
 			}
 			
 			// connect to server
 			var node = CreateWebNode("ws://" + this.server + "/node");
 			
+			// as soon as we get a reply, setup the node list!
 			node.searchTagsCallback = function(nodes)
 			{
-				alert(nodes);
+				SetupNodeList(nodes);
 			}
 			
 			node.connectedCallback = function()
 			{
-				// create message
+				// create message to get tags
 				var msg = new Msg();
 				msg.Type = MsgTypeEnum.SearchTags;
 				msg.Payload = JSON.stringify(table);
@@ -300,20 +320,80 @@ function PerformSearch(servers)
 		
 		var fail = function()
 		{
-			if (!this.loaded)
+			if (!this.loaded && this != window)
 			{
-				this.src = "";
 				this.loaded = true;
+				this.src = "";
+				failedCounter++;
+				
+				// if all failed
+				if (failedCounter == serverList.length)
+				{
+					ShowSearchError();
+				}
 			}			
 		}
 		
-		img.onerror = img.onabort = fail;
 		img.src = "http://" + server + "/ping.bmp";		
+		img.onerror = img.onabort = fail;
 		images.push(img);
 		setTimeout
 		(
 			fail,
 			3000
 		);
+	}
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+function ShowSearchError()
+{
+	var searchLabel = document.getElementById("serversearchlabel");
+	searchLabel.className = "show";
+	searchLabel.innerHTML = "<font color='red'>Cannot connect to any server, perhaps the system is down</font>";
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+function HideSearchError()
+{
+	var searchLabel = document.getElementById("serversearchlabel");
+	searchLabel.className = "hidden";
+}
+
+//------------------------------------------------------------------------------
+/**
+*/
+function SetupNodeList(nodes)
+{
+	// get table
+	var table = document.getElementById(nodeTable);
+	var rows = table.rows;
+	while(table.rows.length > 1)
+	{
+		table.deleteRow(1);
+	}
+	
+	// add a row for each node
+	for (var node in nodes)
+	{
+		var row = table.insertRow(-1);
+		var cell1 = row.insertCell(0);
+		var cell2 = row.insertCell(1);
+		cell2.className = "text-center";
+		
+		cell1.innerHTML = nodes[node];
+		var button = document.createElement("button");
+		button.className = "btn btn-default";
+		button.child = nodes[node];
+		button.innerHTML = "Manage";
+		button.onclick = function()
+		{
+			window.location.href = "/manage" + "?addr=" + this.ip + "&" + "node=" + this.child;
+		}
+		cell2.appendChild(button);
 	}
 }

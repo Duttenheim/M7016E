@@ -42,7 +42,7 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
     
 
     var createButton = document.createElement("a");
-    createButton.href = "#test_modal_"+nr;
+    createButton.href = "#create_modal_"+nr;
     createButton.setAttribute('data-toggle', 'modal');
     var buttonText = document.createTextNode("Create container");
     createButton.className = "btn btn-success btn-margins"
@@ -54,6 +54,7 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
     
     var deleteButton = document.createElement("Button");
     var buttonText2 = document.createTextNode("Remove");
+    
     deleteButton.className = "btn btn-danger"
     deleteButton.appendChild(buttonText2);
     deleteButton.onclick = function()
@@ -171,6 +172,17 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
 	        table.deleteRow(nr);
     	}
     }
+    
+    var commitButton = document.createElement("a");
+    var commitButtonText = document.createTextNode("Save State");
+    commitButton.className = "btn btn-info btn-margins"
+	commitButton.href = "#commit_modal_"+nr;
+    commitButton.setAttribute('data-toggle', 'modal');
+    commitButton.appendChild(commitButtonText);
+    commitButton.onclick = function()
+    {
+    	CommitPushContainerPopup(row, nr, edgeNode, container.ID);
+    }
        
     
     cell1.appendChild(nrtab);
@@ -179,6 +191,7 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     cell4.appendChild(createdTab);
     cell5.appendChild(statusTab);
     cell6.appendChild(deleteButton);
+    cell6.appendChild(commitButton);
     row.appendChild(cell1);
     row.appendChild(cell2);
     row.appendChild(cell3);
@@ -192,8 +205,14 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
 function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
 	var modalDiv = document.createElement("div");
 	modalDiv.className = "modal fade";
-	modalDiv.id = "test_modal_"+nr;
-		
+	modalDiv.id = "create_modal_"+nr;
+	
+	var modalDialogDiv = document.createElement("div");
+	modalDialogDiv.className = "modal-dialog";
+	
+	var modalContentDiv = document.createElement("div");
+	modalContentDiv.className = "modal-content";
+	
 	var modalHeaderDiv = document.createElement("div");
 	modalHeaderDiv.className = "modal-header";
 	
@@ -251,9 +270,109 @@ function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
 	modalFooterDiv.appendChild(CreateButton);
 	modalFooterDiv.appendChild(CloseButton);
 	
-	modalDiv.appendChild(modalHeaderDiv);
-	modalDiv.appendChild(modalBodyDiv);
-	modalDiv.appendChild(modalFooterDiv);
+	modalContentDiv.appendChild(modalHeaderDiv);
+	modalContentDiv.appendChild(modalBodyDiv);
+	modalContentDiv.appendChild(modalFooterDiv);
+	
+	modalDialogDiv.appendChild(modalContentDiv)
+	
+	modalDiv.appendChild(modalDialogDiv)
+	
+	row.appendChild(modalDiv);
+	
+}
+
+function CommitPushContainerPopup(row, nr, edgeNode, container_id){
+	var modalDiv = document.createElement("div");
+	modalDiv.className = "modal fade";
+	modalDiv.id = "commit_modal_"+nr;
+	
+	var modalDialogDiv = document.createElement("div");
+	modalDialogDiv.className = "modal-dialog";
+	
+	var modalContentDiv = document.createElement("div");
+	modalContentDiv.className = "modal-content";
+	
+	var modalHeaderDiv = document.createElement("div");
+	modalHeaderDiv.className = "modal-header";
+	
+	var closeX = document.createElement("a");
+	var closeXtext = document.createTextNode('x');
+	closeX.className = "close";
+	closeX.setAttribute('data-dismiss', 'modal')
+	closeX.appendChild(closeXtext);
+	
+	var header = document.createElement("h3");
+	header.innerHTML = "Commit container: " + container_id;
+	
+	modalHeaderDiv.appendChild(closeX);
+	modalHeaderDiv.appendChild(header);
+	
+	var modalBodyDiv = document.createElement("div"); 
+	modalBodyDiv.className = "modal-body";
+	
+	var infoTextP = document.createElement("p");
+    var infoText = document.createTextNode("Type in name for container");
+    infoTextP.appendChild(infoText);
+	var inputDiv = document.createElement("div");
+	inputDiv.className = "input-group input-group";
+	var inputField = document.createElement("input");
+	inputField.className = "form-control";
+	inputDiv.appendChild(inputField)
+	inputDiv.setAttribute('placeholder', 'Name of new Image');
+
+	modalBodyDiv.appendChild(infoTextP);
+	modalBodyDiv.appendChild(inputDiv);
+	
+	var infoTextP2 = document.createElement("p");
+    var infoText2 = document.createTextNode("Type in a tag for the new image");
+    infoTextP2.appendChild(infoText2);
+	var inputDiv2 = document.createElement("div");
+	inputDiv2.className = "input-group input-group";
+	var inputField2 = document.createElement("input");
+	inputField2.className = "form-control";
+	inputDiv2.appendChild(inputField2)
+	inputDiv2.setAttribute('placeholder', 'Image tag');
+
+	modalBodyDiv.appendChild(infoTextP2);
+	modalBodyDiv.appendChild(inputDiv2);
+	
+		
+	var modalFooterDiv = document.createElement("div"); 
+	modalFooterDiv.className = "modal-footer";
+	
+	var CreateButton = document.createElement("a");
+	CreateButton.className = "btn btn-primary";
+    var createText = document.createTextNode("Commit & Push");
+    CreateButton.appendChild(createText);
+    
+    CreateButton.onclick = function()
+    {
+    	var args = new ContainerCommitArgs();
+        args.ID = container_id;
+        args.Repository = "130.240.134.118:5000/"+inputField.value;
+        args.Tag = inputField2.value;
+        node.CallRPCFunction("EdgeNodeHandler.CommitContainer", args, edgeNode);
+        ShowProcessDialog("Commiting & Pushing " + inputField.value + "...");
+    }
+    CreateButton.setAttribute('data-dismiss', 'modal');
+    
+	var CloseButton = document.createElement("a");
+    var closeText = document.createTextNode("Cancel");
+    CloseButton.appendChild(closeText);
+	CloseButton.className = "btn";
+	CloseButton.setAttribute('data-dismiss', 'modal');
+	
+	modalFooterDiv.appendChild(CreateButton);
+	modalFooterDiv.appendChild(CloseButton);
+	
+	modalContentDiv.appendChild(modalHeaderDiv);
+	modalContentDiv.appendChild(modalBodyDiv);
+	modalContentDiv.appendChild(modalFooterDiv);
+	
+	modalDialogDiv.appendChild(modalContentDiv)
+	
+	modalDiv.appendChild(modalDialogDiv)
 	
 	row.appendChild(modalDiv);
 	
@@ -276,7 +395,6 @@ function ShowProcessDialog(text){
 function HideProcessDialog(){
 	$("#pleaseWaitDialog").modal('hide');
 }
-
 /*
     ErrorCode :  0,
     CreateContainer : 1,
@@ -317,8 +435,10 @@ var NodeReceiveCallback = function(reply)
     	alert(json.Content);
     } else if(json.ReplyCode == 11){ //Commit container
     	listImages(edgeNode);
+    	HideProcessDialog();
     	alert(json.Content);
     } else {
+    	HideProcessDialog();
     	alert(json.Content);
     }
     

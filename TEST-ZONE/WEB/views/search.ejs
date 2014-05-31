@@ -2,12 +2,12 @@
 <html>	                	 
     <body>
         <section>
-            <article>  
+            <article class="center-block">  
                           
 			<h1><%= title %> page </h1>
 			
-			<body>
-				<div class="table-responsive">
+			<div class="row">
+				<div class="col-md-6">
 					<table id="searchtable" class="table">
 					
 					<% var serverList = []; %>
@@ -15,15 +15,21 @@
 					<% serverList.push(servers[server]); %>
 					<% }; %>
 					<script>
-						
-						UpdateTable('searchtable');
+						SetupSearch('searchtable');
 					</script>
 					</table>
 					
 					<button class="btn btn-default" onclick="PerformSearch('<%= serverList %>')">Search</button>
 					<label class="hidden" id="serversearchlabel">No server found</label>
 				</div>
-			</body>               
+				<div class="col-md-6">
+					<table id="nodelist" class="table table-striped table-hover table-bordered">
+					<script>
+						SetupNodes('nodelist');
+					</script>
+					</table>
+				</div>
+			</div>
 
             </article>
         </section>

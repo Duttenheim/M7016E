@@ -34,10 +34,12 @@ function SetupEdgeNodes(edgenodetable)
 			cell2.id = childId + "_tags"
 			
 			var cell1Contents = document.createTextNode(childId);
-			var cell3Contents = document.createElement("a");
+			var cell3Contents = document.createElement("button");
 			cell3Contents.className = "btn btn-default";
 			cell3Contents.appendChild(document.createTextNode("Manage"));
-			cell3Contents.href = "/manage" + "?addr=" + ip + "&" + "node=" + childId;
+			cell3Contents.ip = ip;
+			cell3Contents.child = childId;
+			cell3Contents.onclick = function() { window.location.href = "/manage" + "?addr=" + this.ip + "&" + "node=" + this.child; }
 			
 			cell1.appendChild(cell1Contents);
 			cell3.appendChild(cell3Contents);

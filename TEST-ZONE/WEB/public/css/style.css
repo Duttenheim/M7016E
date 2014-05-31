@@ -1,15 +1,10 @@
 /* Eléments principaux de la page */
-
+@import url("bootstrap.css")
 
 body
 {
     font-family: 'Trebuchet MS', Arial, sans-serif;
     color: #181818;
-}
-
-div.main
-{
-	margin-left: 100px;	
 }
 
 .btn-margins
@@ -58,7 +53,7 @@ article, aside
     display: inline-block;
     vertical-align: top;
     text-align: justify;
-
+	max-width: 80%;
 }
 
 /* Footer */

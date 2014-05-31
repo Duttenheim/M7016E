@@ -3,7 +3,8 @@
 */
 function CheckOnline(addrid, elementid, buttonid)
 {
-	var img = document.body.appendChild(document.createElement("img"));
+	var img = document.createElement("img");
+	document.body.appendChild(img);
 	
 	var addrElement = document.getElementById(addrid);
 	var statusElement = document.getElementById(elementid);
@@ -12,30 +13,32 @@ function CheckOnline(addrid, elementid, buttonid)
 	buttonElement.disabled = true;
 	
 	img.loaded = false;
+	img.status = statusElement;
+	img.button = buttonElement;
 	img.onload = function()
 	{
 		status = "<font color='green'>Online</font>";
-		statusElement.innerHTML = status;
-		buttonElement.disabled = false;
+		this.status.innerHTML = status;
+		this.button.disabled = false;
 		this.loaded = true;
 	}
 	
-	var failFunction = function()
+	var fail = function()
 	{
-		if (!this.loaded)
+		if (!this.loaded && this != window)
 		{
 			status = "<font color='red'>Offline</font>";
-			statusElement.innerHTML = status;
+			this.status.innerHTML = status;
 			this.loaded = true;
-			img.src = "";
+			this.src = "";
 		}
 	}
 	
 	img.src = "http://" + addrElement.innerHTML + "/ping.bmp";
-	img.onerror = img.onabort = failFunction;
+	img.onerror = img.onabort = fail;
 	setTimeout
 	(
-		failFunction,
+		fail,
 		3000
 	);
 }
