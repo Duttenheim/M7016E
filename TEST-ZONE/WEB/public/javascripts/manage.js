@@ -351,10 +351,9 @@ function CommitPushContainerPopup(row, nr, edgeNode, container_id){
     	if (confirm("Are you sure you want to create a new image from this container?") == true) {
 	    	var args = new ContainerCommitArgs();
 	        args.ContainerID = container_id;
-	        args.Repository = "130.240.134.118:5000/"+inputField.value;
+	        args.Repository = "130.240.134.118:5000/"+inputField.value.toLowerCase();
 	        args.Tag = inputField2.value;
 	        node.CallRPCFunction("EdgeNodeHandler.CommitContainer", args, edgeNode);
-	        ShowProcessDialog("Commiting " + inputField.value + "...");
     	}
     }
     CommitAndPushButton.setAttribute('data-dismiss', 'modal');
@@ -438,8 +437,7 @@ var NodeReceiveCallback = function(reply)
     	alert(json.Content);
     } else if(json.ReplyCode == RPCReplyCode.CommitContainer){ //Commit container
     	listImages(edgeNode);
-    	HideProcessDialog();
-    	//alert(json.Content);
+    	alert(json.Content);
     } else {
     	HideProcessDialog();
     	alert(json.Content);
