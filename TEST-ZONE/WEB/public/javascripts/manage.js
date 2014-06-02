@@ -341,21 +341,21 @@ function CommitPushContainerPopup(row, nr, edgeNode, container_id){
 	var modalFooterDiv = document.createElement("div"); 
 	modalFooterDiv.className = "modal-footer";
 	
-	var CreateButton = document.createElement("a");
-	CreateButton.className = "btn btn-primary";
+	var CommitAndPushButton = document.createElement("a");
+	CommitAndPushButton.className = "btn btn-primary";
     var createText = document.createTextNode("Commit & Push");
-    CreateButton.appendChild(createText);
+    CommitAndPushButton.appendChild(createText);
     
-    CreateButton.onclick = function()
+    CommitAndPushButton.onclick = function()
     {
     	var args = new ContainerCommitArgs();
-        args.ID = container_id;
+        args.ContainerID = container_id;
         args.Repository = "130.240.134.118:5000/"+inputField.value;
         args.Tag = inputField2.value;
         node.CallRPCFunction("EdgeNodeHandler.CommitContainer", args, edgeNode);
         ShowProcessDialog("Commiting & Pushing " + inputField.value + "...");
     }
-    CreateButton.setAttribute('data-dismiss', 'modal');
+    CommitAndPushButton.setAttribute('data-dismiss', 'modal');
     
 	var CloseButton = document.createElement("a");
     var closeText = document.createTextNode("Cancel");
@@ -363,7 +363,7 @@ function CommitPushContainerPopup(row, nr, edgeNode, container_id){
 	CloseButton.className = "btn";
 	CloseButton.setAttribute('data-dismiss', 'modal');
 	
-	modalFooterDiv.appendChild(CreateButton);
+	modalFooterDiv.appendChild(CommitAndPushButton);
 	modalFooterDiv.appendChild(CloseButton);
 	
 	modalContentDiv.appendChild(modalHeaderDiv);
@@ -413,6 +413,7 @@ var NodeReceiveCallback = function(reply)
 {
 	var node = this;
     var edgeNode = document.getElementById('edgeNode_id').innerHTML
+    console.log(reply.toSource())
     var json = JSON.parse(reply);
     if(json.IP) {
     	setImageSrc(json.IP)
