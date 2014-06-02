@@ -303,12 +303,6 @@ function PerformSearch(servers)
 			this.loaded = true;
 			serverIp = this.server;
 			
-			// abort all other image loads
-			for (var j in images)
-			{
-				document.body.removeChild(images[j]);
-			}
-			
 			// connect to server
 			var node = CreateWebNode("ws://" + this.server + "/node");
 			
