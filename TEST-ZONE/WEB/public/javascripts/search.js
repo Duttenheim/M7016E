@@ -8,6 +8,7 @@ var usedTags = [];
 var values = [];
 var searchTable;
 var nodeTable;
+var serverIp;
 
 //------------------------------------------------------------------------------
 /**
@@ -292,6 +293,7 @@ function PerformSearch(servers)
 			// select the first server
 			serverFound = true;
 			this.loaded = true;
+			serverIp = this.server;
 			
 			// abort all other image loads
 			for (var j in images)
@@ -372,6 +374,8 @@ function SetupNodeList(nodes)
 	// get table
 	var table = document.getElementById(nodeTable);
 	var rows = table.rows;
+	
+	// clear table like this, ignore row 1 since its the header
 	while(table.rows.length > 1)
 	{
 		table.deleteRow(1);
@@ -392,7 +396,7 @@ function SetupNodeList(nodes)
 		button.innerHTML = "Manage";
 		button.onclick = function()
 		{
-			window.location.href = "/manage" + "?addr=" + this.ip + "&" + "node=" + this.child;
+			window.location.href = "/manage" + "?addr=" + serverIp + "&" + "node=" + this.child;
 		}
 		cell2.appendChild(button);
 	}
