@@ -3,6 +3,7 @@ package bitverse
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 type repokey_t struct {
@@ -227,7 +228,7 @@ func MakeSuperNode(transport Transport, localAddress string, localPort string) (
 				    superNode.children[remoteNode.Id()] = remoteNode
 			    	superNode.tags[remoteNode.Id()] = make(map[string]string)
 
-		    		str := fmt.Sprintf("supernode: adding remote node %s, number of remote nodes are now %d", remoteNode.Id(), len(superNode.children))
+		    		str := fmt.Sprintf("supernode: adding remote node %s, number of remote nodes are now %d [%s]", remoteNode.Id(), len(superNode.children), time.Now())
 	    			info(str)
 
     				msg := composeChildJoin(superNode.nodeId.String(), remoteNode.Id())
