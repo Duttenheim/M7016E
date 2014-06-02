@@ -14,13 +14,13 @@
 					<% for (var server in servers) { %>
 					<% serverList.push(servers[server]); %>
 					<% }; %>
-					<script>
-						SetupSearch('searchtable');
-					</script>
 					</table>
 					
-					<button class="btn btn-default" onclick="PerformSearch('<%= serverList %>')">Search</button>
+					<button id="runsearch" class="btn btn-default" onclick="PerformSearch('<%= serverList %>')">Search</button>
 					<label class="hidden" id="serversearchlabel">No server found</label>
+					<script>
+						SetupSearch('searchtable', 'runsearch');
+					</script>
 				</div>
 				<div class="col-md-6">
 					<table id="nodelist" class="table table-striped table-hover table-bordered">

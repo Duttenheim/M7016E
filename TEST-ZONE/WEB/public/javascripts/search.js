@@ -7,13 +7,14 @@ var defaultTags = ['Service', 'Application', 'Location', 'Name'];
 var usedTags = [];
 var values = [];
 var searchTable;
+var searchButton;
 var nodeTable;
 var serverIp;
 
 //------------------------------------------------------------------------------
 /**
 */
-function SetupSearch(tableElement)
+function SetupSearch(tableElement, searchElement)
 {
 	var table = document.getElementById(tableElement);
 	var header = table.createTHead();
@@ -23,6 +24,11 @@ function SetupSearch(tableElement)
 	headerCell1.innerHTML = 'Tag';
 	headerCell2.innerHTML = 'Value';
 	searchTable = tableElement;
+	
+	var search = document.getElementById(searchElement);
+	searchButton = search;
+	searchButton.disabled = true;
+	
 	
 	var row = table.insertRow(-1);	
 	NewSearchRow(row, table);
@@ -178,6 +184,7 @@ function NewSearchRow(row, table)
 			SetRowEnabled(row, false);
 			var newRow = table.insertRow(-1);
 			NewSearchRow(newRow, table); 
+			searchButton.disabled = false;
 		}
 	}
 	
@@ -186,6 +193,7 @@ function NewSearchRow(row, table)
 		buttonAdd.disabled = false;
 		buttonRemove.disabled = true;
 		RemoveSearchRow(row, table);
+		if (table.rows.length < 3) searchButton.disabled = true;
 	}
 	
 	buttonDiv.appendChild(buttonAdd);
