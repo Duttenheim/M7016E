@@ -223,7 +223,7 @@ function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
 	closeX.appendChild(closeXtext);
 	
 	var header = document.createElement("h3");
-	header.innerHTML = "Create container for Image: " + imageName;
+	header.innerHTML = "Create container for Image:\n" + imageName;
 	
 	modalHeaderDiv.appendChild(closeX);
 	modalHeaderDiv.appendChild(header);
@@ -303,7 +303,7 @@ function CommitPushContainerPopup(row, nr, edgeNode, container_id){
 	closeX.appendChild(closeXtext);
 	
 	var header = document.createElement("h3");
-	header.innerHTML = "Commit container: " + container_id;
+	header.innerHTML = "Commit container: " + container_id.substring(0,10);
 	
 	modalHeaderDiv.appendChild(closeX);
 	modalHeaderDiv.appendChild(header);
@@ -343,17 +343,19 @@ function CommitPushContainerPopup(row, nr, edgeNode, container_id){
 	
 	var CommitAndPushButton = document.createElement("a");
 	CommitAndPushButton.className = "btn btn-primary";
-    var createText = document.createTextNode("Commit & Push");
+    var createText = document.createTextNode("Commit container");
     CommitAndPushButton.appendChild(createText);
     
     CommitAndPushButton.onclick = function()
     {
-    	var args = new ContainerCommitArgs();
-        args.ContainerID = container_id;
-        args.Repository = "130.240.134.118:5000/"+inputField.value;
-        args.Tag = inputField2.value;
-        node.CallRPCFunction("EdgeNodeHandler.CommitContainer", args, edgeNode);
-        ShowProcessDialog("Commiting & Pushing " + inputField.value + "...");
+    	if (confirm("Are you sure you want to create a new image from this container?") == true) {
+	    	var args = new ContainerCommitArgs();
+	        args.ContainerID = container_id;
+	        args.Repository = "130.240.134.118:5000/"+inputField.value;
+	        args.Tag = inputField2.value;
+	        node.CallRPCFunction("EdgeNodeHandler.CommitContainer", args, edgeNode);
+	        ShowProcessDialog("Commiting " + inputField.value + "...");
+    	}
     }
     CommitAndPushButton.setAttribute('data-dismiss', 'modal');
     
@@ -407,7 +409,8 @@ function HideProcessDialog(){
     PullImage : 8,
     RemoveImage : 9,
     ListImages : 10,
-    CommitContainer: 11
+    CommitContainer: 11,
+    PushImage : 12
  */
 var NodeReceiveCallback = function(reply)
 {
@@ -417,27 +420,27 @@ var NodeReceiveCallback = function(reply)
     var json = JSON.parse(reply);
     if(json.IP) {
     	setImageSrc(json.IP)
-    }else if(json.ReplyCode == 10){ // ListImages
+    }else if(json.ReplyCode == RPCReplyCode.ListImages){ // ListImages
     	CreateImageList(json, node)
-    } else if(json.ReplyCode == 7) { // ListContainers
+    } else if(json.ReplyCode == RPCReplyCode.ListContainers) { // ListContainers
     	CreateContainerList(json, node)
     } else if(json.ReplyCode > 0 && json.ReplyCode < 6){ // Create, Start, Stop, Kill, Restart containers
     	listContainers(edgeNode);
     	alert(json.Content);
-    } else if(json.ReplyCode == 6){ // Remove container
+    } else if(json.ReplyCode == RPCReplyCode.RemoveContainer){ // Remove container
     	setContainerHeaderText(document.getElementById("container_table").rows.length-1) //Use -1 since the header-row is counted here
     	alert(json.Content);
-    } else if(json.ReplyCode == 9){ // Remove Image
+    } else if(json.ReplyCode == RPCReplyCode.RemoveImage){ // Remove Image
     	setImagesHeaderText(document.getElementById("images_table").rows.length-1) //Use -1 since the header-row is counted here
     	alert(json.Content);
-    } else if(json.ReplyCode == 8){ // Pull image
+    } else if(json.ReplyCode == RPCReplyCode.PullImage){ // Pull image
     	listImages(edgeNode);
     	HideProcessDialog();
     	alert(json.Content);
-    } else if(json.ReplyCode == 11){ //Commit container
+    } else if(json.ReplyCode == RPCReplyCode.CommitContainer){ //Commit container
     	listImages(edgeNode);
     	HideProcessDialog();
-    	alert(json.Content);
+    	//alert(json.Content);
     } else {
     	HideProcessDialog();
     	alert(json.Content);
