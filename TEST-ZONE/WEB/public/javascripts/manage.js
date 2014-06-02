@@ -416,7 +416,6 @@ var NodeReceiveCallback = function(reply)
 {
 	var node = this;
     var edgeNode = document.getElementById('edgeNode_id').innerHTML
-    console.log(reply.toSource())
     var json = JSON.parse(reply);
     if(json.IP) {
     	setImageSrc(json.IP)
