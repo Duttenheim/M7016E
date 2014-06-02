@@ -27,22 +27,26 @@ exports.index = function(req, res){
 		if (!error && response.statusCode == 200) {
 			zeImages = body;
 			//~ console.log(body)
-			if (body.num_results==0){
+			if (body.num_results==0 && text!=" "){
 				console.log("No images found");
 				request({
 				url: 'http://'+IP+':5000/v1/search?',
 				json: true
 				}, function (error, response, body) {
 					//~ console.log(body);
-					res.render('images', { title: 'Private repository images' , images: body, server_addr: IP , text:"no images found for "+req.query.search});
+					res.render('images', { title: 'Private repository images' , images: body, server_addr: IP , text:"no images found for \""+req.query.search+"\""});
 				})
 			};
 		}
 		else {
 			console.log(error)
 			zeImages = error;
+			res.render('images', { title: 'Private repository images' , images: zeImages, server_addr: IP, text :zeImages });
 		}
-		if(!error && body.num_results!=0){
+		if((!error && body.num_results!=0) || (!error && text == " ")){
+			if (body.num_results == 0){
+				text = "The repository is curently empty";
+			}
 			res.render('images', { title: 'Private repository images' , images: zeImages, server_addr: IP, text :text });
 		}
 	})
