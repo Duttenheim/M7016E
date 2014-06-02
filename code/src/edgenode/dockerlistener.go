@@ -243,7 +243,7 @@ func (obj* EdgeNodeHandler) CommitContainer(args* ContainerCommitArgs, output* s
 		b, _ := json.Marshal(rpcOutput)
 		*output += fmt.Sprintf(string(b))
 	} else {
-		rpcOutput.Content += fmt.Sprintf("Commited container %s with new Image ID: %s", args.ContainerID, image.ID)
+		rpcOutput.Content += fmt.Sprintf("Commited container, new Image ID is: %s", image.ID)
 		rpcOutput.ReplyCode = CommitContainer
 	}
 	b, _ := json.Marshal(rpcOutput)
@@ -303,7 +303,8 @@ func (obj* EdgeNodeHandler) PushImage(args* ImageArgs, output* string) error {
 	client, _ := docker.NewClient(endpoint)
 	rpcOutput := RpcOutput{}
 	rpcOutput.Content = ""
-	err := client.PushImage(docker.PushImageOptions{Name: args.ID, Registry: args.Registry}, docker.AuthConfiguration{})
+	fmt.Println("Args repo: %s", args.Repository)
+	err := client.PushImage(docker.PushImageOptions{Name: args.Repository, Registry: args.Registry}, docker.AuthConfiguration{})
 	if err != nil {
 		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
 		rpcOutput.ReplyCode = ErrorCode
