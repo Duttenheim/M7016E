@@ -7,6 +7,7 @@ import (
 	"encoding/json"
     "flag"
 	"github.com/fsouza/go-dockerclient"
+	"time"
 )
 
 type EdgeNodeHandler struct {}
@@ -46,7 +47,6 @@ const (
     RemoveImage		= 9
     ListImages		= 10
     CommitContainer 	= 11
-    PushImage		= 12
 )
 
 type DockerListArgs struct {
@@ -298,24 +298,6 @@ func (obj* EdgeNodeHandler) PullImage(args* ImageArgs, output* string) error {
 	return nil
 }
 
-func (obj* EdgeNodeHandler) PushImage(args* ImageArgs, output* string) error {
-	endpoint := "unix:///var/run/docker.sock"
-	client, _ := docker.NewClient(endpoint)
-	rpcOutput := RpcOutput{}
-	rpcOutput.Content = ""
-	err := client.PushImage(docker.PushImageOptions{Name: args.ID, Registry: args.Registry}, docker.AuthConfiguration{})
-	if err != nil {
-		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
-		rpcOutput.ReplyCode = ErrorCode
-	} else {
-		rpcOutput.Content += fmt.Sprintf("Pushed Image: " + args.Registry+"/"+args.Repository)
-		rpcOutput.ReplyCode = PushImage
-	}
-	b, _ := json.Marshal(rpcOutput)
-	*output += fmt.Sprintf(string(b))
-	return nil
-}
-
 func (obj* EdgeNodeHandler) RemoveImage(args* RemoveImageArgs, output* string) error {
 	endpoint := "unix:///var/run/docker.sock"
 	client, _ := docker.NewClient(endpoint)
@@ -400,6 +382,7 @@ func (observer* TestObserver) OnConnected(localNode* bitverse.EdgeNode, remoteNo
 	
 	// change tags
 	localNode.UpdateTags(tags)
+	fmt.Println(time.Now())	//Gives time when EN is connected to the SN
 }
 
 //------------------------------------------------------------------------------
