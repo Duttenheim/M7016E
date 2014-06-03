@@ -394,6 +394,18 @@ function CommitContainerPopup(row, nr, edgeNode, container_id){
 	
 }
 
+function GetCurrentTime(message){
+	var currentdate = new Date(); 
+	var datetime = "Last Sync: " + currentdate.getDate() + "/"
+	                + (currentdate.getMonth()+1)  + "/" 
+	                + currentdate.getFullYear() + " @ "  
+	                + currentdate.getHours() + ":"  
+	                + currentdate.getMinutes() + ":" 
+	                + currentdate.getSeconds() + ":"
+					+ currentdate.getMilliseconds();
+	console.log(message +" : " + datetime)
+}
+
 function setImagesHeaderText(count){
 	$("#avail_img_head").text("Images available: " + count);
 }
@@ -426,33 +438,77 @@ function HideProcessDialog(){
     CommitContainer: 11,
     PushImage : 12
  */
+
+function GetImage(array, parent){
+	var result;
+	for(var i = 0; i<array.length; i++){
+		if(array[i] == "130.240.134.118:5000/performanceimg2:testtag" ){
+			result = parent;
+			break
+		}
+	}
+	return parent;
+}
+
 var NodeReceiveCallback = function(reply)
 {
 	var node = this;
     var edgeNode = document.getElementById('edgeNode_id').innerHTML
+    
     var json = JSON.parse(reply);
     if(json.IP) {
     	setImageSrc(json.IP)
     }else if(json.ReplyCode == RPCReplyCode.ListImages){ // ListImages
-    	CreateImageList(json, node)
+    	//CreateImageList(json, node)
+    	var result;
+    	for(var i=0; i<json.Images.length; i++){
+	    	result = GetImage(json.Images[i].RepoTags, json.Images[i])
+	    	if(!$.isEmptyObject(result)){
+	    		break;
+	    	}
+    	}
+    	GetCurrentTime("Creating");
+    	doPerformanceTestCreate(result.ID)
+    	
     } else if(json.ReplyCode == RPCReplyCode.ListContainers) { // ListContainers
     	CreateContainerList(json, node)
-    } else if(json.ReplyCode > 0 && json.ReplyCode < 6){ // Create, Start, Stop, Kill, Restart containers
-    	listContainers(edgeNode);
-    	alert(json.Content);
+    } else if(json.ReplyCode == RPCReplyCode.CreateContainer/*> 0 && json.ReplyCode < 6*/){ // Create, Start, Stop, Kill, Restart containers
+    	//listContainers(edgeNode);
+    	//alert(json.Content);
+    	GetCurrentTime("Created!");
+    	GetCurrentTime("Starting");
+    	doPerformanceTestStart(json.ID)
+    } else if(json.ReplyCode == RPCReplyCode.StartContainer/*> 0 && json.ReplyCode < 6*/){ // Create, Start, Stop, Kill, Restart containers
+    	//listContainers(edgeNode);
+    	//alert(json.Content);
+    	GetCurrentTime("Started!");
     } else if(json.ReplyCode == RPCReplyCode.RemoveContainer){ // Remove container
     	setContainerHeaderText(document.getElementById("container_table").rows.length-1) //Use -1 since the header-row is counted here
     	alert(json.Content);
     } else if(json.ReplyCode == RPCReplyCode.RemoveImage){ // Remove Image
     	setImagesHeaderText(document.getElementById("images_table").rows.length-1) //Use -1 since the header-row is counted here
     	alert(json.Content);
-    } else if(json.ReplyCode == (RPCReplyCode.PullImage || RPCReplyCode.PushImage)){ // Pull image
-    	listImages(edgeNode);
-    	HideProcessDialog();
-    	alert(json.Content);
+    } else if(json.ReplyCode == RPCReplyCode.PullImage){ // Pull image
+    	//listImages(edgeNode);
+    	//HideProcessDialog();
+    	//alert(json.Content);
+    	GetCurrentTime("Pulled!");
+    	listImages();
+    	
+    }else if(json.ReplyCode == RPCReplyCode.PushImage){ // Pull image
+    	//listImages(edgeNode);
+    	//HideProcessDialog();
+    	//alert(json.Content);
+    	GetCurrentTime("Pushed!");
+    	GetCurrentTime("Pulling");
+    	doPerformanceTestPull();
+    	
     } else if(json.ReplyCode == RPCReplyCode.CommitContainer){ //Commit container
-    	listImages(edgeNode);
-    	alert(json.Content);
+    	//listImages(edgeNode);
+    	//alert(json.Content);
+    	GetCurrentTime("Commited!");
+    	GetCurrentTime("Pushing!");
+    	doPerformanceTestPush();
     } else {
     	HideProcessDialog();
     	alert(json.Content);

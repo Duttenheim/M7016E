@@ -78,6 +78,12 @@ type RpcOutput struct {
 	ReplyCode int
 }
 
+type RpcOutputCreateContainer struct {
+	Content string
+	ID string
+	ReplyCode int
+}
+
 type Container struct {
 	ID string
 	Image string
@@ -114,13 +120,14 @@ func (obj* EdgeNodeHandler) CreateContainer(args* CreateContainerArgs, output* s
 	config := docker.Config{Image: args.ImageName}
 	createArgs := docker.CreateContainerOptions{Name: args.ContainerName, Config: &config}	
 	container, err := client.CreateContainer(createArgs)
-	rpcOutput := RpcOutput{}
+	rpcOutput := RpcOutputCreateContainer{}
 	rpcOutput.Content = ""
 	if err != nil {
 		rpcOutput.Content += fmt.Sprintf("ERROR: %s", err)
 		rpcOutput.ReplyCode = ErrorCode
 	}else{
-		rpcOutput.Content += fmt.Sprintf("Container %s created successfully", container.ID)
+		rpcOutput.Content += fmt.Sprintf("Container created successfully with new ID: %s", container.ID)
+		rpcOutput.ID = container.ID
 		rpcOutput.ReplyCode = CreateContainer
 	}
 	b, _ := json.Marshal(rpcOutput)

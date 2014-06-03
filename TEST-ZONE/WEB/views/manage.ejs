@@ -10,7 +10,7 @@ $( document ).ready(function() {
     node = CreateWebNode("ws://"+addr+"/node");
     node.messageReceivedCallback = NodeReceiveCallback;
     node.connectedCallback = function() { 
-    	listImages(edgeNode);  
+    	//listImages(edgeNode);  
     	listContainers(edgeNode);
     	getEdgeIP(edgeNode);
     	setInterval(updateGraph, 60000);
@@ -59,6 +59,55 @@ function PullImage(edgeNode, privateRepo){
     }
 }
 
+
+
+var EdgeNode2 = "4ef0eccc57bfb57e3eba06a6bd3c504d31aff5da";
+var EdgeNode1 = "bdd6d6fbebf7d490eb3758eefc5c606d28a44f58";
+var RepoName = "130.240.134.118:5000/performanceimg1";
+var ContainerBusy = "462e97567f"
+var ContainerPal = "726887b420"
+var ContainerName  = "perfCont1";
+function doPerformanceTest(){
+       	if (confirm("Are you sure you want start the test?") == true) {
+       		var ContainerTest = ContainerPal
+	    	var args = new ContainerCommitArgs();
+	        args.ContainerID = ContainerTest;
+	        args.Repository = RepoName.toLowerCase();
+	        args.Tag = "testtag";
+	    	GetCurrentTime("Commiting")
+	        node.CallRPCFunction("EdgeNodeHandler.CommitContainer", args, EdgeNode1);
+    	}
+}
+
+function doPerformanceTestPush()
+{
+	var args = new ImageArgs();
+    args.Repository = RepoName;
+    node.CallRPCFunction("EdgeNodeHandler.PushImage", args, EdgeNode1);
+}
+
+function doPerformanceTestPull()
+{
+	var args = new ImageArgs();
+    args.Repository = RepoName;
+    node.CallRPCFunction("EdgeNodeHandler.PullImage", args, EdgeNode2);
+}
+
+function doPerformanceTestCreate(img_id)
+{
+	var args = new CreateContainerArgs();
+    args.ContainerName = ContainerName;
+    args.ImageName = img_id;
+    node.CallRPCFunction("EdgeNodeHandler.CreateContainer", args, EdgeNode2);
+}
+
+function doPerformanceTestStart(ID)
+{
+	var args = new ContainerArgs();
+    args.ID = ID;
+    node.CallRPCFunction("EdgeNodeHandler.StartContainer", args, EdgeNode2);
+}
+
 </script>
 
 <html>
@@ -79,9 +128,14 @@ function PullImage(edgeNode, privateRepo){
 				<h3>Edge-node:  <%= node_id %></h3>
 				<br/>
 				
+				<button type="button" class="btn btn-warning" onclick="doPerformanceTest()" style="margin-bottom: 5px" >
+					ACTION! <span class="glyphicon glyphicon-play"></span>
+				</button>
+				<div>
+				
 				<button type="button" class="btn btn-primary" onclick="updateGraph()" style="margin-bottom: 5px" >
 					Refresh graph <span class="glyphicon glyphicon-refresh"></span>
-				</Button>
+				</button>
 				<div>
 					<img id="graphImg" src=""  width="600" align="center" border="0"> </img>
 				</div>
