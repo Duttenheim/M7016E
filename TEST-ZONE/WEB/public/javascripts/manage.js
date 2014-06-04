@@ -327,7 +327,7 @@ function CommitContainerPopup(row, nr, edgeNode, container_id){
 	modalBodyDiv.className = "modal-body";
 	
 	var infoTextP = document.createElement("p");
-    var infoText = document.createTextNode("Type in name for container");
+    var infoText = document.createTextNode("Repository name for image");
     infoTextP.appendChild(infoText);
 	var inputDiv = document.createElement("div");
 	inputDiv.className = "input-group input-group";
@@ -340,7 +340,7 @@ function CommitContainerPopup(row, nr, edgeNode, container_id){
 	modalBodyDiv.appendChild(inputDiv);
 	
 	var infoTextP2 = document.createElement("p");
-    var infoText2 = document.createTextNode("Type in a tag for the new image");
+    var infoText2 = document.createTextNode("Tag for the new image");
     infoTextP2.appendChild(infoText2);
 	var inputDiv2 = document.createElement("div");
 	inputDiv2.className = "input-group input-group";
