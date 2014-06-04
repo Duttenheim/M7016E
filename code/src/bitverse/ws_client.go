@@ -63,6 +63,8 @@ func (wsClient *wsClientType) handshake() *RemoteNode {
 	wsClient.send(msg)
 	reply := wsClient.receive()
 
+    // seriously, why do we take a perfectly working node id and make it into something else?
+    // is it perhaps to avoid not getting duplicate ids?
 	//remoteNodeId := makeNodeIdFromString(reply.Src)
 	remoteNode := makeRemoteNode(wsClient.remoteNodeChannel, wsClient.ws, wsClient.localNodeId.String(), reply.Src)
 
