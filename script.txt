@@ -1,0 +1,69 @@
+Hello, welcome to Yet Another Cloud System, or YACS for short. 
+
+The YACS administration site consists of four pages. This is the home page, the home page shows a brief overview of the architecture we have used. 
+
+The next page we will look at is the search page. *click on search page*.
+
+This is the search page, to the left, you can see a list consisting of keys and values. 
+These key-value pairs will act as search criteria used to find a suitable edge node.
+Filling the fields is easy! Simply type a tag name, and a value, and press the add button. *demonstrate*.
+You can add several search criteria in order to increase the precision of the search.
+You can also remove search criteria. *demonstrate*.
+When you are done, press the search button.
+
+If any edge nodes match your search criteria, they will appear in the table to the right.
+Edge nodes are visualized with their ID and a button with the text 'Manage'. Clicking the 'Manage' button will take us to the management page.
+However, we will not visit the management page at this point.
+
+Next is the page called SuperNodes. This page displays a list of all the currently online super nodes in the internal YACS network.
+It also shows the online status of the super node. If a supernode is marked as 'Offline', it will not be manageable.
+
+Since this node is Online, we can manage it. *demonstrate*
+This will display all edge nodes currently connected to this super node. It will also show all edge nodes which are connected in the network itself.
+Clicking 'Manage' here on any edge node will take us the same page as we showed on the Search page. *demonstrate*
+
+This is the node management page. This page shows the current status of an edge node.
+First, we can see a graph showing the CPU load over time, with the Y-axis showing the load and the X-axis showing the time.
+Pressing the button 'Refresh graph' will refresh the graph to show the current CPU load. *demonstrate*.
+
+Below, we can see two collapsed menus, Images and Containers.
+Images list the images which are currently on the edge node machines Docker client.
+Containers list the containers running or stopped on the edge node machines Docker client.
+
+Pressing the toggle table will show or hide the associated lists. *demonstrate*.
+If for example an edge node is being managed by some other peer, the site doesn't refresh itself.
+Pressing the 'refresh' button will cause the associated table to update its contents. *demonstrate*.
+
+Under the images heading, we can see a button called 'Pull image'.
+This button will display a pop-up which allows us to pull an image to this edge node. 
+Here you will see two buttons, 'Pull image' and 'Pull image from private repository'.
+Pulling an image with the ordinary method will cause it to download the image put in the field from the global Docker repositories.
+Pulling an image with the private method will cause the image to be pulled from our private Docker repository.
+Availability of images may vary depending on which repository we chose to use. *demonstrate*
+
+When an image is on the edge node, we can create a container from it. *demonstrate*.
+We can also remove the image. *demonstrate*.
+And we can push the image to the private repository so that it may be used by another edge node on the network.
+We are going to take an image and create a container from it.
+*create new container*
+
+Over in the containers field, we can see the currently active containers running on the edge node.
+We can also see their current status. For example, this container has exited.
+Our newly created container is here. 
+We can start the container by pressing 'Start'. When the container is in its running state, we get a few more options.
+We can chose to stop it, kill or delete it, and save its state.
+Stopping the container will result in a graceful application termination.
+Kill will cause an OS interrupt which will immediately stop the container.
+Delete will stop and remove the container from the container list.
+
+Pressing the save state button allows us to create a new image with the current state of the container.
+When you save a container state, you will create a new image. 
+To do so, one must input an image name, and a tag which is used to distinguish between different subversions of the same image.
+
+Here, we can see the image we just created. By pressing the button labeled 'Push' we commit it to the private repository from which it can be retrieved and setup again.
+
+Next, we have the images page. 
+This page shows the images currently on the private repository. 
+This page also allows us to search for an image.  
+
+That concludes the YACS management page. Thank you for listening.
