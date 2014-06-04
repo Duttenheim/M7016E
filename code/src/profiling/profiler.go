@@ -16,16 +16,8 @@ type Profiler struct {
 }
 
 // store profilers in global map, this will NOT be exported so it wont be available from outside this package
-var profilers 	map[string]*Profiler
-var NTPAddress 	string
-
-//------------------------------------------------------------------------------
-/**
-*/
-func Setup() {
-	profilers 	= make(map[string]*Profiler)
-	NTPAddress 	= "ntp.ltu.se"
-}
+var profilers map[string]*Profiler = make(map[string]*Profiler)
+var NTPAddress string = "ntp.ltu.se"
 
 //------------------------------------------------------------------------------
 /**
