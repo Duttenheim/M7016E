@@ -249,7 +249,7 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 		msgChannel := make(chan Msg)
 		nodeChannel := make(chan *RemoteNode, 10)	
 	
-		go func() {
+		go func(msgChan chan Msg, nodeChan chan *RemoteNode) {
     		var SN *RemoteNode
 			for {
 				select {
@@ -280,7 +280,7 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 						superNode.updateTags(msg)				
 					} else {
                         debug("supernode: putting message into main channel " + msg.String())
-//						superNode.msgChannel <- msg
+						superNode.msgChannel <- msg
 					}
 				case remoteNode := <-nodeChannel:
 					if remoteNode.state == Dead {
@@ -296,7 +296,7 @@ func(superNode* SuperNode) ConnectSuccessor(addrs []string, port string) {
 					}
 				}
 			}
-		}()
+		}(msgChannel, nodeChannel)
 	
 		go transport.ConnectToNode(addr + ":" + port, nodeChannel, msgChannel)	
 	}
