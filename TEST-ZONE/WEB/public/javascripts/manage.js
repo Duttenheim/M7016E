@@ -54,8 +54,7 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
     
     var deleteButton = document.createElement("Button");
     var buttonText2 = document.createTextNode("Remove");
-    
-    deleteButton.className = "btn btn-danger"
+    deleteButton.className = "btn btn-danger btn-margins"
     deleteButton.appendChild(buttonText2);
     deleteButton.onclick = function()
     {
@@ -67,6 +66,21 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
         }
     }
     
+    var pushButton = document.createElement("Button");
+    var buttonText3 = document.createTextNode("Push");
+    pushButton.className = "btn btn-info"
+	pushButton.appendChild(buttonText3);
+    pushButton.onclick = function()
+    {
+        if (confirm("Do you really want to push " + imageName + " to private repo?") == true) {
+        	var args = new ImageArgs();
+	        args.Repository = imageName[0]+":"+imageName[1];
+	        node.CallRPCFunction("EdgeNodeHandler.PushImage", args, edgeNode);
+	        ShowProcessDialog("Pushing " + args.Repository + " to private repo")
+        }
+    }
+    
+    
     cell1.appendChild(nrtab);
     cell2.appendChild(idCell);
     cell3.appendChild(repoTab);
@@ -74,6 +88,7 @@ function populateImageList(nr, image, edgeNode, imageName, node, table){
     cell5.appendChild(sizeTab);
     cell6.appendChild(createButton);
     cell6.appendChild(deleteButton);
+    cell6.appendChild(pushButton);
     row.appendChild(cell1);
     row.appendChild(cell2);
     row.appendChild(cell3);
@@ -181,7 +196,7 @@ function populateContainerList(nr, container, node, edgeNode, json, table){
     commitButton.appendChild(commitButtonText);
     commitButton.onclick = function()
     {
-    	CommitPushContainerPopup(row, nr, edgeNode, container.ID);
+    	CommitContainerPopup(row, nr, edgeNode, container.ID);
     }
        
     
@@ -223,7 +238,7 @@ function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
 	closeX.appendChild(closeXtext);
 	
 	var header = document.createElement("h3");
-	header.innerHTML = "Create container for Image:\n" + imageName;
+	header.innerHTML = "Create container for Image:\n" + imageName[0]+":"+imageName[1];
 	
 	modalHeaderDiv.appendChild(closeX);
 	modalHeaderDiv.appendChild(header);
@@ -282,7 +297,7 @@ function CreateContainerPopup(row, nr, edgeNode, image_ID, imageName){
 	
 }
 
-function CommitPushContainerPopup(row, nr, edgeNode, container_id){
+function CommitContainerPopup(row, nr, edgeNode, container_id){
 	var modalDiv = document.createElement("div");
 	modalDiv.className = "modal fade";
 	modalDiv.id = "commit_modal_"+nr;
@@ -431,7 +446,7 @@ var NodeReceiveCallback = function(reply)
     } else if(json.ReplyCode == RPCReplyCode.RemoveImage){ // Remove Image
     	setImagesHeaderText(document.getElementById("images_table").rows.length-1) //Use -1 since the header-row is counted here
     	alert(json.Content);
-    } else if(json.ReplyCode == RPCReplyCode.PullImage){ // Pull image
+    } else if(json.ReplyCode == (RPCReplyCode.PullImage || RPCReplyCode.PushImage)){ // Pull image
     	listImages(edgeNode);
     	HideProcessDialog();
     	alert(json.Content);
